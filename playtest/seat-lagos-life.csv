@@ -1,0 +1,47 @@
+field,value,note
+# Lagos Life seat — fill this during the three sittings (playtest/PROTOCOL.md §3).
+# field names below are matched by `node tools/playtest.mjs --compare`; leave a
+# value blank or write n/a if it truly does not apply, and say why in the note.
+# one line per event in the note column, format: mm:ss | kind | what | cost | reversible?
+# THE ENTRY
+artifact bytes,,devtools → network → document size, cold cache
+seconds to interactive,,first tap that responds
+account required,,yes/no — and what it asks for
+offline,,aeroplane mode + reload
+price,,what money buys; whether play is gated by it
+# THE ARC
+a full arc,,in real days; convert to hours played in the note
+terminal,,hard/soft/none — what ends a run and who decides
+is the world paused when you leave,,yes/no — the axis we differ on most
+consequential state reached at,,minutes — first choice that still matters 10 min later
+# DECISION ECONOMICS (per 30-minute sitting)
+decisions offered,,every commitment: spends money, spends time, or cannot be undone
+decisions taken,,
+minutes per decision,,sitting length ÷ decisions taken
+irreversible share,,%
+visible price share,,% of offered decisions whose cost is shown before you commit
+worst available mistake,,% of starting stock
+surprise rate,,% — and the reason in the note, or it is not counted
+# PRESSURE
+named obligations,,things with a name and a date
+period of each,,days
+cost of not showing up,,nothing/delayed/permanent loss/dead run
+forced interruptions,,per hour
+can you bank progress,,does the world move while you are away
+# SOCIAL
+other players visible,,in the room with you, or a leaderboard
+what they change about your run,,none/visit/trade/compete — be precise
+what your run does alone,,
+# THEIR CLAIM (record once per sitting; label as their claim)
+online now,,from the site
+all-time visits,,from the site
+# VERDICTS — one per FINDINGS.md §3 mechanic: copy / decline / unmeasurable + the log line
+share card (3.1),,
+dealt start (3.2),,
+Lagos nouns (3.3),,
+appointment (3.4),,
+named pressure (3.5),,
+public numbers (3.6),,
+public site (3.7),,
+add to home screen (3.8),,
+one-line pitch (3.9),,

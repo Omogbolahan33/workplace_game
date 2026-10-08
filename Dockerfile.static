@@ -1,0 +1,16 @@
+# LEDGER — the single file, served by nginx with nothing to build.
+#
+# The game is one HTML file with no external requests, so this image is a static
+# server with four files in it and no toolchain at all. It is the deploy for
+# "somebody wants to play this": no Node, no build step, no dependencies.
+#
+#   docker build -f Dockerfile.static -t ledger-static .
+#   docker run --rm -p 8080:80 ledger-static
+#
+# Installability needs https (or localhost): browsers only give a service worker
+# to a secure origin, so an offline-capable install belongs behind a TLS
+# terminator or a platform that provides one.
+FROM nginx:alpine
+COPY ledger/ /usr/share/nginx/html/
+COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80

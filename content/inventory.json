@@ -1,0 +1,3357 @@
+{
+ "generated": "2026-10-07",
+ "source": "packages/core (the shipped module) · seed 4242 · profile The Fresh Graduate · Lagos · Realistic",
+ "counts": {
+  "quarters_in_a_run": 168,
+  "tabs": 5,
+  "subs": 24,
+  "views_rendered": 43,
+  "controls_in_the_registry": 166,
+  "verbs_by_screen": 249,
+  "events": 87,
+  "arcs": 26,
+  "careers": 7,
+  "businesses": 10,
+  "goods": 11,
+  "assets": 13,
+  "deal_types": 8,
+  "covenants": 6,
+  "resolutions": 21,
+  "household_roles": 10,
+  "perks": 5,
+  "negotiation_tactics": 7,
+  "levers": 3,
+  "traits": 8,
+  "ambitions": 5,
+  "eras": 7,
+  "difficulties": 7,
+  "board_archetypes": 9,
+  "cities": 6,
+  "profiles": 5
+ },
+ "pipeline": [
+  {
+   "fn": "flushPending",
+   "why": "consequences that were scheduled in earlier quarters come due",
+   "present": true
+  },
+  {
+   "fn": "stepEra",
+   "why": "the era can turn: ordinary times, boom, crunch, devaluation",
+   "present": true
+  },
+  {
+   "fn": "stepMarket",
+   "why": "inflation, FX, asset prices move",
+   "present": true
+  },
+  {
+   "fn": "maybeSwan",
+   "why": "a rare shock: the swan deck",
+   "present": true
+  },
+  {
+   "fn": "stepAssets",
+   "why": "your holdings pay out or fall",
+   "present": true
+  },
+  {
+   "fn": "simBusiness",
+   "why": "the business trades: capacity, demand, price, staff, upkeep",
+   "present": true
+  },
+  {
+   "fn": "stepGovernance",
+   "why": "the board, covenants, resolutions and the register",
+   "present": true
+  },
+  {
+   "fn": "stepGroup",
+   "why": "group accounts, breaches and cross-default",
+   "present": true
+  },
+  {
+   "fn": "stepHouse",
+   "why": "the household: roles, perks, asks",
+   "present": true
+  },
+  {
+   "fn": "stepPersonal",
+   "why": "health, stress, happiness, family, reputation",
+   "present": true
+  },
+  {
+   "fn": "stepCast",
+   "why": "the people in your life move: news, illness, death, asks",
+   "present": true
+  },
+  {
+   "fn": "stepRival",
+   "why": "the rival does something you may have to answer",
+   "present": true
+  },
+  {
+   "fn": "refreshDeals",
+   "why": "new capital opportunities appear",
+   "present": true
+  },
+  {
+   "fn": "refreshContractOffers",
+   "why": "clients put work on the table",
+   "present": true
+  },
+  {
+   "fn": "resolveDeals",
+   "why": "deals you committed to land: win or lose",
+   "present": true
+  },
+  {
+   "fn": "maybeOfferPartner",
+   "why": "somebody asks for a stake in your business",
+   "present": true
+  },
+  {
+   "fn": "snapshot",
+   "why": "the quarter is recorded for the charts",
+   "present": true
+  },
+  {
+   "fn": "checkEnd",
+   "why": "insolvency, health, retirement, the season finish line",
+   "present": true
+  },
+  {
+   "fn": "dueThread",
+   "why": "a story you started comes back for its next stage",
+   "present": true
+  },
+  {
+   "fn": "pickEvent",
+   "why": "the event deck: 62% chance of something happening",
+   "present": true
+  },
+  {
+   "fn": "year review",
+   "why": "every fourth quarter: the annual review modal",
+   "present": true
+  }
+ ],
+ "decks": {
+  "life": {
+   "name": "Life events — what happens to you",
+   "count": 23,
+   "rows": [
+    {
+     "a": "Aso-ebi and a wedding you cannot skip",
+     "b": "Your university friend is getting married. The aso-ebi alone is priced like a small appliance, and everyone will notice whether you showed up properly.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Your father's blood pressure is not a joke",
+     "b": "The clinic in the village says he needs to see a specialist in the city. The tests are not free and neither is the trip.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A visa came through",
+     "b": "A recruiter abroad has been pursuing you for months. The offer is real: a role, a relocation package, and a salary denominated in something that does not lose value while you sleep.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A friend wants you into a round",
+     "b": "He has a deck, a prototype, and a deadline. He needs ₦500,000 and he is offering 4% of the company. He is also the third friend this year to ask.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A man with a very confident smile",
+     "b": "He explains a structure. Import something, sell it, double your money in ninety days. He uses the word \"guaranteed\" four times in two minutes.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "This is the person",
+     "b": "You have known them for two years. It is time to decide whether this becomes a formal thing with a ceremony, a family meeting, and a joint budget.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "An old friend needs a soft loan",
+     "b": "He needs ₦300,000 before Friday. He is not a bad person. He is also not employed right now, and you have heard this story before from other people.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "The roadblock",
+     "b": "It is 11pm. Three men with a torch and a vehicle that is not going anywhere until something changes hands.",
+     "c": "",
+     "opts": 2
+    },
+    {
+     "a": "School fees, again",
+     "b": "Your younger sibling's school has sent the third reminder. The amount is not enormous. The expectation that you will handle it is.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Estate levy and the community association",
+     "b": "The residents association has \"resolved\" that every household contributes to a new project. The chairman is standing in your compound with a receipt book.",
+     "c": "",
+     "opts": 2
+    },
+    {
+     "a": "Something is not right",
+     "b": "Three weeks of tiredness that sleep does not fix. You can book a full check-up for ₦180,000, or assume it is stress and keep moving.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Your body is sending invoices",
+     "b": "You have been running at this pace for a while. Something has to give and you get to choose what.",
+     "c": "",
+     "opts": 2
+    },
+    {
+     "a": "Your phone left with someone else",
+     "b": "Danfo window seat, earphones in, and then it was gone. Everything is on that phone.",
+     "c": "",
+     "opts": 2
+    },
+    {
+     "a": "Someone senior offers you access",
+     "b": "A partner at a firm you admire asks you to join a small working group. It meets on Saturdays for a year. The pay is nothing. The room is everything.",
+     "c": "",
+     "opts": 2
+    },
+    {
+     "a": "A weekend contract lands in your lap",
+     "b": "Someone needs work done urgently and is willing to pay cash for a two-week sprint. It will eat every evening you have.",
+     "c": "",
+     "opts": 2
+    },
+    {
+     "a": "The pledge card",
+     "b": "Your place of worship is building something. The pledge card has suggested amounts and everyone watches who fills what.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A distressed seller",
+     "b": "A man needs to exit a property fast — relocation, deadline, no time to negotiate. He is asking 60% of what comparable units went for last quarter.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A letter with a government letterhead",
+     "b": "It is polite, numbered, and refers to \"outstanding obligations\". Someone has been filing things about you, or not filing things about you.",
+     "c": "",
+     "opts": 2
+    },
+    {
+     "a": "A cousin is coming to stay",
+     "b": "He needs a place for \"a few weeks\" while he looks for work. Your flat has one room and he has already told the family you agreed.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Money you had forgotten about",
+     "b": "An old account. A dormant balance. A refund nobody chased. ₦640,000 has your name on it.",
+     "c": "",
+     "opts": 2
+    },
+    {
+     "a": "An industry event you were invited to",
+     "b": "A conference. The ticket is not cheap, the speakers are mid, but the hallway is where the actual value is.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "The car makes a new sound",
+     "b": "A sound that was not there last week. The mechanic says two words you did not want to hear: \"gearbox\" and \"soon\".",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Men have appeared on your land",
+     "b": "They have documents. You have documents. Both sets of documents cannot be right, and they have brought a surveyor who agrees with them.",
+     "c": "",
+     "opts": 3
+    }
+   ]
+  },
+  "more": {
+   "name": "More events — business, career, health, money",
+   "count": 27,
+   "rows": [
+    {
+     "a": "A customer has stopped answering",
+     "b": "()=>'You delivered '+fmt(Math.round(S.biz.recv*0.4))+' of goods six weeks ago. The goods were accepted. The phone is now going to voicemail, and the person who signed for it has \"travelled\".'",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Somebody is selling your thing",
+     "b": "A former employee, or someone who studied you closely, has launched a near-identical product at two-thirds of your price. They have copied the name, the packaging and, you notice, a typo from your own artwork.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "The landlord wants to sell",
+     "b": "()=>'Your landlord has decided to sell the building. You have first refusal on your own premises for '+fmt(Math.round(Math.max(12000000,(S.biz.capex\\|\\|0)*3)*S.cumInfl))+', or you can find somewhere else, or you can take your chances with whoever buys it.'",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "The grid has given up",
+     "b": "National power has been down for eleven days. Your generator is running nine hours a day, diesel has gone up 40%, and the generator itself has started making a noise that a mechanic has described, at length, as expensive.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Half the team is thinking about leaving the country",
+     "b": "Two of your people have asked for references for visa applications. This is not about you. It is about the fact that everyone they know under thirty has a folder of documents and a plan.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Your staff are running a business out of your business",
+     "b": "They are using your premises, your supplier account and, on two occasions you can prove, your stock. It is small. It is also systematic, and it has been going on for a while.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A bad review is doing numbers",
+     "b": "One unhappy customer has written a long, specific, well-argued complaint and posted it where your customers will see it. Some of what they say is fair. Some of it is not. All of it is being shared.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A new certification is now mandatory",
+     "b": "()=>'A regulator has announced that from next quarter your category requires certification. The course and the inspection together cost about '+fmt(Math.round(900000*S.cumInfl))+'. Operating without it carries a fine of twice that, per quarter, once they start enforcing.'",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A bulk price, this week only",
+     "b": "Your supplier will sell you six months of input at 28% off if you pay today. That is a real discount and it is also all of your cash, in a warehouse, for two quarters.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A relative would like a job",
+     "b": "A cousin has finished their degree and needs somewhere to start. Your mother has mentioned it twice. There is a real vacancy, and there are also better candidates.",
+     "c": "",
+     "opts": 4
+    },
+    {
+     "a": "Instant working capital",
+     "b": "()=>'A lender is offering '+fmt(Math.round(Math.max(3000000,(S.biz.revenue\\|\\|0)*0.5)))+' against your card receipts, approved in ten minutes, no paperwork. The rate is 7% a month. They are very clear about it and very cheerful.'",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "The association wants a levy",
+     "b": "()=>'The local traders\\' association has levied every business on the street for \"security and sanitation\". '+fmt(Math.round(250000*S.cumInfl))+'. Nobody can tell you what it buys. Everybody is paying.'",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Somebody abroad wants to franchise you",
+     "b": "A diaspora buyer has offered to open your brand in another country. They will pay a fee for the name and the system, and then operate it themselves. If it works, it is free money. If it fails, it is your name on a failing shop three thousand miles away.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Somebody needs bail money",
+     "b": "()=>'A relative has been arrested and the family has called you, because you are the one they call. It is '+fmt(Math.round(700000*S.cumInfl))+' and it is needed tonight.'",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "They would like to give you a title",
+     "b": "()=>'Your community has decided you should take a chieftaincy title. It is an honour, it comes with obligations, and the committee has been very direct about the expected contribution of '+fmt(Math.round(3500000*S.cumInfl))+'.'",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "There has been a death",
+     "b": "()=>'Somebody you grew up with has died, suddenly, at forty-one. There is a burial committee, a levy of '+fmt(Math.round(180000*S.cumInfl))+', and a widow with two children and no income.'",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Two years of rent, in advance",
+     "b": "()=>'Your landlord will not renew annually any more. Two years, paid up front: '+fmt(Math.round(S.fin.budget.housing*24))+'. This is now common and it is not negotiable, only payable or not.'",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Something showed up on a scan",
+     "b": "A routine check has found something that needs a better scan and a specialist. It is probably nothing. \"Probably\" is doing a lot of work in that sentence.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "An old friend is now extremely successful",
+     "b": "Somebody you shared a room with in your twenties now runs something large. They have called, out of nowhere, to ask what you are doing with your life, and then to offer you a role that would pay roughly double.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "They want you to stand",
+     "b": "Your community wants you to run for local office. It is unpaid, it will consume a year, and it is also the fastest way to become the person who is consulted about everything.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Somebody left you something",
+     "b": "()=>'A distant relative has died and left you '+fmt(Math.round(4500000*S.cumInfl))+'. Two other people are disputing the will, and one of them has already changed the locks on a house that is not theirs.'",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Fees are due on Monday",
+     "b": "()=>'The school has sent the invoice and a reminder, and a note that places are confirmed on payment. '+fmt(Math.round(Math.max(600000, 400000*S.p.kids)*S.cumInfl))+'.'",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "You have been pre-approved",
+     "b": "()=>'A bank has written to say you are pre-approved for '+fmt(Math.round(Math.max(3000000, (salaryMonthly()+informalMonthly())*14)))+' at \"just\" 4.5% a month, with no collateral. The letter is friendly. The arithmetic is not.'",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "There is a gap in the rate",
+     "b": "The official rate and the street rate have separated by 22%. For about a week, somebody with cash and the right contacts can move money through the gap. Everybody you know is doing it.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "What happens to them",
+     "b": "An insurance agent has asked a question you have been avoiding: if you died this year, what would your family actually live on? The honest answer appears to be \"the sale of things, slowly\".",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A pension scheme you have never read",
+     "b": "Your employer runs a contributory pension. You have been in it for years without looking at it. The statement shows a number, and the number is smaller than you expected, and the fund is invested mostly in government bonds.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Everyone you know is buying the same thing",
+     "b": "It might be land in a particular corridor, a crypto token, a friend's startup, or imported cars. Whatever it is, everyone is making money and the people making money are telling everyone else about it.",
+     "c": "",
+     "opts": 3
+    }
+   ]
+  },
+  "policy": {
+   "name": "Policy events — the country does something to everyone",
+   "count": 12,
+   "rows": [
+    {
+     "a": "Fuel subsidy removed overnight",
+     "b": "Pump price triples before dawn. Transport, food and diesel repriced by lunchtime.",
+     "c": "",
+     "opts": null
+    },
+    {
+     "a": "Currency devalued at the official window",
+     "b": "The central bank unification lands. Importers reprice everything within a week.",
+     "c": "",
+     "opts": null
+    },
+    {
+     "a": "Cash redesign / naira scarcity",
+     "b": "New notes, no notes. POS operators become the most powerful people in the country for six weeks.",
+     "c": "",
+     "opts": null
+    },
+    {
+     "a": "Monetary policy committee hikes aggressively",
+     "b": "Borrowing gets expensive. Fixed income suddenly pays; equities and property stop moving.",
+     "c": "",
+     "opts": null
+    },
+    {
+     "a": "Central bank begins an easing cycle",
+     "b": "Credit loosens. Cheap money returns and risk assets breathe again.",
+     "c": "",
+     "opts": null
+    },
+    {
+     "a": "Oil price collapse",
+     "b": "The budget gaps widen, the currency wobbles, and government contracts stop paying.",
+     "c": "",
+     "opts": null
+    },
+    {
+     "a": "Foreign investment returns",
+     "b": "Capital floods in. Valuations, land prices and confidence move together.",
+     "c": "",
+     "opts": null
+    },
+    {
+     "a": "National grid collapses — again",
+     "b": "Eleven days of darkness. Diesel sellers and solar installers have a very good quarter.",
+     "c": "",
+     "opts": null
+    },
+    {
+     "a": "Power supply improves unexpectedly",
+     "b": "A new independent grid deal lands. Businesses quietly stop budgeting for diesel.",
+     "c": "",
+     "opts": null
+    },
+    {
+     "a": "New tax regime takes effect",
+     "b": "Withholding, VAT and levies get restructured. Compliance costs go up for everyone formal.",
+     "c": "",
+     "opts": null
+    },
+    {
+     "a": "Bank recapitalisation directive",
+     "b": "Lenders must raise capital. Credit to small business dries up for two quarters.",
+     "c": "",
+     "opts": null
+    },
+    {
+     "a": "Security incident spooks investors",
+     "b": "A high-profile incident dominates the news. Logistics routes lengthen, insurance rises.",
+     "c": "",
+     "opts": null
+    }
+   ]
+  },
+  "biz": {
+   "name": "Business events",
+   "count": 14,
+   "rows": [
+    {
+     "a": "A corporate client wants a large order",
+     "b": "The volume is three times your normal quarter. They want it delivered in six weeks and they want 90-day payment terms.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Someone filmed you",
+     "b": "A customer posted a video. It has 400,000 views by Tuesday and your phone has not stopped since.",
+     "c": "",
+     "opts": 2
+    },
+    {
+     "a": "They are being interviewed",
+     "b": "Your best person has been taking calls during lunch. A competitor is offering 40% more, and they have told you about it, which means they have not decided yet.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "The numbers do not add up",
+     "b": "Stock is disappearing. It is small enough to be invisible per day and large enough to matter per quarter. Someone in this building is taking it.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Officials at the door",
+     "b": "Two men, one clipboard, and a laminated ID each. They would like to see your registration documents, your tax clearance, and your fire certificate.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "The landlord has \"reviewed\" the rent",
+     "b": "A 65% increase, effective next quarter. He knows exactly what it would cost you to move.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A surge took out your equipment",
+     "b": "The grid came back on at 2am with enthusiasm. Some of your equipment did not come back with it.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Someone opened next door",
+     "b": "Same product, cheaper, and they copied your branding closely enough that customers are asking if you are related.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A government tender is open",
+     "b": "Real money, published criteria, and a process. It will take three weeks of your life to prepare the bid.",
+     "c": "",
+     "opts": 2
+    },
+    {
+     "a": "A fund wants to talk",
+     "b": "They have seen the numbers and they would like to invest. The term sheet involves a valuation, a board seat, and a growth plan you will be held to.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "The team has organised",
+     "b": "They have elected a spokesperson. The ask is a 20% increase, and the timing is not an accident — it is your best quarter yet.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Your supplier offers 60-day terms",
+     "b": "A genuine offer of credit — with a 4% premium baked into the price if you take it. You did not ask for the premium; it is simply in there.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Your inputs are priced in dollars",
+     "b": "A devaluation lands mid-quarter. Your suppliers reprice before your customers will accept a new price. For six weeks, your margin simply does not exist.",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A batch went out bad",
+     "b": "Twenty-eight customers have complained in four days. The problem is traceable to one supplier batch and everyone can see it.",
+     "c": "",
+     "opts": 3
+    }
+   ]
+  },
+  "gov": {
+   "name": "Government and board events",
+   "count": 11,
+   "rows": [
+    {
+     "a": "function(){ const d=angriestDirector(S.biz); return d ? (d.name+' wants to resign') : 'A director wants out'; }",
+     "b": "function(){    const b=S.biz, d=angriestDirector(b); if(!d) return 'Somebody on your board has had enough.';    const A=archOf(d.arc);    return d.name+' has asked for a private word, which is how these things start. They have been on the board of '+b.name+      ' for '+Math.max(1, S.turn-(d.since\\|\\|S.turn))+' quarters, they have watched '+((b.profit\\|\\|0)>=0?'a business that works':'a business that does not')+      ', and they have come to the view that their name is attached to something they cannot influence. '+      '\"I would rather go now, cleanly,\" they say, \"than be in the room when it goes wrong.\" '+      'Patience '+Math.round(d.patience\\|\\|50)+'/100. Loyalty '+Math.round(d.loyalty\\|\\|50)+'/100. '+esc(A.blurb)+'.';  }",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "function(){ const h=biggestHolder(S.biz); return h ? (h.name+' is selling their stake') : 'A shareholder is selling'; }",
+     "b": "function(){    const b=S.biz, h=biggestHolder(b); if(!h) return 'One of your shareholders is selling.';    const price=Math.round(bizValue(b)*((h.pct\\|\\|0)/100)*R.range(0.72,1.15));    S._gevPrice=price; S._gevHolder=h.id;    return h.name+' holds '+pct((h.pct\\|\\|0)/100,1)+' of '+b.name+' and has found a buyer \\u2014 '+      R.pick(['a fund that specialises in distressed consumer businesses','a competitor you have lost tenders to',              'an overseas group buying into the sector','a consortium with no operating experience and a lot of money'])+      '. The price agreed is '+fmt(price)+'. Under the shareholders\\u2019 agreement you '+      (deedOf(b).preEmption ? 'have a right of first refusal: you can buy it at that price before it transfers.'                             : 'have no pre-emption right. It can transfer without your consent.')+      (deedOf(b).tag ? ' You also have tag-along rights, which let you sell alongside on identical terms.' : '');  }",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "function(){ const h=biggestHolder(S.biz); return h ? (h.name+' wants the company to buy from them') : 'A related-party proposal'; }",
+     "b": "function(){    const b=S.biz, h=biggestHolder(b); if(!h) return 'A shareholder wants to sell to the company.';    const amt=Math.round((b.revenue\\|\\|0)*R.range(0.10,0.26));    S._gevRel=amt; S._gevHolder=h.id;    return h.name+' owns another company. It supplies '+R.pick(['packaging','logistics','raw input','IT services','cleaning and facilities'])+      ', and it would like '+b.name+'\\u2019s business: about '+fmt(amt)+' a year, on a three-year term. '+      'Their price is roughly '+R.int(8,26)+'% above what you pay now, which they describe as \"certainty of supply\". '+      'The board will have to approve it as a related-party transaction, and it will be minuted.';  }",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "The nominee has a request",
+     "b": "function(){    const b=S.biz;    const d=boardOf(b).find(function(x){ return x.arc==='nominee'; });    S._gevDir=d?d.id:null;    const amt=Math.round((b.revenue\\|\\|0)*R.range(0.01,0.035)+400000*S.cumInfl);    S._gevFee=amt;    return (d?d.name:'Your government nominee')+' has mentioned, twice, that your '+R.pick(['operating licence','import permit','environmental clearance','sector registration'])+      ' is due for renewal, and that renewal \"can be assisted\". The figure discussed is '+fmt(amt)+      '. It would be invoiced as consultancy. Everyone in the room understands what it is, and nobody will write down that they said so.';  }",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "A minority shareholder has sued",
+     "b": "function(){    const b=S.biz;    return 'A holder of '+pct((b.externalPct\\|\\|0)/100,0)+' of '+b.name+' has filed a derivative action. '+      'The claim is that related-party contracts were approved without disclosure, that the company paid above market for them, '+      'and that you, as the controlling shareholder, caused it. They want the contracts set aside, an account of profits, and your removal as a director. '+      'They have counsel. Whether they win depends partly on the facts and partly on whether you wrote anything down.';  }",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "Somebody has been buying in the secondary market",
+     "b": "function(){    const b=S.biz, h=biggestHolder(b); if(!h) return 'A stake in your company has changed hands.';    const seller=h;    const buyerName=R.pick(FIRST)+' '+R.pick(LAST);    return 'You were not consulted, because you did not have to be. '+seller.name+' has sold their '+pct((seller.pct\\|\\|0)/100,1)+      ' of '+b.name+' to '+buyerName+', who '+(R.chance(0.5)        ? 'already owns two companies in adjacent sectors and has been asking about you for a year.'        : 'has made a career of buying minority stakes in founder-led businesses and waiting.')+      ' The new holder has the same shares, the same seat, and a completely different plan. '+      (deedOf(b).tag ? 'You had tag-along rights on a sale like this and did not use them.' : 'There is no tag-along clause, which is why you are reading about it now.');  }",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "function(){ return ((S.biz&amp;&amp;S.biz.md&amp;&amp;S.biz.md.name)\\|\\|'Your managing director')+' has been approached'; }",
+     "b": "function(){    const b=S.biz, m=b.md; if(!m) return 'Your managing director has been approached.';    const offer=Math.round(m.salary*R.range(1.7,2.6));    S._gevOffer=offer;    return m.name+' has been running '+b.name+' for '+Math.max(1,S.turn-(m.since\\|\\|S.turn))+' quarters. '+      'Somebody has offered them '+fmt(offer)+' a quarter \\u2014 roughly '+Math.round(offer/Math.max(1,m.salary)*10)/10+      ' times what you pay \\u2014 to run a larger operation. They have told you before accepting, which is either loyalty or leverage, '+      'and you have about a week to decide which it is.';  }",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "The investors want their own managing director",
+     "b": "function(){    const b=S.biz;    return 'The holders of '+pct((b.externalPct\\|\\|0)/100,0)+' of '+b.name+' have written to you. They are, they say, delighted with progress. '+      'They also think the company has reached the size where it needs \"professional management\", which is the phrase used '+      'immediately before a founder is asked to become chairman. They have a candidate: '+      R.pick(['a former group MD of a listed company','an operator from a business three times this size','somebody who has done two turnarounds and one collapse'])+      ', at about '+fmt(Math.round(1100000*S.cumInfl))+' a quarter. They would like your view, by which they mean your agreement.';  }",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "The board is deadlocked",
+     "b": "function(){    const b=S.biz;    return 'It has happened three times now: a resolution split exactly down the middle, with the chair '+      (chairIsYours(b)?'using a casting vote to break it':'unable to break it, because the chair is not yours')+      '. The company is not being mismanaged so much as not being managed. Under the shareholders\\u2019 agreement, deadlock is '+      (({mediation:'resolved by mediation', shotgun:'resolved by a shotgun clause', expert:'referred to an independent expert'})[deedOf(b).deadlock]\\|\\|'unresolved')+      ', and somebody on the other side has started quoting that clause at you.';  }",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "function(){ const h=biggestHolder(S.biz); return h ? (h.name+' needs their money back') : 'A shareholder needs liquidity'; }",
+     "b": "function(){    const b=S.biz, h=biggestHolder(b); if(!h) return 'A shareholder needs their money back.';    const v=Math.max(1000000,bizValue(b));    const ask=Math.round(v*((h.pct\\|\\|0)/100)*R.range(0.55,0.85));    S._gevAsk=ask; S._gevHolder=h.id;    return h.name+' has called about something else entirely and got round to it in the last minute. '+      'They need liquidity \\u2014 '+R.pick(['a property completion','a margin call','a divorce','a business of their own that is short'])+      ' \\u2014 and they would rather sell to you than to a stranger. They are asking '+fmt(ask)+' for their '+      pct((h.pct\\|\\|0)/100,1)+', which is '+Math.round(ask/Math.max(1, v*((h.pct\\|\\|0)/100))*100)+'% of what the stake is worth on paper. '+      'You have '+fmt(S.fin.cash)+'.';  }",
+     "c": "",
+     "opts": 3
+    },
+    {
+     "a": "function(){ const b=S.biz; const x=covenantBreaches(b)[0];    return x ? ('Covenant breach: '+(COVENANT_KINDS[x.c.kind]\\|\\|{label:x.c.kind}).label) : 'Covenant breach'; }",
+     "b": "function(){    const b=S.biz; const x=covenantBreaches(b)[0]; if(!x) return 'A covenant has been breached.';    const K=COVENANT_KINDS[x.c.kind]\\|\\|{label:x.c.kind,desc:''};    const a=bizAccounts(b);    S._gevCov=x.c.id;    const fmtv=function(v){ return (x.c.kind==='mincash'\\|\\|x.c.kind==='capex')? fmt(Math.round(v)) : (x.c.kind==='conc'? Math.round(v)+'%' : v.toFixed(2)+'x'); };    return 'The certificate is due under the facility from '+x.c.from+'. '+esc(K.desc)+' '+      'The limit is '+fmtv(x.c.limit)+'. You are at '+fmtv(x.actual)+'. '+      (x.c.kind==='leverage' ? 'Trailing EBITDA is '+fmt(a.ebitda)+' against borrowings of '+fmt(a.debt)+'.'       : x.c.kind==='cover' ? 'Trailing EBITDA is '+fmt(a.ebitda)+' and the annual interest bill is '+fmt(a.interest*4)+'.'       : x.c.kind==='mincash' ? 'The company closed the quarter with '+fmt(a.closeCash)+'.'       : x.c.kind==='capex' ? 'Trailing capital spend is '+fmt(b.capex12\\|\\|0)+'.'       : x.c.kind==='conc' ? 'One customer is '+Math.round(x.actual)+'% of revenue.'       : 'You are no longer the managing director, which is an event of default under the facility.')+      ' This is not the end of the company. It is the beginning of a conversation in which you have no leverage at all.';  }",
+     "c": "",
+     "opts": 4
+    }
+   ]
+  }
+ },
+ "arcs": [
+  {
+   "title": "The Container",
+   "cast": "friend",
+   "stages": 3
+  },
+  {
+   "title": "The Family Land",
+   "cast": "sibling",
+   "stages": 2
+  },
+  {
+   "title": "The Door",
+   "cast": "mentor",
+   "stages": 3
+  },
+  {
+   "title": "The Undercut",
+   "cast": "rival",
+   "stages": 2
+  },
+  {
+   "title": "The File",
+   "cast": "contact",
+   "stages": 2
+  },
+  {
+   "title": "The Line",
+   "cast": "banker",
+   "stages": 2
+  },
+  {
+   "title": "The Cousin",
+   "cast": "cousin",
+   "stages": 3
+  },
+  {
+   "title": "The Title",
+   "cast": "elder",
+   "stages": 2
+  },
+  {
+   "title": "The Ask",
+   "cast": "love",
+   "stages": 3
+  },
+  {
+   "title": "The Exit",
+   "cast": "rival",
+   "stages": 2
+  },
+  {
+   "title": "The Crash",
+   "cast": "",
+   "stages": 3
+  },
+  {
+   "title": "The Tender",
+   "cast": "contact",
+   "stages": 2
+  },
+  {
+   "title": "The Whale",
+   "cast": "",
+   "stages": 3
+  },
+  {
+   "title": "The Partnership",
+   "cast": "",
+   "stages": 2
+  },
+  {
+   "title": "The Second Location",
+   "cast": "",
+   "stages": 3
+  },
+  {
+   "title": "The New Line",
+   "cast": "",
+   "stages": 2
+  },
+  {
+   "title": "The Crunch",
+   "cast": "banker",
+   "stages": 2
+  },
+  {
+   "title": "The Assessment",
+   "cast": "",
+   "stages": 2
+  },
+  {
+   "title": "The Right Hand",
+   "cast": "",
+   "stages": 2
+  },
+  {
+   "title": "The Exit",
+   "cast": "",
+   "stages": 3
+  },
+  {
+   "title": "The Night It Happened",
+   "cast": "",
+   "stages": 2
+  },
+  {
+   "title": "The Export Order",
+   "cast": "",
+   "stages": 2
+  },
+  {
+   "title": "Going Proper",
+   "cast": "",
+   "stages": 2
+  },
+  {
+   "title": "The Input",
+   "cast": "supplier",
+   "stages": 2
+  },
+  {
+   "title": "The Shortfall",
+   "cast": "",
+   "stages": 2
+  },
+  {
+   "title": "Who Runs It",
+   "cast": "",
+   "stages": 2
+  }
+ ],
+ "instruments": {
+  "careers": [
+   {
+    "label": "Work late, deliver hard",
+    "hours": 52,
+    "money": 0,
+    "note": "Four extra hours a week, every week, for a whole quarter. It works, and then it stops working. The second lot of late nights in one quarter buys far less than the first."
+   },
+   {
+    "label": "Take people to lunch",
+    "hours": 18,
+    "money": 60000,
+    "note": "Relationship capital compounds faster than money capital early on. It takes afternoons, though, and the same people can only be asked to lunch so often before it becomes a story about you."
+   },
+   {
+    "label": "Ask for a raise",
+    "money": 0,
+    "note": "Odds scale with performance, tenure and how replaceable you are."
+   },
+   {
+    "label": "Interview elsewhere",
+    "money": 45000,
+    "note": "The fastest way to close the gap between what you are paid and what you are worth."
+   },
+   {
+    "label": "Run a side hustle after hours",
+    "hours": 88,
+    "money": 0,
+    "note": "Seven hours a week of evenings and weekends, sold off in blocks. There are only so many nights in a quarter — take on a second hustle and the second one comes out of your sleep."
+   },
+   {
+    "label": "Resign and go full-time on the business",
+    "money": 0,
+    "note": "Burn the boats. Business output jumps — and so does the cost of being wrong."
+   },
+   {
+    "label": "Take a month off to reset",
+    "hours": 0,
+    "money": 0,
+    "note": "Sometimes the highest-return action available is stopping. Once a year, at most — a month off every quarter is not a sabbatical, it is unemployment."
+   }
+  ],
+  "businesses": [
+   {
+    "label": "Import &amp; Retail Trading",
+    "from": 8000000,
+    "margin": 0.19,
+    "growth": 0.14
+   },
+   {
+    "label": "Food &amp; Restaurant",
+    "from": 4000000,
+    "margin": 0.47,
+    "growth": 0.11
+   },
+   {
+    "label": "Logistics &amp; Delivery",
+    "from": 12000000,
+    "margin": 0.28,
+    "growth": 0.2
+   },
+   {
+    "label": "Tech Startup (SaaS)",
+    "from": 3000000,
+    "margin": 0.7,
+    "growth": 0.34
+   },
+   {
+    "label": "Agribusiness",
+    "from": 10000000,
+    "margin": 0.34,
+    "growth": 0.13
+   },
+   {
+    "label": "Real Estate Development",
+    "from": 40000000,
+    "margin": 0.36,
+    "growth": 0.17
+   },
+   {
+    "label": "Creative Agency",
+    "from": 2000000,
+    "margin": 0.52,
+    "growth": 0.16
+   },
+   {
+    "label": "Light Manufacturing",
+    "from": 30000000,
+    "margin": 0.31,
+    "growth": 0.12
+   },
+   {
+    "label": "Professional Services",
+    "from": 1500000,
+    "margin": 0.56,
+    "growth": 0.14
+   },
+   {
+    "label": "Solar &amp; Energy Installs",
+    "from": 9000000,
+    "margin": 0.33,
+    "growth": 0.24
+   }
+  ],
+  "goods": [
+   {
+    "label": "Smartphone",
+    "cost": 420000,
+    "upkeep": 4000,
+    "life": 8,
+    "note": "Everything runs through it."
+   },
+   {
+    "label": "Laptop",
+    "cost": 950000,
+    "upkeep": 2000,
+    "life": 12,
+    "note": "A tool, not a toy. Doubles as your office."
+   },
+   {
+    "label": "Generator (big boy)",
+    "cost": 780000,
+    "upkeep": 28000,
+    "life": 40,
+    "note": "The single most Nigerian purchase in existence. Fuel not included."
+   },
+   {
+    "label": "Solar + Inverter",
+    "cost": 4200000,
+    "upkeep": 6000,
+    "life": 60,
+    "note": "Capital now, silence forever. Pays back in ~4 years."
+   },
+   {
+    "label": "Used Car",
+    "cost": 6500000,
+    "upkeep": 45000,
+    "life": 60,
+    "note": "Freedom, status, and a maintenance schedule that never ends."
+   },
+   {
+    "label": "Furnish the flat",
+    "cost": 1800000,
+    "upkeep": 3000,
+    "life": 60,
+    "note": "You stop feeling like you are camping."
+   },
+   {
+    "label": "Proper Wardrobe",
+    "cost": 700000,
+    "upkeep": 4000,
+    "life": 24,
+    "note": "People absolutely do judge. Especially in this town."
+   },
+   {
+    "label": "Gym Membership",
+    "cost": 180000,
+    "upkeep": 27000,
+    "life": 0,
+    "note": "Cheapest health insurance there is."
+   },
+   {
+    "label": "Health Insurance",
+    "cost": 220000,
+    "upkeep": 75000,
+    "life": 0,
+    "note": "Turns a catastrophic event into an annoying one."
+   },
+   {
+    "label": "Professional Certification",
+    "cost": 1200000,
+    "upkeep": 0,
+    "life": 0,
+    "note": "ACA, CFA, PMP. Signals competence to strangers."
+   },
+   {
+    "label": "Executive MBA",
+    "cost": 9500000,
+    "upkeep": 0,
+    "life": 0,
+    "note": "Buying a network with a diploma attached."
+   }
+  ],
+  "assets": [
+   {
+    "label": "Bank Savings",
+    "cls": "Cash",
+    "ret": 0.004,
+    "vol": 0,
+    "note": "Instant access. Loses to inflation, every single quarter."
+   },
+   {
+    "label": "Ajo / Esusu Group",
+    "cls": "Cash",
+    "ret": 0.026,
+    "vol": 0.03,
+    "note": "Informal rotating savings. Decent return, real risk the collector disappears."
+   },
+   {
+    "label": "Treasury Bills",
+    "cls": "Fixed Income",
+    "ret": 0.048,
+    "vol": 0.004,
+    "note": "Sovereign short-term. Priced off the central bank rate."
+   },
+   {
+    "label": "Fixed Deposit",
+    "cls": "Fixed Income",
+    "ret": 0.044,
+    "vol": 0.003,
+    "note": "Locked 90 days. Break it and you lose the interest."
+   },
+   {
+    "label": "Government Bonds",
+    "cls": "Fixed Income",
+    "ret": 0.05,
+    "vol": 0.02,
+    "note": "Long duration. Price falls when rates rise."
+   },
+   {
+    "label": "Local Equities",
+    "cls": "Equity",
+    "ret": 0.036,
+    "vol": 0.155,
+    "note": "The domestic stock market. Violent drawdowns, violent recoveries."
+   },
+   {
+    "label": "Dollar Account",
+    "cls": "Currency",
+    "ret": 0.001,
+    "vol": 0,
+    "note": "Pure FX hedge. Earns nothing, protects everything."
+   },
+   {
+    "label": "Global Equity ETF",
+    "cls": "Equity",
+    "ret": 0.016,
+    "vol": 0.075,
+    "note": "Broad index in hard currency. Your returns are amplified by devaluation."
+   },
+   {
+    "label": "REIT / Property Fund",
+    "cls": "Property",
+    "ret": 0.024,
+    "vol": 0.085,
+    "note": "Listed real estate. Liquid-ish, moves with rates and rent."
+   },
+   {
+    "label": "Land (peri-urban)",
+    "cls": "Property",
+    "ret": 0.03,
+    "vol": 0.072,
+    "note": "Illiquid, title risk is real, but this is where generational money is made."
+   },
+   {
+    "label": "Rental Property",
+    "cls": "Property",
+    "ret": 0.024,
+    "vol": 0.048,
+    "note": "Completed unit. Rents come in, tenants happen."
+   },
+   {
+    "label": "Gold",
+    "cls": "Commodity",
+    "ret": 0.014,
+    "vol": 0.072,
+    "note": "Crisis hedge. Boring until the quarter it is not."
+   },
+   {
+    "label": "Crypto",
+    "cls": "Crypto",
+    "ret": 0.014,
+    "vol": 0.21,
+    "note": "Genuinely life-changing and genuinely ruinous. Position size is the only real skill."
+   }
+  ],
+  "deals": [
+   {
+    "label": "Property flip",
+    "turns": 4,
+    "upside": 0.55,
+    "risk": 0.3,
+    "note": "A unit that needs work and a seller who needs to be somewhere else. Four quarters to turn it."
+   },
+   {
+    "label": "Private placement",
+    "turns": 8,
+    "upside": 0.95,
+    "risk": 0.48,
+    "note": "A growing company wants money before it wants a valuation. Illiquid for at least two years."
+   },
+   {
+    "label": "Distressed stock",
+    "turns": 2,
+    "upside": 0.45,
+    "risk": 0.28,
+    "note": "A business is closing. Stock, equipment and a customer list, priced to move this week."
+   },
+   {
+    "label": "Bridge loan",
+    "turns": 3,
+    "upside": 0.32,
+    "risk": 0.38,
+    "note": "Ninety days, twelve per cent, secured against a contract that has already been signed. Everyone says it is safe."
+   },
+   {
+    "label": "Import arbitrage",
+    "turns": 2,
+    "upside": 0.4,
+    "risk": 0.42,
+    "note": "Buy here, sell there, before the next FX move. The window is about one quarter wide."
+   },
+   {
+    "label": "Land banking",
+    "turns": 12,
+    "upside": 1.3,
+    "risk": 0.22,
+    "note": "A corridor nobody wants yet. Nothing happens for two years and then everything happens."
+   },
+   {
+    "label": "Franchise unit",
+    "turns": 6,
+    "upside": 0.5,
+    "risk": 0.3,
+    "note": "A proven brand wants an operator with capital. You supply both and follow their system."
+   },
+   {
+    "label": "Equipment purchase",
+    "turns": 4,
+    "upside": 0.38,
+    "risk": 0.2,
+    "note": "Buy the machine your business keeps renting. It pays for itself or it sits in the yard."
+   }
+  ],
+  "covenants": [
+   {
+    "label": "Leverage",
+    "unit": "x",
+    "worse": "higher",
+    "note": "Borrowings must stay below a multiple of trailing EBITDA."
+   },
+   {
+    "label": "Interest cover",
+    "unit": "x",
+    "worse": "lower",
+    "note": "Trailing EBITDA must cover interest a set number of times."
+   },
+   {
+    "label": "Minimum cash",
+    "unit": "",
+    "worse": "lower",
+    "note": "The company must hold at least this much cash at every quarter end."
+   },
+   {
+    "label": "Capital expenditure cap",
+    "unit": "",
+    "worse": "higher",
+    "note": "Capital spend in any four quarters may not exceed this."
+   },
+   {
+    "label": "Customer concentration",
+    "unit": "%",
+    "worse": "higher",
+    "note": "No single customer may exceed this share of revenue."
+   },
+   {
+    "label": "Key person",
+    "unit": "",
+    "worse": "breach",
+    "note": "The founder must remain managing director, or the facility falls for review."
+   }
+  ],
+  "resolutions": [
+   {
+    "label": "Declare a distribution",
+    "cls": "board",
+    "threshold": "ordinary"
+   },
+   {
+    "label": "Cap owner drawings",
+    "cls": "board",
+    "threshold": "ordinary"
+   },
+   {
+    "label": "Raise outside capital",
+    "cls": "shareholder",
+    "threshold": "special"
+   },
+   {
+    "label": "Sell the company",
+    "cls": "shareholder",
+    "threshold": "special"
+   },
+   {
+    "label": "Wind the company up",
+    "cls": "shareholder",
+    "threshold": "special"
+   },
+   {
+    "label": "Take on material debt",
+    "cls": "board",
+    "threshold": "ordinary"
+   },
+   {
+    "label": "Major capital commitment",
+    "cls": "board",
+    "threshold": "ordinary"
+   },
+   {
+    "label": "Appoint to the board",
+    "cls": "shareholder",
+    "threshold": "ordinary"
+   },
+   {
+    "label": "Remove a director",
+    "cls": "shareholder",
+    "threshold": "special"
+   },
+   {
+    "label": "Replace the managing director",
+    "cls": "board",
+    "threshold": "ordinary"
+   },
+   {
+    "label": "Install a professional MD",
+    "cls": "board",
+    "threshold": "ordinary"
+   },
+   {
+    "label": "Approve the annual operating plan",
+    "cls": "board",
+    "threshold": "ordinary"
+   },
+   {
+    "label": "Approve an option pool top-up",
+    "cls": "shareholder",
+    "threshold": "special"
+   },
+   {
+    "label": "Commission a forensic audit",
+    "cls": "board",
+    "threshold": "ordinary"
+   },
+   {
+    "label": "Acquire another business",
+    "cls": "shareholder",
+    "threshold": "special"
+   },
+   {
+    "label": "Approve a related-party contract",
+    "cls": "board",
+    "threshold": "ordinary"
+   },
+   {
+    "label": "Amend the shareholders' agreement",
+    "cls": "shareholder",
+    "threshold": "special"
+   },
+   {
+    "label": "Hold back profit as reserve",
+    "cls": "board",
+    "threshold": "ordinary"
+   },
+   {
+    "label": "Bring the company to market",
+    "cls": "shareholder",
+    "threshold": "special"
+   },
+   {
+    "label": "Remove the founder as MD",
+    "cls": "board",
+    "threshold": "ordinary"
+   },
+   {
+    "label": "Fund the company or be diluted",
+    "cls": "shareholder",
+    "threshold": "special"
+   }
+  ],
+  "household": [
+   {
+    "label": "Housekeeper",
+    "pay": 0.55,
+    "note": "The house stops being a second job. Nothing dramatic, every single week."
+   },
+   {
+    "label": "Cook",
+    "pay": 0.72,
+    "note": "You eat properly and at the same hour. It turns up in your bloodwork a decade later."
+   },
+   {
+    "label": "Nanny",
+    "pay": 0.8,
+    "note": "Childcare that is not you at two in the morning. The largest single block of attention you can buy."
+   },
+   {
+    "label": "Driver",
+    "pay": 0.95,
+    "note": "Traffic stops being your job. You arrive composed and you work in the back seat."
+   },
+   {
+    "label": "Gardener",
+    "pay": 0.45,
+    "note": "Grounds, generator, gutters. Property upkeep falls and the place looks like somebody owns it."
+   },
+   {
+    "label": "Security",
+    "pay": 0.62,
+    "note": "A gate and a man on it. Cuts theft at home and, if you post him there, at the business."
+   },
+   {
+    "label": "Personal assistant",
+    "pay": 1.15,
+    "note": "Your calendar, your calls, the birthday you always forget. The best return on attention on this list."
+   },
+   {
+    "label": "Chief of staff",
+    "pay": 2.25,
+    "note": "Runs your affairs across every company you own. Partly covers businesses that have no general manager."
+   },
+   {
+    "label": "Accountant",
+    "pay": 1.6,
+    "note": "Books kept properly across the companies and your own affairs. Tax exposure falls, compliance rises."
+   },
+   {
+    "label": "Lawyer",
+    "pay": 1.95,
+    "note": "Reads what you are about to sign. Contracts tighten and disputes cost less when they arrive."
+   }
+  ],
+  "perks": [
+   {
+    "label": "Accommodation",
+    "note": "They live in. Cheaper than the equivalent allowance, and they are always there."
+   },
+   {
+    "label": "Transport",
+    "note": "You cover getting to work and back."
+   },
+   {
+    "label": "Feeding",
+    "note": "One proper meal a day on you."
+   },
+   {
+    "label": "Medical",
+    "note": "A retainer at a clinic. They stop bringing you their problems."
+   },
+   {
+    "label": "13th month",
+    "note": "An extra month every December. The cheapest way to keep somebody through a hard year."
+   }
+  ],
+  "negotiation": [
+   {
+    "label": "Anchor hard",
+    "note": "Name a number near your best case and defend it. Moves them a long way when it works."
+   },
+   {
+    "label": "Argue it with numbers",
+    "note": "Comparables, margins, what the market actually pays. Effective and low-risk if your finance skill is real."
+   },
+   {
+    "label": "Make a genuine concession",
+    "note": "Move meaningfully to unlock movement from them. Costs you, nearly always closes."
+   },
+   {
+    "label": "Hold firm and say nothing",
+    "note": "Free. Works when they are under time pressure and badly when they are not."
+   },
+   {
+    "label": "Trade a term instead of price",
+    "note": "Give something that costs you less than cash: notice period, payment days, exclusivity, a title."
+   },
+   {
+    "label": "Use your leverage",
+    "note": "Remind them, concretely, what you bring and what it costs them to lose you. You can only spend this once."
+   },
+   {
+    "label": "Walk away",
+    "note": "Ends it. Sometimes the only leverage you ever actually had."
+   }
+  ],
+  "staff": [
+   {
+    "label": "Operations",
+    "note": "Produces the thing you sell."
+   },
+   {
+    "label": "Sales",
+    "note": "Brings demand in. +10% effectiveness."
+   },
+   {
+    "label": "Support",
+    "note": "Admin, stores, front of house."
+   },
+   {
+    "label": "Finance",
+    "note": "Improves the books and reduces tax risk."
+   },
+   {
+    "label": "General manager",
+    "note": "Runs the unit without you. Frees your attention for other companies."
+   }
+  ],
+  "levers": [
+   {
+    "label": "Second shift",
+    "gives": "Capacity +35% for as long as it runs.",
+    "ask": "Run the units a second time"
+   },
+   {
+    "label": "Input supply contract",
+    "gives": "Cost of goods about 10% lower for the term.",
+    "ask": "Lock your input costs"
+   },
+   {
+    "label": "Distribution deal",
+    "gives": "Demand +22% for the term.",
+    "ask": "Hand the selling to a distributor"
+   }
+  ],
+  "traits": [
+   {
+    "label": "Sharp",
+    "note": "High output, negotiates hard on salary."
+   },
+   {
+    "label": "Loyal",
+    "note": "Stays through hard quarters. Rare."
+   },
+   {
+    "label": "Connected",
+    "note": "Brings clients and shortcuts with them."
+   },
+   {
+    "label": "Coasts",
+    "note": "Does the minimum. Needs managing."
+   },
+   {
+    "label": "Light fingers",
+    "note": "Inventory goes missing. You will find out late."
+   },
+   {
+    "label": "Ambitious",
+    "note": "Grows fast, leaves faster if underpaid."
+   },
+   {
+    "label": "Steady",
+    "note": "Nothing spectacular, nothing breaks."
+   },
+   {
+    "label": "Genuinely excellent",
+    "note": "Top decile. You will struggle to keep them."
+   }
+  ],
+  "ambitions": [
+   {
+    "label": "Clean millionaire by 40",
+    "note": "Net worth of ₦500m in start-of-game money before you turn forty, with no debt hanging off it."
+   },
+   {
+    "label": "Build something that outlasts you",
+    "note": "Raise a family, keep them close, and leave behind more than money."
+   },
+   {
+    "label": "Never need anyone again",
+    "note": "A Freedom Index above 80 with zero debt. Work becomes a choice."
+   },
+   {
+    "label": "Build the biggest thing you can",
+    "note": "Scale a business past ₦250m of quarterly revenue and employ more than twenty people."
+   },
+   {
+    "label": "Buy back what was lost",
+    "note": "Own land and property worth ₦1bn in start-of-game money. The family gets the point."
+   }
+  ],
+  "eras": [
+   {
+    "label": "Ordinary Times",
+    "tone": "neutral",
+    "head": "Nothing is happening, which is its own kind of luck."
+   },
+   {
+    "label": "The Boom",
+    "tone": "good",
+    "head": "Money is cheap, valuations are silly, and everyone you know is suddenly an investor."
+   },
+   {
+    "label": "The Bust",
+    "tone": "bad",
+    "head": "The music stopped. Nobody wants to admit they were still dancing."
+   },
+   {
+    "label": "The Long Stagnation",
+    "tone": "warn",
+    "head": "Nothing collapses. Nothing improves. Years go by like this."
+   },
+   {
+    "label": "Reform Season",
+    "tone": "info",
+    "head": "New rules, new taxes, new forms. Some of this is good for you. Most of it is paperwork."
+   },
+   {
+    "label": "Election Season",
+    "tone": "warn",
+    "head": "Promises are cheap, contracts are frozen, and everyone with a file is waiting for the result."
+   },
+   {
+    "label": "Crisis",
+    "tone": "bad",
+    "head": "Something broke. Nobody agrees what, and the argument is expensive."
+   }
+  ],
+  "difficulties": [
+   {
+    "label": "Apprentice",
+    "shock": 0.55,
+    "inflation": 0.68,
+    "odds": true,
+    "coach": true,
+    "pay": 1.12
+   },
+   {
+    "label": "Realistic",
+    "shock": 1.45,
+    "inflation": 1.18,
+    "odds": false,
+    "coach": false,
+    "pay": 0.93
+   },
+   {
+    "label": "Hardcore",
+    "shock": 1.4,
+    "inflation": 1.22,
+    "odds": false,
+    "coach": false,
+    "pay": 0.92
+   },
+   {
+    "label": "Relentless",
+    "shock": 1.72,
+    "inflation": 1.24,
+    "odds": false,
+    "coach": false,
+    "pay": 0.88
+   },
+   {
+    "label": "Brutal",
+    "shock": 1.72,
+    "inflation": 1.32,
+    "odds": false,
+    "coach": false,
+    "pay": 0.82
+   },
+   {
+    "label": "Merciless",
+    "shock": 1.9,
+    "inflation": 1.4,
+    "odds": false,
+    "coach": false,
+    "pay": 0.72
+   },
+   {
+    "label": "Adaptive",
+    "shock": 1.45,
+    "inflation": 1.18,
+    "odds": false,
+    "coach": false,
+    "pay": 0.93
+   }
+  ],
+  "seasonAxes": [
+   {
+    "label": "Wealth",
+    "weight": 25,
+    "why": "What you are worth in real terms, after inflation has had its say."
+   },
+   {
+    "label": "Enterprise",
+    "weight": 20,
+    "why": "Not what a business earned, but that you built one that would still be standing without you."
+   },
+   {
+    "label": "Reputation",
+    "weight": 15,
+    "why": "What your name is worth in a room you are not in."
+   },
+   {
+    "label": "Family",
+    "weight": 15,
+    "why": "Who is actually there at the end of it."
+   },
+   {
+    "label": "Health",
+    "weight": 10,
+    "why": "You have to be alive and well enough to enjoy any of the rest of this."
+   },
+   {
+    "label": "Integrity",
+    "weight": 15,
+    "why": "Whether you got there in a way you could describe out loud."
+   }
+  ],
+  "board": [
+   {
+    "label": "Founder",
+    "skill": "ops",
+    "note": "you, in the chair, holding the casting vote"
+   },
+   {
+    "label": "Capital",
+    "skill": "finance",
+    "note": "counts the quarters since the last distribution"
+   },
+   {
+    "label": "Operations",
+    "skill": "ops",
+    "note": "thinks the answer to most questions is more capacity"
+   },
+   {
+    "label": "Access",
+    "skill": "network",
+    "note": "knows who to call, and expects to be credited for it"
+   },
+   {
+    "label": "Craft",
+    "skill": "tech",
+    "note": "cares whether the thing actually works"
+   },
+   {
+    "label": "Family",
+    "skill": "network",
+    "note": "represents a surname, not a shareholding"
+   },
+   {
+    "label": "Non-executive",
+    "skill": "finance",
+    "note": "reads the numbers before the narrative"
+   },
+   {
+    "label": "Strategic",
+    "skill": "finance",
+    "note": "bought in intending to end up with all of it"
+   },
+   {
+    "label": "Government nominee",
+    "skill": "network",
+    "note": "speaks for a ministry that holds opinions about your sector"
+   }
+  ],
+  "cities": [
+   {
+    "label": "Lagos, Nigeria",
+    "currency": "₦",
+    "fx": "USD/NGN 1520",
+    "inflation": 0.14
+   },
+   {
+    "label": "Abuja, Nigeria",
+    "currency": "₦",
+    "fx": "USD/NGN 1520",
+    "inflation": 0.135
+   },
+   {
+    "label": "Accra, Ghana",
+    "currency": "₵",
+    "fx": "USD/GHS 15.5",
+    "inflation": 0.105
+   },
+   {
+    "label": "Nairobi, Kenya",
+    "currency": "KSh",
+    "fx": "USD/KES 129",
+    "inflation": 0.085
+   },
+   {
+    "label": "London, UK",
+    "currency": "£",
+    "fx": "USD/GBP 0.78",
+    "inflation": 0.035
+   },
+   {
+    "label": "New York, USA",
+    "currency": "$",
+    "fx": "USD/USD 1",
+    "inflation": 0.038
+   }
+  ],
+  "profiles": [
+   {
+    "label": "The Fresh Graduate",
+    "age": 23,
+    "cash": 180000,
+    "note": "Degree fresh, account empty. You have time, energy and zero leverage."
+   },
+   {
+    "label": "The Corporate Climber",
+    "age": 28,
+    "cash": 1500000,
+    "note": "Good salary, better title, and a lifestyle that quietly eats all of it."
+   },
+   {
+    "label": "The Relentless Founder",
+    "age": 26,
+    "cash": 620000,
+    "note": "You left school to build. High hustle, low runway, no safety net."
+   },
+   {
+    "label": "The Market Trader",
+    "age": 31,
+    "cash": 2600000,
+    "note": "Cash moves through your hands daily. Informal, fast, and completely undocumented."
+   },
+   {
+    "label": "The Returnee",
+    "age": 33,
+    "cash": 6000000,
+    "note": "Came back with savings, a foreign degree, and a family that now expects miracles."
+   }
+  ]
+ },
+ "screens": [
+  {
+   "view": "Overview (agenda)",
+   "fn": "viewAgenda",
+   "controls": 3,
+   "verbs": [
+    {
+     "a": "goto",
+     "label": "Take me there Import & Retail Trading — leas"
+    },
+    {
+     "a": "doact",
+     "label": "Do it Import & Retail Trading — you are 0% s"
+    },
+    {
+     "a": "goto",
+     "label": "Take me there"
+    }
+   ]
+  },
+  {
+   "view": "Work › Business",
+   "fn": "viewBiz",
+   "controls": 11,
+   "verbs": [
+    {
+     "a": "expand",
+     "label": "Commit to location #2 &middot; ₦16.10m now"
+    },
+    {
+     "a": "formalize",
+     "label": "Register company (₦862k)"
+    },
+    {
+     "a": "inject",
+     "label": "Inject capital"
+    },
+    {
+     "a": "draw",
+     "label": "Pay myself"
+    },
+    {
+     "a": "closebiz",
+     "label": "Wind it up Owner attention: 32% — you still "
+    },
+    {
+     "a": "toggle",
+     "label": "Work evenings too People 0 staff · ₦0/mo No "
+    },
+    {
+     "a": "hirenego",
+     "label": "Make an offer"
+    },
+    {
+     "a": "hireask",
+     "label": "Take them at ₦1.22m/mo Emeka Ajayi skill 5/1"
+    },
+    {
+     "a": "hireask",
+     "label": "Take them at ₦785k/mo Femi Nwosu skill 8/10 "
+    },
+    {
+     "a": "hireask",
+     "label": "Take them at ₦1.45m/mo Hiring costs half a m"
+    },
+    {
+     "a": "seekpartner",
+     "label": "Sound people out Track record Q2 2030 ₦— rev"
+    }
+   ]
+  },
+  {
+   "view": "Governance › Board",
+   "fn": "viewBoard",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Work › Career",
+   "fn": "viewCareer",
+   "controls": 7,
+   "verbs": [
+    {
+     "a": "career",
+     "label": "Do it Take people to lunch 18h Why Relations"
+    },
+    {
+     "a": "career",
+     "label": "Do it Ask for a raise Why Odds scale with pe"
+    },
+    {
+     "a": "career",
+     "label": "Do it Interview elsewhere ₦45k Why The faste"
+    },
+    {
+     "a": "career",
+     "label": "Do it Run a side hustle after hours 88h Why "
+    },
+    {
+     "a": "career",
+     "label": "Do it Resign and go full-time on the busines"
+    },
+    {
+     "a": "career",
+     "label": "Do it Take a month off to reset Why Sometime"
+    },
+    {
+     "a": "career",
+     "label": "Do it Capability finance 18 ops 30 hustle 35"
+    }
+   ]
+  },
+  {
+   "view": "Legacy › Your record",
+   "fn": "viewCareerRecord",
+   "controls": 3,
+   "verbs": [
+    {
+     "a": "profile",
+     "label": "Sync & sign in"
+    },
+    {
+     "a": "goto",
+     "label": "Save slots Your record 0 runs Experience — N"
+    },
+    {
+     "a": "profile",
+     "label": "Profile, sync & export No finished runs yet."
+    }
+   ]
+  },
+  {
+   "view": "Overview (commitments)",
+   "fn": "viewCommitments",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Work › Business (contracts)",
+   "fn": "viewContracts",
+   "controls": 5,
+   "verbs": [
+    {
+     "a": "bid",
+     "label": "Bid at full value · ₦690k"
+    },
+    {
+     "a": "bid",
+     "label": "Bid 5% under · ₦655k"
+    },
+    {
+     "a": "bid",
+     "label": "Bid 10% under · ₦621k"
+    },
+    {
+     "a": "bid",
+     "label": "Bid 20% under · ₦552k"
+    },
+    {
+     "a": "bid",
+     "label": "Bid 30% under · ₦483k"
+    }
+   ]
+  },
+  {
+   "view": "Overview (dashboard)",
+   "fn": "viewDash",
+   "controls": 1,
+   "verbs": [
+    {
+     "a": "advance",
+     "label": "Advance to Q3 2030 ▸"
+    }
+   ]
+  },
+  {
+   "view": "Money › Deals",
+   "fn": "viewDeals",
+   "controls": 3,
+   "verbs": [
+    {
+     "a": "takedeal",
+     "label": "Commit ₦—"
+    },
+    {
+     "a": "passdeal",
+     "label": "Pass Franchise unit 6 quarters upside +50% 7"
+    },
+    {
+     "a": "passdeal",
+     "label": "Pass Committed capital Nothing running. Capi"
+    }
+   ]
+  },
+  {
+   "view": "Governance › Deed",
+   "fn": "viewDeed",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Work › Business (the engine)",
+   "fn": "viewEngine",
+   "controls": 4,
+   "verbs": [
+    {
+     "a": "bizinsure",
+     "label": "Insure (₦180k/q)"
+    },
+    {
+     "a": "bizacct",
+     "label": "Engage an accountant (₦120k/q)"
+    },
+    {
+     "a": "bizauto",
+     "label": "Invest in equipment Automation 0/100 — raise"
+    },
+    {
+     "a": "supplnego",
+     "label": "Renegotiate supplier terms Your suppliers fi"
+    }
+   ]
+  },
+  {
+   "view": "Governance",
+   "fn": "viewGovernance",
+   "controls": 2,
+   "verbs": [
+    {
+     "a": "proposeplan",
+     "label": "Put a plan to the board Covenants 0 tested q"
+    },
+    {
+     "a": "tablepool",
+     "label": "Propose a pool Promises 0 live Nothing minut"
+    }
+   ]
+  },
+  {
+   "view": "Money › Group",
+   "fn": "viewGroup",
+   "controls": 4,
+   "verbs": [
+    {
+     "a": "grpdiv",
+     "label": "Declare dividend"
+    },
+    {
+     "a": "grploan",
+     "label": "Lend up to holdco Intercompany balances Noth"
+    },
+    {
+     "a": "grpmgmt",
+     "label": "− 0%"
+    },
+    {
+     "a": "grpmgmt",
+     "label": "+ Transfer-pricing exposure Nothing on the c"
+    }
+   ]
+  },
+  {
+   "view": "Work › Household",
+   "fn": "viewHousehold",
+   "controls": 3,
+   "verbs": [
+    {
+     "a": "housenego",
+     "label": "Make an offer"
+    },
+    {
+     "a": "houseask",
+     "label": "Take at ₦203k/mo Paid by: You Import & Retai"
+    },
+    {
+     "a": "houseask",
+     "label": "Take at ₦194k/mo Paid by: You Import & Retai"
+    }
+   ]
+  },
+  {
+   "view": "Governance › Bids",
+   "fn": "viewInbound",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Money › Markets",
+   "fn": "viewInvest",
+   "controls": 13,
+   "verbs": [
+    {
+     "a": "buyasset",
+     "label": "Buy Ajo / Esusu Group exp. 2.6%/qtr vol 3.0%"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Fixed Income Treasury Bills exp. 4.8%/qt"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Fixed Deposit exp. 4.4%/qtr vol 0.3%"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Government Bonds exp. 5.0%/qtr vol 2.0%"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Equity Local Equities exp. 3.6%/qtr vol "
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Global Equity ETF exp. 1.6%/qtr vol 7.5%"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Currency Dollar Account exp. 0.1%/qtr vo"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Property REIT / Property Fund exp. 2.4%/"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Land (peri-urban) exp. 3.0%/qtr vol 7.2%"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Rental Property exp. 2.4%/qtr vol 4.8% i"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Commodity Gold exp. 1.4%/qtr vol 7.2% FX"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Crypto Crypto exp. 1.4%/qtr vol 21.0% FX"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy What each asset is for Bank Savings — In"
+    }
+   ]
+  },
+  {
+   "view": "Money › Markets",
+   "fn": "viewInvestMarkets",
+   "controls": 13,
+   "verbs": [
+    {
+     "a": "buyasset",
+     "label": "Buy Ajo / Esusu Group exp. 2.6%/qtr vol 3.0%"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Fixed Income Treasury Bills exp. 4.8%/qt"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Fixed Deposit exp. 4.4%/qtr vol 0.3%"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Government Bonds exp. 5.0%/qtr vol 2.0%"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Equity Local Equities exp. 3.6%/qtr vol "
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Global Equity ETF exp. 1.6%/qtr vol 7.5%"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Currency Dollar Account exp. 0.1%/qtr vo"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Property REIT / Property Fund exp. 2.4%/"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Land (peri-urban) exp. 3.0%/qtr vol 7.2%"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Rental Property exp. 2.4%/qtr vol 4.8% i"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Commodity Gold exp. 1.4%/qtr vol 7.2% FX"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy Crypto Crypto exp. 1.4%/qtr vol 21.0% FX"
+    },
+    {
+     "a": "buyasset",
+     "label": "Buy What each asset is for Bank Savings — In"
+    }
+   ]
+  },
+  {
+   "view": "Money › Markets (portfolio)",
+   "fn": "viewInvestPortfolio",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Legacy › Your record",
+   "fn": "viewLedger",
+   "controls": 17,
+   "verbs": [
+    {
+     "a": "save",
+     "label": "Save"
+    },
+    {
+     "a": "load",
+     "label": "Load Slot 2 empty"
+    },
+    {
+     "a": "load",
+     "label": "Load Slot 3 empty"
+    },
+    {
+     "a": "load",
+     "label": "Load Auto-saved after every move · last at 1"
+    },
+    {
+     "a": "setdiff",
+     "label": "Switch Realistic hidden no free ×0.93 playin"
+    },
+    {
+     "a": "setdiff",
+     "label": "Switch Relentless hidden no none ×0.88 Locke"
+    },
+    {
+     "a": "setdiff",
+     "label": "Switch What each tier plays like Apprentice "
+    },
+    {
+     "a": "setcity",
+     "label": "Lagos"
+    },
+    {
+     "a": "setcity",
+     "label": "Abuja"
+    },
+    {
+     "a": "setcity",
+     "label": "Accra"
+    },
+    {
+     "a": "setcity",
+     "label": "Nairobi"
+    },
+    {
+     "a": "setcity",
+     "label": "London"
+    },
+    {
+     "a": "setcity",
+     "label": "New York Why locations Switching re-bases lo"
+    },
+    {
+     "a": "copyexp",
+     "label": "Copy"
+    },
+    {
+     "a": "import",
+     "label": "Import from box"
+    },
+    {
+     "a": "restart",
+     "label": "Abandon run ends this life and returns to se"
+    },
+    {
+     "a": "showwhy",
+     "label": "Show all tips again"
+    }
+   ]
+  },
+  {
+   "view": "Legacy › Chronicle",
+   "fn": "viewLedgerChronicle",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Legacy › Settings",
+   "fn": "viewLedgerSettings",
+   "controls": 17,
+   "verbs": [
+    {
+     "a": "save",
+     "label": "Save"
+    },
+    {
+     "a": "load",
+     "label": "Load Slot 2 empty"
+    },
+    {
+     "a": "load",
+     "label": "Load Slot 3 empty"
+    },
+    {
+     "a": "load",
+     "label": "Load Auto-saved after every move · last at 1"
+    },
+    {
+     "a": "setdiff",
+     "label": "Switch Realistic hidden no free ×0.93 playin"
+    },
+    {
+     "a": "setdiff",
+     "label": "Switch Relentless hidden no none ×0.88 Locke"
+    },
+    {
+     "a": "setdiff",
+     "label": "Switch What each tier plays like Apprentice "
+    },
+    {
+     "a": "setcity",
+     "label": "Lagos"
+    },
+    {
+     "a": "setcity",
+     "label": "Abuja"
+    },
+    {
+     "a": "setcity",
+     "label": "Accra"
+    },
+    {
+     "a": "setcity",
+     "label": "Nairobi"
+    },
+    {
+     "a": "setcity",
+     "label": "London"
+    },
+    {
+     "a": "setcity",
+     "label": "New York Why locations Switching re-bases lo"
+    },
+    {
+     "a": "copyexp",
+     "label": "Copy"
+    },
+    {
+     "a": "import",
+     "label": "Import from box"
+    },
+    {
+     "a": "restart",
+     "label": "Abandon run ends this life and returns to se"
+    },
+    {
+     "a": "showwhy",
+     "label": "Show all tips again"
+    }
+   ]
+  },
+  {
+   "view": "Legacy — the whole tab",
+   "fn": "viewLegacy",
+   "controls": 7,
+   "verbs": [
+    {
+     "a": "setambition",
+     "label": "Clean millionaire by 40"
+    },
+    {
+     "a": "setambition",
+     "label": "Build something that outlasts you"
+    },
+    {
+     "a": "setambition",
+     "label": "Never need anyone again"
+    },
+    {
+     "a": "setambition",
+     "label": "Build the biggest thing you can"
+    },
+    {
+     "a": "setambition",
+     "label": "Buy back what was lost Where you stand Why f"
+    },
+    {
+     "a": "makewill",
+     "label": "Draw up a will"
+    },
+    {
+     "a": "trust",
+     "label": "Set up a family trust With no children, the "
+    }
+   ]
+  },
+  {
+   "view": "Work › Levers",
+   "fn": "viewLevers",
+   "controls": 15,
+   "verbs": [
+    {
+     "a": "goto",
+     "label": "Change Marketing ₦0/q Buys customers, not de"
+    },
+    {
+     "a": "goto",
+     "label": "Change Quality ₦0/mo Product quality is 45/1"
+    },
+    {
+     "a": "goto",
+     "label": "Change Credit terms 14 days Buys about 3% mo"
+    },
+    {
+     "a": "goto",
+     "label": "Change Stock depth Deep Under-stock and you "
+    },
+    {
+     "a": "goto",
+     "label": "Change Owner draw ₦0/q It paid out ₦0 last q"
+    },
+    {
+     "a": "goto",
+     "label": "Change Commit to nothing on Lumpy, slow to a"
+    },
+    {
+     "a": "levershift",
+     "label": "Commit ₦4.22m Input supply contract ₦900k Co"
+    },
+    {
+     "a": "leversupply",
+     "label": "Commit ₦900k Distribution deal ₦1.20m Demand"
+    },
+    {
+     "a": "leverchannel",
+     "label": "Commit ₦1.20m"
+    },
+    {
+     "a": "goto",
+     "label": "Hire someone"
+    },
+    {
+     "a": "goto",
+     "label": "Open a unit Negotiate 1 open These belong to"
+    },
+    {
+     "a": "goto",
+     "label": "Negotiate Cannot control 3 biting Not yours "
+    },
+    {
+     "a": "goto",
+     "label": "Raise price Your rival has matched you 18% o"
+    },
+    {
+     "a": "goto",
+     "label": "Look at price Election Season 4q left What i"
+    },
+    {
+     "a": "goto",
+     "label": "See the numbers How to read this screen One "
+    }
+   ]
+  },
+  {
+   "view": "Work › Your life",
+   "fn": "viewLife",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Money — the whole tab",
+   "fn": "viewMoney",
+   "controls": 19,
+   "verbs": [
+    {
+     "a": "infladj",
+     "label": "Adjust for inflation What that means You are"
+    },
+    {
+     "a": "preset",
+     "label": "Survival mode"
+    },
+    {
+     "a": "preset",
+     "label": "Balanced"
+    },
+    {
+     "a": "preset",
+     "label": "Invest in myself"
+    },
+    {
+     "a": "preset",
+     "label": "Status & family"
+    },
+    {
+     "a": "infladj",
+     "label": "Adjust for inflation (+92%) Total: ₦229k /mo"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Laptop ₦2.0k/mo upkeep tech +2 ₦1.09m"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Generator (big boy) ₦28k/mo upkeep stres"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Solar + Inverter ₦6.0k/mo upkeep stress "
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Used Car ₦45k/mo upkeep happy +7 rep +5 "
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Furnish the flat ₦3.0k/mo upkeep happy +"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Proper Wardrobe ₦4.0k/mo upkeep rep +6 h"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Gym Membership ₦27k/mo upkeep health +5 "
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Health Insurance ₦75k/mo upkeep health +"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Professional Certification finance +6 op"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Executive MBA finance +9 ops +6 network "
+    },
+    {
+     "a": "buygood",
+     "label": "Buy What each thing is for Smartphone — Ever"
+    },
+    {
+     "a": "borrow",
+     "label": "Bank loan"
+    },
+    {
+     "a": "borrow",
+     "label": "Private lender (30%/qtr) How borrowing works"
+    }
+   ]
+  },
+  {
+   "view": "Money › Budget",
+   "fn": "viewMoneyBudget",
+   "controls": 6,
+   "verbs": [
+    {
+     "a": "infladj",
+     "label": "Adjust for inflation What that means You are"
+    },
+    {
+     "a": "preset",
+     "label": "Survival mode"
+    },
+    {
+     "a": "preset",
+     "label": "Balanced"
+    },
+    {
+     "a": "preset",
+     "label": "Invest in myself"
+    },
+    {
+     "a": "preset",
+     "label": "Status & family"
+    },
+    {
+     "a": "infladj",
+     "label": "Adjust for inflation (+92%) Total: ₦229k /mo"
+    }
+   ]
+  },
+  {
+   "view": "Money › Position",
+   "fn": "viewMoneyPosition",
+   "controls": 2,
+   "verbs": [
+    {
+     "a": "borrow",
+     "label": "Bank loan"
+    },
+    {
+     "a": "borrow",
+     "label": "Private lender (30%/qtr) How borrowing works"
+    }
+   ]
+  },
+  {
+   "view": "Money › Property",
+   "fn": "viewMoneyProperty",
+   "controls": 11,
+   "verbs": [
+    {
+     "a": "buygood",
+     "label": "Buy Laptop ₦2.0k/mo upkeep tech +2 ₦1.09m"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Generator (big boy) ₦28k/mo upkeep stres"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Solar + Inverter ₦6.0k/mo upkeep stress "
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Used Car ₦45k/mo upkeep happy +7 rep +5 "
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Furnish the flat ₦3.0k/mo upkeep happy +"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Proper Wardrobe ₦4.0k/mo upkeep rep +6 h"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Gym Membership ₦27k/mo upkeep health +5 "
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Health Insurance ₦75k/mo upkeep health +"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Professional Certification finance +6 op"
+    },
+    {
+     "a": "buygood",
+     "label": "Buy Executive MBA finance +9 ops +6 network "
+    },
+    {
+     "a": "buygood",
+     "label": "Buy What each thing is for Smartphone — Ever"
+    }
+   ]
+  },
+  {
+   "view": "Work › Business (outlets)",
+   "fn": "viewOutlets",
+   "controls": 7,
+   "verbs": [
+    {
+     "a": "rentnego",
+     "label": "Negotiate the renewal"
+    },
+    {
+     "a": "upgradeoutlet",
+     "label": "Extend (₦3.16m)"
+    },
+    {
+     "a": "maintainoutlet",
+     "label": "Maintain"
+    },
+    {
+     "a": "openoutlet",
+     "label": "Open a unit here (₦6.23m)"
+    },
+    {
+     "a": "openoutlet",
+     "label": "Abuja (₦4.79m)"
+    },
+    {
+     "a": "openoutlet",
+     "label": "Accra (₦5.03m)"
+    },
+    {
+     "a": "openoutlet",
+     "label": "Nairobi (₦4.79m) Opening in another city cos"
+    }
+   ]
+  },
+  {
+   "view": "Overview",
+   "fn": "viewOverview",
+   "controls": 4,
+   "verbs": [
+    {
+     "a": "goto",
+     "label": "Take me there Import & Retail Trading — leas"
+    },
+    {
+     "a": "doact",
+     "label": "Do it Import & Retail Trading — you are 0% s"
+    },
+    {
+     "a": "goto",
+     "label": "Take me there This quarter Income ₦1.02m Bus"
+    },
+    {
+     "a": "advance",
+     "label": "Advance to Q3 2030 ▸"
+    }
+   ]
+  },
+  {
+   "view": "Governance › The pack",
+   "fn": "viewPack",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Legacy › People",
+   "fn": "viewPeople",
+   "controls": 18,
+   "verbs": [
+    {
+     "a": "favour",
+     "label": "Ask them to put in money"
+    },
+    {
+     "a": "give",
+     "label": "Send money"
+    },
+    {
+     "a": "cutoff",
+     "label": "Let it lapse Ebuka Balogun · Business rival "
+    },
+    {
+     "a": "favour",
+     "label": "Ask what they are hearing"
+    },
+    {
+     "a": "cutoff",
+     "label": "Let it lapse Kelechi Fashola · Sibling · 32 "
+    },
+    {
+     "a": "favour",
+     "label": "Ask them to cover the family contribution th"
+    },
+    {
+     "a": "cutoff",
+     "label": "Let it lapse Aisha Oduya · Mentor · 33 cordi"
+    },
+    {
+     "a": "favour",
+     "label": "Ask for an introduction"
+    },
+    {
+     "a": "cutoff",
+     "label": "Let it lapse Halima Chukwu · Old friend · 35"
+    },
+    {
+     "a": "cutoff",
+     "label": "Let it lapse Damilola Danladi · Sibling · 33"
+    },
+    {
+     "a": "cutoff",
+     "label": "Let it lapse Ngozi Olawale · Community elder"
+    },
+    {
+     "a": "favour",
+     "label": "Ask them to speak for you"
+    },
+    {
+     "a": "cutoff",
+     "label": "Let it lapse Sola Ibrahim · Cousin · 31 cool"
+    },
+    {
+     "a": "favour",
+     "label": "Ask them to work for you cheaply"
+    },
+    {
+     "a": "cutoff",
+     "label": "Let it lapse Why they remember These people "
+    },
+    {
+     "a": "spend",
+     "label": "Help family (₦287k)"
+    },
+    {
+     "a": "spend",
+     "label": "Private care (₦422k)"
+    },
+    {
+     "a": "spend",
+     "label": "Be seen (₦230k) Your rival Coronation Holdin"
+    }
+   ]
+  },
+  {
+   "view": "Overview (pressure)",
+   "fn": "viewPressure",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Governance › Deed",
+   "fn": "viewPromises",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Overview (pulse)",
+   "fn": "viewPulse",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Governance › Register",
+   "fn": "viewRegister",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Governance › Votes",
+   "fn": "viewResolutions",
+   "controls": 10,
+   "verbs": [
+    {
+     "a": "tableres",
+     "label": "Distribution"
+    },
+    {
+     "a": "tableres",
+     "label": "Raise capital"
+    },
+    {
+     "a": "tableres",
+     "label": "Sell the company"
+    },
+    {
+     "a": "tableres",
+     "label": "Acquisition"
+    },
+    {
+     "a": "tableres",
+     "label": "Borrow"
+    },
+    {
+     "a": "tableres",
+     "label": "Hire an MD"
+    },
+    {
+     "a": "tableres",
+     "label": "Capital spend"
+    },
+    {
+     "a": "tableres",
+     "label": "Audit"
+    },
+    {
+     "a": "tableres",
+     "label": "Amend the deed"
+    },
+    {
+     "a": "tableres",
+     "label": "Wind up"
+    }
+   ]
+  },
+  {
+   "view": "Work › Rival",
+   "fn": "viewRival",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Legacy › Season",
+   "fn": "viewSeason",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Work › Business (staff)",
+   "fn": "viewStaffDeep",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Governance › Board (targets)",
+   "fn": "viewTargets",
+   "controls": 0,
+   "verbs": []
+  },
+  {
+   "view": "Work — the whole tab",
+   "fn": "viewWork",
+   "controls": 44,
+   "verbs": [
+    {
+     "a": "switchbiz",
+     "label": "Import & Retail Trading ₦— Group revenue ₦0 "
+    },
+    {
+     "a": "anotherbiz",
+     "label": "Start another company (you have 1)"
+    },
+    {
+     "a": "sellbiz",
+     "label": "Sell this one"
+    },
+    {
+     "a": "closebiz",
+     "label": "Wind this one up Waiting on you Import & Ret"
+    },
+    {
+     "a": "goto",
+     "label": "Take me there Import & Retail Trading — leas"
+    },
+    {
+     "a": "doact",
+     "label": "Do it Import & Retail Trading — you are 0% s"
+    },
+    {
+     "a": "goto",
+     "label": "Take me there Engine room Startup Quarter 12"
+    },
+    {
+     "a": "bizinsure",
+     "label": "Insure (₦180k/q)"
+    },
+    {
+     "a": "bizacct",
+     "label": "Engage an accountant (₦120k/q)"
+    },
+    {
+     "a": "bizauto",
+     "label": "Invest in equipment Automation 0/100 — raise"
+    },
+    {
+     "a": "supplnego",
+     "label": "Renegotiate supplier terms Your suppliers fi"
+    },
+    {
+     "a": "rentnego",
+     "label": "Negotiate the renewal"
+    },
+    {
+     "a": "upgradeoutlet",
+     "label": "Extend (₦3.16m)"
+    },
+    {
+     "a": "maintainoutlet",
+     "label": "Maintain"
+    },
+    {
+     "a": "openoutlet",
+     "label": "Open a unit here (₦6.23m)"
+    },
+    {
+     "a": "openoutlet",
+     "label": "Abuja (₦4.79m)"
+    },
+    {
+     "a": "openoutlet",
+     "label": "Accra (₦5.03m)"
+    },
+    {
+     "a": "openoutlet",
+     "label": "Nairobi (₦4.79m) Opening in another city cos"
+    },
+    {
+     "a": "bid",
+     "label": "Bid at full value · ₦690k"
+    },
+    {
+     "a": "bid",
+     "label": "Bid 5% under · ₦655k"
+    },
+    {
+     "a": "bid",
+     "label": "Bid 10% under · ₦621k"
+    },
+    {
+     "a": "bid",
+     "label": "Bid 20% under · ₦552k"
+    },
+    {
+     "a": "bid",
+     "label": "Bid 30% under · ₦483k Team 0 staff · ₦0/mo N"
+    },
+    {
+     "a": "expand",
+     "label": "Commit to location #2 &middot; ₦16.10m now"
+    },
+    {
+     "a": "formalize",
+     "label": "Register company (₦862k)"
+    },
+    {
+     "a": "inject",
+     "label": "Inject capital"
+    },
+    {
+     "a": "draw",
+     "label": "Pay myself"
+    },
+    {
+     "a": "closebiz",
+     "label": "Wind it up Owner attention: 32% — you still "
+    },
+    {
+     "a": "toggle",
+     "label": "Work evenings too People 0 staff · ₦0/mo No "
+    },
+    {
+     "a": "hirenego",
+     "label": "Make an offer"
+    },
+    {
+     "a": "hireask",
+     "label": "Take them at ₦1.22m/mo Emeka Ajayi skill 5/1"
+    },
+    {
+     "a": "hireask",
+     "label": "Take them at ₦785k/mo Femi Nwosu skill 8/10 "
+    },
+    {
+     "a": "hireask",
+     "label": "Take them at ₦1.45m/mo Hiring costs half a m"
+    },
+    {
+     "a": "seekpartner",
+     "label": "Sound people out Track record Q2 2030 ₦— rev"
+    },
+    {
+     "a": "career",
+     "label": "Do it Take people to lunch 18h Why Relations"
+    },
+    {
+     "a": "career",
+     "label": "Do it Ask for a raise Why Odds scale with pe"
+    },
+    {
+     "a": "career",
+     "label": "Do it Interview elsewhere ₦45k Why The faste"
+    },
+    {
+     "a": "career",
+     "label": "Do it Run a side hustle after hours 88h Why "
+    },
+    {
+     "a": "career",
+     "label": "Do it Resign and go full-time on the busines"
+    },
+    {
+     "a": "career",
+     "label": "Do it Take a month off to reset Why Sometime"
+    },
+    {
+     "a": "career",
+     "label": "Do it Capability finance 18 ops 30 hustle 35"
+    },
+    {
+     "a": "housenego",
+     "label": "Make an offer"
+    },
+    {
+     "a": "houseask",
+     "label": "Take at ₦203k/mo Paid by: You Import & Retai"
+    },
+    {
+     "a": "houseask",
+     "label": "Take at ₦194k/mo Paid by: You Import & Retai"
+    }
+   ]
+  },
+  {
+   "view": "Money › Position (working capital)",
+   "fn": "viewWorkingCapital",
+   "controls": 0,
+   "verbs": []
+  }
+ ],
+ "endings": [
+  {
+   "key": "retire",
+   "condition": "You reach 65, or turn 168 (42 years). The run closes on its own terms."
+  },
+  {
+   "key": "season",
+   "condition": "The season finish line you joined, or set, arrives. It takes precedence over every other ending."
+  },
+  {
+   "key": "bankrupt",
+   "condition": "Cash is deeply negative, debts exceed ₦1m and credit is under 22. On Hardcore the run ends here; below it, assets are seized and you continue with less."
+  },
+  {
+   "key": "health",
+   "condition": "Health reaches zero. Nothing buys it back at that point."
+  }
+ ],
+ "repercussions": [
+  [
+   "Delayed consequences",
+   "flushPending",
+   "A decision can schedule its own bill: `{turn, title, text, eff}`. It arrives as a modal, on the quarter it comes due."
+  ],
+  [
+   "Insolvency, below Hardcore",
+   "checkEnd",
+   "Assets are seized against the debt, credit collapses to 14, stress +18, happiness −14, reputation −10. You continue with less."
+  ],
+  [
+   "Debt service",
+   "stepPersonal / budget",
+   "Interest and repayments are drawn every quarter; credit score gates what you can borrow next."
+  ],
+  [
+   "Inflation",
+   "stepMarket",
+   "Cash loses purchasing power every quarter. The currency can also devalue, which hurts imports and helps exporters."
+  ],
+  [
+   "Covenants",
+   "COVENANT_KINDS",
+   "Leverage, cover, distributions, capex, liquidity and owner drawings. Breach is recorded and priced."
+  ],
+  [
+   "Group cross-default",
+   "stepGroup",
+   "A breach in one group company can pull the others in."
+  ],
+  [
+   "Board",
+   "stepGovernance",
+   "Directors have tempers and patience; resolutions pass or fail on votes, and the register records both."
+  ],
+  [
+   "Rival",
+   "stepRival",
+   "A competitor undercuts, poaches or expands; ignoring it has a cost."
+  ],
+  [
+   "Cast",
+   "stepCast",
+   "Friends, siblings, parents and partners age, ask for money, get ill and die."
+  ],
+  [
+   "Stress and health",
+   "stepPersonal",
+   "High stress erodes health and happiness; low happiness bleeds into output."
+  ],
+  [
+   "Business failure",
+   "simBusiness",
+   "Without capacity, staff, price or demand, revenue falls and upkeep still lands."
+  ],
+  [
+   "Deals",
+   "resolveDeals",
+   "Committed capital is at risk: the deal wins or loses, on the odds you were shown."
+  ],
+  [
+   "Partner offers",
+   "maybeOfferPartner",
+   "Above ₦3m revenue, somebody asks for a stake. Accepting changes who owns the business."
+  ],
+  [
+   "Arcs",
+   "dueThread / maybeStartArc",
+   "Stories have stages; a stage not answered comes back on its own schedule."
+  ]
+ ],
+ "verbs": {
+  "total": 166,
+  "commitment_shaped": [
+   "doact",
+   "close",
+   "startgame",
+   "buygood",
+   "buyasset",
+   "sellasset",
+   "repay",
+   "borrow",
+   "startbiz",
+   "startbizpartner",
+   "hireask",
+   "negoaccept",
+   "hirenego",
+   "grantopt",
+   "dogrant",
+   "callvote",
+   "buyoutminority",
+   "biddd",
+   "bidnego",
+   "bidaccept",
+   "bidreject",
+   "sellbiz",
+   "openoutlet",
+   "closeoutlet",
+   "maintainoutlet",
+   "bid",
+   "dropc",
+   "trainstaff",
+   "promotegm",
+   "raisenego",
+   "firenego",
+   "takedeal",
+   "passdeal",
+   "takepartner",
+   "declineoffer",
+   "acceptpartner",
+   "buyout",
+   "hire",
+   "fire",
+   "raise",
+   "closebiz"
+  ],
+  "navigation_shaped": [
+   "tab",
+   "sub",
+   "goto",
+   "help",
+   "settings",
+   "close",
+   "advance",
+   "skipanim",
+   "animtoggle",
+   "pickcity",
+   "pickdiff",
+   "pickdir",
+   "submitplan",
+   "tablepool",
+   "tableres",
+   "pickceo",
+   "pickdeed",
+   "pickfin",
+   "closeoutlet",
+   "closebiz",
+   "toggle"
+  ]
+ },
+ "ACT": [
+  "tab",
+  "sub",
+  "goto",
+  "doact",
+  "discall",
+  "help",
+  "settings",
+  "close",
+  "advance",
+  "skipanim",
+  "animtoggle",
+  "keepplaying",
+  "pickcity",
+  "seasontoggle",
+  "eratoggle",
+  "belltoggle",
+  "whyopen",
+  "hidewhy",
+  "showwhy",
+  "toggrp",
+  "installapp",
+  "grpdiv",
+  "grploan",
+  "grprepay",
+  "grpmgmt",
+  "startgame",
+  "seasonopen",
+  "seasetyear",
+  "seasetq",
+  "seasonpickseed",
+  "seasonreroll",
+  "seasonrecode",
+  "seasoncopylink",
+  "seasonscan",
+  "seasonscancancel",
+  "seasoncopy",
+  "seasetcity",
+  "seasetprof",
+  "seasetdiff",
+  "seasoncreate",
+  "seasonjoin",
+  "seasonclear",
+  "setdiff",
+  "pickdiff",
+  "profile",
+  "goprofile",
+  "step",
+  "stepnext",
+  "stepback",
+  "fmdone",
+  "runinfo",
+  "cloudin",
+  "cloudup",
+  "cloudpush",
+  "cloudpull",
+  "cloudout",
+  "profclear",
+  "setcity",
+  "restart",
+  "preset",
+  "infladj",
+  "buygood",
+  "buyasset",
+  "sellasset",
+  "repay",
+  "borrow",
+  "startbiz",
+  "startbizpartner",
+  "_start",
+  "housenego",
+  "houseask",
+  "housereview",
+  "houseraise",
+  "housetrain",
+  "houseperk",
+  "housedeclare",
+  "housefire",
+  "hireask",
+  "negoaccept",
+  "hirenego",
+  "supplnego",
+  "transfer",
+  "appointdir",
+  "pickdir",
+  "removedir",
+  "lobby",
+  "govsub",
+  "proposeplan",
+  "submitplan",
+  "tablepool",
+  "grantopt",
+  "dogrant",
+  "whip",
+  "callvote",
+  "withdrawres",
+  "tableres",
+  "pickceo",
+  "amenddeed",
+  "pickdeed",
+  "fulfil",
+  "shotgun",
+  "buyoutminority",
+  "biddd",
+  "bidnego",
+  "bidaccept",
+  "bidreject",
+  "tgtdd",
+  "tgtbid",
+  "pickfin",
+  "rentnego",
+  "sellbiz",
+  "switchbiz",
+  "anotherbiz",
+  "openoutlet",
+  "closeoutlet",
+  "upgradeoutlet",
+  "maintainoutlet",
+  "bid",
+  "renewc",
+  "dropc",
+  "trainstaff",
+  "promotegm",
+  "raisenego",
+  "firenego",
+  "negtactic",
+  "negclose",
+  "bizinsure",
+  "bizacct",
+  "bizauto",
+  "takedeal",
+  "passdeal",
+  "favour",
+  "give",
+  "cutoff",
+  "setambition",
+  "makewill",
+  "trust",
+  "spend",
+  "takepartner",
+  "declineoffer",
+  "acceptpartner",
+  "seekpartner",
+  "buyout",
+  "hire",
+  "fire",
+  "raise",
+  "expand",
+  "levershift",
+  "leversupply",
+  "leverchannel",
+  "leverdrop",
+  "abandon",
+  "formalize",
+  "inject",
+  "draw",
+  "closebiz",
+  "toggle",
+  "career",
+  "findjob",
+  "opt",
+  "okamount",
+  "okconfirm",
+  "save",
+  "load",
+  "copyexp",
+  "import"
+ ]
+}

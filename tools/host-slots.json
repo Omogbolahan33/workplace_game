@@ -1,0 +1,15 @@
+{
+ "Q": "el",
+ "buildStampInfo": "call",
+ "cloudSyncBackground": "cloudSyncBackground",
+ "fetch": "net.fetch",
+ "hasSave": "hasSave",
+ "loadProfile": "loadProfile",
+ "location": "url",
+ "render": "render",
+ "renderThreadStage": "call",
+ "save": "save",
+ "saveProfile": "saveProfile",
+ "seasonCanScan": "canScan",
+ "toast": "toast"
+}

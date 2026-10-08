@@ -1,0 +1,145 @@
+{
+ "at": "2026-09-23",
+ "surfaces": {
+  "help": {
+   "chars": 1142,
+   "total": 1142,
+   "controls": 1,
+   "acts": [
+    "close|"
+   ],
+   "folds": 0
+  },
+  "settings": {
+   "chars": 576,
+   "total": 1558,
+   "controls": 12,
+   "acts": [
+    "close|",
+    "help|",
+    "restart|",
+    "setcity|",
+    "setcity|",
+    "setcity|",
+    "setcity|",
+    "setcity|",
+    "setcity|",
+    "setdiff|",
+    "setdiff|",
+    "setdiff|"
+   ],
+   "folds": 1
+  },
+  "runinfo": {
+   "chars": 55,
+   "total": 55,
+   "controls": 1,
+   "acts": [
+    "close|"
+   ],
+   "folds": 0
+  },
+  "profile": {
+   "chars": 521,
+   "total": 581,
+   "controls": 4,
+   "acts": [
+    "close|",
+    "cloudin|",
+    "cloudup|",
+    "profclear|"
+   ],
+   "folds": 1
+  },
+  "season": {
+   "chars": 1301,
+   "total": 1301,
+   "controls": 45,
+   "acts": [
+    "close|",
+    "seasetcity|",
+    "seasetcity|",
+    "seasetcity|",
+    "seasetcity|",
+    "seasetcity|",
+    "seasetcity|",
+    "seasetdiff|",
+    "seasetdiff|",
+    "seasetdiff|",
+    "seasetdiff|",
+    "seasetdiff|",
+    "seasetdiff|",
+    "seasetdiff|",
+    "seasetprof|",
+    "seasetprof|",
+    "seasetprof|",
+    "seasetprof|",
+    "seasetprof|",
+    "seasetq|",
+    "seasetq|",
+    "seasetq|",
+    "seasetq|",
+    "seasetyear|",
+    "seasetyear|",
+    "seasetyear|",
+    "seasetyear|",
+    "seasetyear|",
+    "seasetyear|",
+    "seasetyear|",
+    "seasetyear|",
+    "seasetyear|",
+    "seasetyear|",
+    "seasetyear|",
+    "seasoncopylink|",
+    "seasoncopy|",
+    "seasoncreate|",
+    "seasonjoin|",
+    "seasonpickseed|",
+    "seasonpickseed|",
+    "seasonpickseed|",
+    "seasonpickseed|",
+    "seasonpickseed|",
+    "seasonrecode|",
+    "seasonreroll|"
+   ],
+   "folds": 0
+  },
+  "nego": {
+   "chars": 262,
+   "total": 262,
+   "controls": 0,
+   "acts": [],
+   "folds": 0
+  },
+  "anotherbiz": {
+   "chars": 1633,
+   "total": 1633,
+   "controls": 13,
+   "acts": [
+    "close|",
+    "goto|",
+    "goto|",
+    "startbiz|",
+    "startbiz|",
+    "startbiz|",
+    "startbiz|",
+    "startbiz|",
+    "startbiz|",
+    "startbiz|",
+    "startbiz|",
+    "startbiz|",
+    "startbiz|"
+   ],
+   "folds": 0
+  },
+  "govvote": {
+   "chars": 204,
+   "total": 204,
+   "controls": 1,
+   "acts": [
+    "close|"
+   ],
+   "folds": 0
+  }
+ }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "ledger",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Ledger \u2014 a life in decisions. One simulation, two apps, one HTML file.",
+  "workspaces": [
+    "packages/*",
+    "apps/web"
+  ],
+  "scripts": {
+    "build": "bash tools/rebuild.sh",
+    "bootstrap": "node tools/split.mjs --bootstrap",
+    "setup": "npm install && npm install --prefix tools && npm install --prefix .harness && cd .harness && npx playwright install chromium",
+    "mirror": "node tools/mirror.mjs",
+    "pretest": "npm run build",
+    "pretest:integration": "npm run build --silent",
+    "pretest:e2e": "npm run build --silent",
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:shell && npm run test:gates",
+    "test:unit": "node --test tests/unit",
+    "test:integration": "node --test tests/integration",
+    "test:e2e": "node --test tests/e2e",
+    "test:gates": "cd .harness && node run.js",
+    "test:fast": "npm run test:unit && npm run test:integration",
+    "deploy:check": "node tools/deploy-check.mjs",
+    "deploy:static": "docker build -f Dockerfile.static -t ledger-static . && docker run --rm -p 8080:80 ledger-static",
+    "deploy:app": "docker build -t ledger-app . && docker run --rm -p 3007:3007 ledger-app",
+    "assets": "node tools/native-assets.mjs",
+    "faces": "node tools/faces.mjs",
+    "web": "npm --workspace apps/web run dev",
+    "mobile": "npm --prefix apps/mobile run start",
+    "phone": "npm --prefix apps/phone run sync",
+    "test:shell": "node tools/shellaudit.mjs --check",
+    "content": "node tools/systems.mjs"
+  }
+}

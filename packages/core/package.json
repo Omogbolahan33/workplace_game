@@ -1,0 +1,9 @@
+{
+  "name": "@ledger/core",
+  "version": "0.1.0",
+  "description": "The Ledger simulation: no DOM, no framework, one module.",
+  "type": "module",
+  "main": "index.js",
+  "exports": "./index.js",
+  "private": true
+}

@@ -1,0 +1,220 @@
+{
+ "ui/src/00-q.js": {
+  "importAt": 64,
+  "importLen": 98,
+  "exports": [
+   162,
+   510,
+   537,
+   862
+  ]
+ },
+ "ui/src/01-view-working-capital.js": {
+  "importAt": 156,
+  "importLen": 467,
+  "exports": [
+   623,
+   3513,
+   6316,
+   6953,
+   7437,
+   7719,
+   8244,
+   8567,
+   9528,
+   9844,
+   10296,
+   10722,
+   10751
+  ]
+ },
+ "ui/src/02-view-overview.js": {
+  "importAt": 185,
+  "importLen": 491,
+  "exports": [
+   676,
+   4734,
+   6039,
+   6941,
+   7929
+  ]
+ },
+ "ui/src/03-render.js": {
+  "importAt": 2,
+  "importLen": 505,
+  "exports": [
+   507,
+   4685,
+   4748,
+   4854,
+   6224,
+   9777,
+   9854,
+   9884,
+   10644,
+   10799,
+   11256,
+   12811,
+   13046,
+   13211,
+   13342,
+   13838,
+   14503,
+   14621,
+   16242,
+   16271,
+   16378,
+   16932
+  ]
+ },
+ "ui/src/04-render-tabs-and-rail.js": {
+  "importAt": 1,
+  "importLen": 311,
+  "exports": [
+   312,
+   1188,
+   1582,
+   1900,
+   3876,
+   4772,
+   6537
+  ]
+ },
+ "ui/src/05-view-dash.js": {
+  "importAt": 1,
+  "importLen": 229,
+  "exports": [
+   230
+  ]
+ },
+ "ui/src/06-view-money-budget.js": {
+  "importAt": 2,
+  "importLen": 261,
+  "exports": [
+   263,
+   3284
+  ]
+ },
+ "ui/src/07-view-money-position.js": {
+  "importAt": 2,
+  "importLen": 514,
+  "exports": [
+   516,
+   3057,
+   3312,
+   6474,
+   6749,
+   8028,
+   8614,
+   11123,
+   11334,
+   28269,
+   32422
+  ]
+ },
+ "ui/src/08-view-people.js": {
+  "importAt": 1,
+  "importLen": 245,
+  "exports": [
+   246,
+   5470
+  ]
+ },
+ "ui/src/09-view-levers.js": {
+  "importAt": 1,
+  "importLen": 579,
+  "exports": [
+   580,
+   1838,
+   5547,
+   8646,
+   11266,
+   19834,
+   25222
+  ]
+ },
+ "ui/src/10-view-household.js": {
+  "importAt": 320,
+  "importLen": 530,
+  "exports": [
+   850,
+   1066,
+   9871,
+   14264
+  ]
+ },
+ "ui/src/11-view-legacy.js": {
+  "importAt": 84,
+  "importLen": 268,
+  "exports": [
+   352,
+   4626,
+   6640
+  ]
+ },
+ "ui/src/12-view-ledger-settings.js": {
+  "importAt": 1154,
+  "importLen": 405,
+  "exports": [
+   1559,
+   1656,
+   5627
+  ]
+ },
+ "ui/src/13-render-modal.js": {
+  "importAt": 1,
+  "importLen": 546,
+  "exports": [
+   547,
+   17323,
+   17461
+  ]
+ },
+ "ui/src/14-view-register.js": {
+  "importAt": 2,
+  "importLen": 425,
+  "exports": [
+   427,
+   3107,
+   7382,
+   12044,
+   14941,
+   16701,
+   18882
+  ]
+ },
+ "ui/src/15-view-pack.js": {
+  "importAt": 2,
+  "importLen": 497,
+  "exports": [
+   499,
+   13452
+  ]
+ },
+ "ui/src/16-view-group.js": {
+  "importAt": 1,
+  "importLen": 327,
+  "exports": [
+   328
+  ]
+ },
+ "ui/src/17-actions.js": {
+  "importAt": 1,
+  "importLen": 2697,
+  "exports": [
+   2698,
+   78037,
+   80732,
+   86367,
+   86584,
+   87023,
+   87083,
+   88960,
+   91379,
+   91405,
+   91663,
+   92027,
+   92283
+  ]
+ }
+}

@@ -1,0 +1,88 @@
+{
+ "game": "LEDGER — A Life in Decisions",
+ "seat_taken": "2026-10-07",
+ "measured_by": "tools/playtest.mjs · seed 4242 · profile grad · city lagos · difficulty realistic",
+ "structure": {
+  "a_full_arc": {
+   "unit": "quarters",
+   "value": 168,
+   "note": "a run that makes no choices at all still reaches the terminal: retire at 168 quarters, age 65"
+  },
+  "forced_interruptions_per_quarter": {
+   "unit": "events/quarter",
+   "value": 0.99,
+   "note": "things that happen to you whether or not you act: {\"event\":165,\"end\":1}"
+  },
+  "things_asking_for_a_decision": {
+   "unit": "per sampled quarter",
+   "value": 10,
+   "note": "the game’s own agenda + open deals + candidates + house candidates + offers, sampled at quarters 0, 8, 16, 32, 64, 96, 128, 160",
+   "samples": [
+    {
+     "quarter": 0,
+     "agenda": 2,
+     "deals": 2,
+     "candidates": 3,
+     "houseCands": 3,
+     "offers": 0
+    }
+   ]
+  },
+  "controls_that_change_state": {
+   "unit": "controls",
+   "value": 166,
+   "note": "the action registry: 25 commitment-shaped by name, 21 navigation-shaped, rest are modal fields and toggles"
+  }
+ },
+ "scarcity": {
+  "money": {
+   "resources": [
+    "cash",
+    "usdCash",
+    "debt",
+    "credit",
+    "overdrawn"
+   ],
+   "unit": "naira"
+  },
+  "time": {
+   "resource": "hours per quarter",
+   "note": "hoursBudget() − hoursSpent(); unspent time is the one thing that never carries"
+  },
+  "personal": {
+   "resources": [
+    "health",
+    "stress",
+    "happy",
+    "family",
+    "rep"
+   ],
+   "unit": "0–100",
+   "note": "none of them can be bought back with money alone"
+  },
+  "recurring_charge": {
+   "unit": "naira/quarter",
+   "value": 687666,
+   "note": "the charge the quarter imposes on the sampled state"
+  }
+ },
+ "irreversibility": {
+  "classes": {
+   "commitDrop": "free",
+   "commitDropCost": "at a cost",
+   "commitBreak": "sunk",
+   "commitSunk": "sunk"
+  },
+  "note": "three ways a commitment can end, read from the handlers the game ships: undo free, undo at a cost, sunk"
+ },
+ "artifact": {
+  "bytes": 1104445,
+  "external_requests": 0,
+  "offline": true,
+  "account_required": false,
+  "price": "none"
+ },
+ "behavioural": {
+  "note": "needs a human with a stopwatch — fill in seat-lagos-life.csv and copy the fields here, or run --compare"
+ }
+}

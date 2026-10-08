@@ -1,0 +1,585 @@
+/*
+  Keep packages/changes.json honest and current.
+
+  The statement ledger in tools/bundle.mjs compares the bundle against
+  reference/baseline-single-file.html and fails if anything differs that nobody
+  wrote down. Keeping that list by hand is a transcription exercise with a
+  guaranteed typo in it, so this tool does the transcription: give it the
+  marker for each edited statement and the reason, and it pulls the before and
+  after text out of the two files itself.
+
+  Markers are matched against a statement's LEADING COMMENT first and then its
+  code, so 'function loadProfile' finds that function and a distinctive comment
+  finds whatever it belongs to.
+
+  Run: node tools/declared-changes.mjs          (writes and reports)
+*/
+import fs from 'node:fs';
+import path from 'node:path';
+import { parse } from 'acorn';
+import { composeBundle } from './compose.mjs';
+
+/* ROOT is where this file is, not where you happened to run it: the download
+   is unpacked anywhere, and a tool that only works in one directory is a tool
+   that only works on one machine. */
+const ROOT = path.join(import.meta.dirname, '..');
+const read = p => fs.readFileSync(ROOT + '/' + p, 'utf8');
+
+/* Every deliberate change, with the reason it is deliberate. Add an entry when
+   you edit a section; the tool does the rest. */
+const EDITS = [
+  { marker: 'function seasonChipHTML()',
+    name: 'seasonChipHTML — the word "left" becomes its own span',
+    why: 'on a phone the chip said "0 left" in the width that keeps the header on two rows; the number and the warning colour stay, the word is in the popover the chip opens' },
+  /* the typed table lookup: one function, seven call sites, and a message that
+     stopped printing the word "undefined" */
+  { marker: 'function traitOf(id)', addition: true,
+    name: 'traitOf — the staff trait lookup, in one typed place',
+    why: 'seven rules looked a member\'s trait up with `TRAITS.find(...)||{}` and read fields off the empty object, which is why none of them could be checked against the table; they now go through one function typed as the table\'s own element type, so a field the data does not have is a type error rather than undefined at runtime' },
+  { marker: 'function staffProd(b)', all: true,
+    name: 'staffProd, theftRate, connBonus, simOneBiz, stepHouse — through traitOf',
+    why: 'the same lookup, seven times, now through the one function above; no other line in any of them changed' },
+  { marker: 'function theftRate(b)', all: true,
+    name: 'theftRate and connBonus — through traitOf',
+    why: 'the same trait lookup as staffProd, in two one-line rules that read `theft` and `demand` off the empty fallback; nothing else in either line changed' },
+  { marker: 'function connBonus(b)', all: true,
+    name: 'connBonus — through traitOf',
+    why: 'the trait lookup, in the one-line rule that reads `demand` off the empty fallback' },
+  { marker: 'function stepHouse()', all: true,
+    name: 'stepHouse — through traitOf',
+    why: 'the trait lookup for household staff, which read `loyalty` and `output` off the empty fallback' },
+  { marker: 'function simOneBiz(b)', all: true,
+    name: 'simOneBiz and stepHouse — through traitOf',
+    why: 'the last two of the seven trait lookups; both read a field off the fallback object, which is why neither could be checked against the table' },
+  { marker: 'function hire(c)', all: true,
+    name: 'hire — the trait in the hiring message is the candidate\'s own',
+    why: 'the lookup compared the trait to itself (`t.id===t.trait`), so it never matched and the player was told "You offered X the job — skill 4/10, ₦363k/month. undefined. They work their notice"; it now names the trait it was always meant to name, and says so plainly when the candidate has none' },
+  { marker: 'const ALL_EVENTS =', all: true,
+    name: 'ALL_EVENTS — the four decks read as one list',
+    why: 'each deck is typed from its own data, and this line is only about them being events: the cast says which of the two facts the line is about, so the three concat calls stop needing a type that is the union of every card in the game' },
+  { marker: 'function _href()', all: true,
+    name: '_href — the invite link asks the host for the address in the app build',
+    why: 'the module build shims `location` to the host (so `location()` is the host\'s url) and the single file has the browser\'s object under that name; reading `.href` off the shim is undefined, so every invite link in the app was the bare code with no address in it, even when the host had one — the row a player would paste said nothing about where to go' },
+  { marker: 'function buildCast()',
+    name: 'buildCast — the dead first line goes',
+    why: 'the function opened with `const roles = R.weightedN ? null : null;`: a local bound to null either way and read nowhere in the function, and `weightedN` is not a member of the generator table either — the pool is chosen two lines below, by ROLE_POOL and R.weighted. It had been dead since it was written, and it took a type-checked table to say so; the only change is that the line is gone' },
+  { marker: "if('serviceWorker' in navigator", all: true,
+    name: 'the service-worker guard asks pageProtocol() instead of the shim',
+    why: 'the same name collision as pageProtocol itself: `location` is imported from core in the module build, so the condition was false in the app and the registration never ran' },
+  { marker: 'function pageProtocol()', addition: true,
+    name: 'pageProtocol — the service worker checks the page, not the host shim',
+    why: 'the module build imports `location` from core, where that name is the host shim and `location()` asks the host for its url - so `location.protocol` was undefined and the whole condition was false in the app: the service worker never registered, and the offline half of the game was switched off by a name collision. The helper answers the same question in both builds: the protocol of the page, from the browser object in the single file and from the host url in an app' },
+  /* the ui's DOM reads, typed where the reads happen */
+  { marker: 'function toast(msg, ms)', all: true,
+    name: 'toast — the timeout handle moves beside the host',
+    why: 'the handle of the toast on screen was kept as `h._t` on the host element, which is a property the DOM does not have and a checker cannot follow; it is one module-level slot now, with the same behaviour (only the newest toast clears the host) and a guard for a host that is not in the page yet' },
+  { marker: 'let _toastT = null;', addition: true,
+    name: '_toastT — the one toast handle',
+    why: 'the slot the handle moved into' },
+  { marker: 'function inputValue(id)', addition: true,
+    name: 'inputValue(id) — six reads of an input box, in one typed place',
+    why: 'six call sites read an input as `(Q(\'x\')||{}).value || \'\'`, which types as "HTMLElement or an empty object" and cannot be checked; the helper returns a string, missing box included' },
+  { marker: 'function viewPack(b)', all: true,
+    name: 'viewPack — the variance figure in a row is a number',
+    why: 'the P&L rows are [label, figure] pairs and the figure has always been compared as a number; the annotation says so, and nothing else on the line changed' },
+  { marker: 'const _af =', all: true,
+    name: 'render() — activeElement read as what the three lines need it to be',
+    why: 'document.activeElement is an Element and the focus memory reads `.dataset`, `.selectionStart` and `.type` off it, which are the fields of an input; one cast, same behaviour' },
+  { marker: 'function seasonStatus()', all: true,
+    name: 'seasonStatus — the shape a screen reads off it',
+    why: 'the season strip and the household screen read `.left`, `.total` and `.end` off this, and it was returning an untyped object; the return type is written down now' },
+  { marker: "let _sea = {name:''", all: true,
+    name: '_sea — the seed a season carries is a string until it is parsed',
+    why: 'initialised to \'\' and assigned `parseInt(...)` a few dozen lines later: the field has always held both, and the type says so now instead of describing half of its life' },
+  { marker: 'function viewSeason()', all: true,
+    name: 'viewSeason — the season card reads a status that can be absent',
+    why: 'the card was reading `.left`, `.total` and `.end` off a fallback written as `{}`, which is a shape with no fields; the fallback now carries the status shape, which is what the screen has always assumed' },
+  { marker: 'function bindInputs()', all: true,
+    name: 'bindInputs — the rows of controls are typed where they are bound',
+    why: 'one cast a row, at the top of each forEach: `[data-inp]` reads a range or a box, and the delegated reads on it are the fields of an input. The rows, the order and the handlers are unchanged' },
+  { marker: "document.addEventListener('click', function(e)", all: true,
+    name: 'the click delegation — the target is found the way it always was',
+    why: '`e.target` is an EventTarget and `.closest()` is a method of a node; the cast states which, one line, no behaviour change' },
+  { marker: 'function renderMarkupPage(v)', addition: true,
+    name: 'renderMarkupPage — the route and the modal, as markup',
+    why: 'the second half of the markup path: the route as the string it has always been, and the modal underneath it, in the order render() has always called them' },
+  { marker: 'function renderChrome()', addition: true,
+    name: 'renderChrome + renderMarkupPage — the markup path gets names',
+    why: 'render() is three jobs (the chrome, the route and the modal, and the page-level work) and the first two were two `if(!page)` blocks inside the loop; they are two functions now, with the same statements in the same order, so the string path the single file runs is a place in the file rather than a pair of branches - and the gates that compare markup against React point at it' },
+  { marker: "if('serviceWorker' in navigator", all: true,
+    name: 'the service worker registers even when the game loads after `load`',
+    why: 'the registration waited for the window load event. In the single file that is correct; in the app the ui is imported after load has fired, so the listener was attached to an event that never comes again and the worker never registered on any app deploy — the app was deployable and not installable, and no gate could see it. It now registers at once if the page is already complete' },
+  { marker: 'function pageProtocol()', addition: true, all: true,
+    name: 'pageProtocol — a host that says nothing cannot switch a feature off',
+    why: 'the app installs no `url` slot and the default returns \'\', so the protocol came back empty and the service worker never registered in the app on any deploy. The host still wins when it answers; when it does not, the page\'s own location is the truth' },
+  { marker: 'function boot()',
+    name: 'boot — the self-starting IIFE becomes a function',
+    why: 'the single file boots itself; an app calls install() then boot(). The same function, started by a guard instead of immediately, because a module cannot wait for its host' },
+  { marker: 'globalThis.__LEDGER_IS_APP__', addition: true,
+    name: 'the boot guard',
+    why: 'the line that decides who starts the game: nobody, in the single file; the app, in the module build' },
+
+  /* the module boundary: state the core owns may not be reassigned from
+     outside it, so the core grew setters and the ui calls them */
+  { marker: 'function loadProfile()',
+    name: 'loadProfile — through the setters',
+    why: 'the same function, calling setProfile instead of assigning to a binding it does not own' },
+  { marker: 'seasonclear:',
+    name: 'seasonclear — through the core',
+    why: 'clears the draft by asking the core to clear it' },
+  { marker: '_syncing', all: true,
+    name: '_syncing — the flag moves to where the function lives',
+    why: 'the sync flag was declared in core and used only by the ui\'s cloud sync; it belongs with the code that reads it' },
+  { marker: 'function render(', all: true,
+    name: 'render — the route is the app’s to draw when the app can draw all of it',
+    why: 'two lines of the render loop: the disclosure chrome comes off the container first, because that chrome is DOM the ui adds and React cannot patch its way around wrappers it does not know about; then the route is the app\'s when the app can draw all of it. The string path stays for every route React cannot draw whole (still grouped by core, or holding a screen that is not converted), and everything after these two lines - modal, inputs, disclosure, scroll, focus - runs either way' },
+  { marker: 'function renderStart(',
+    name: 'renderStart — lets the app’s root go before writing the start screen',
+    why: 'the start screen is markup written straight into #main; if the app owned that container a moment ago it has to unmount first' },
+  { marker: '_installEvt', all: true,
+    name: '_installEvt — the install-prompt event moves to the ui',
+    why: 'a browser event, declared in core and used only by the ui; the core has no business holding it' },
+  { marker: 'function saveProfile()',
+    name: 'saveProfile — reads the profile through the core',
+    why: 'the same rule; the core holds PROF, the ui only asks for it' },
+  { marker: 'function load(slot)',
+    name: 'load — puts a save into the core',
+    why: 'the same rule as setS; the ui reads the storage, the core holds the state' },
+  { marker: 'const ACT = {',
+    name: 'ACT — the restart handler and the season actions call setters',
+    why: 'action handlers no longer assign to bindings the core owns' },
+
+  /* statements the module boundary added to the core */
+  { marker: 'function setS(v)', addition: true,
+    name: 'core: setS', why: 'see above: the core holds S, the ui asks it to' },
+  { marker: 'function setProfile(p)', addition: true,
+    name: 'core: setProfile', why: 'see above' },
+  { marker: 'function setSeaInviteUsed(v)', addition: true,
+    name: 'core: setSeaInviteUsed', why: 'see above' },
+  { marker: 'function seaDraftReset()', addition: true,
+    name: 'core: seaDraftReset', why: 'see above' },
+  /* stating a shortfall is only half of it: the player has to be able to act
+     on what the screen just told them */
+  { marker: 'function viewBiz()',
+    name: 'viewBiz — the shortfall notice hands over the routes it names, and every disabled control says why',
+    why: 'the notice named Work > Career and Money > Deals in prose with no way to walk to either, so it now carries goto buttons; the disabled Start and the minority buy-out carry their own reason on the control (needs / you have / short), because a title attribute is no use to a thumb' },
+
+  /* The user's rule, applied everywhere a control is disabled: a greyed button
+     with no reason is indistinguishable from a missing feature. Each of these
+     statements gained a reason on the control - a number, a condition, or the
+     route that is still open - and .harness/disabled.js now walks every route
+     in two worlds and fails on any disabled control that says nothing. */
+  { marker: 'function viewMoneyProperty()',
+    name: 'viewMoneyProperty — buying a thing says what you are short of',
+    why: 'the Buy button was disabled below the price with nothing on it: now costs / you have / short, on the control' },
+  { marker: 'function viewCareer()',
+    name: 'viewCareer — Do it says whether it is money or a condition that stops you',
+    why: 'one disabled button covered two different refusals (locked by a condition, or short of cash); each now names its own, and the condition reuses the card hint rather than inventing new copy' },
+  { marker: 'function portfolioBar()',
+    name: 'portfolioBar — a transfer button says there is nothing to move',
+    why: 'treasury transfers out of a company holding no cash were disabled silently' },
+  { marker: 'function anotherBizModal()',
+    name: 'anotherBizModal — start another company states the shortfall and hands over the routes',
+    why: 'this modal offered ten disabled Start buttons and no way forward; it now carries the same stated shortfall as the first-company screen, with goto buttons to Career and Deals' },
+  { marker: 'function viewGroup()',
+    name: 'viewGroup — the consolidation table stays inside the card that owns it',
+    why: 'the "one company is not a group" note closed the card AND left a stray </div> behind it, so on a single-company run the consolidated P&L table was emitted outside its own card and rendered as a bare table on the page below the next card; the card now closes once, after the table it belongs to' },
+  /* ---- the shell becomes the app's, one piece at a time ----------------
+     Four statements gained one line each - a question asked before the markup
+     is written - and nine are new: the declaration of which pieces the app
+     draws, the drawer itself, and the one side effect that belongs to the page
+     rather than to the markup (keeping the active tab in view, which the app's
+     strip needs too). Nothing about what the shell says changes; what changes is
+     who may say it. */
+  { marker: 'function renderTop()',
+    name: 'renderTop — asks the app first',
+    why: 'the header row is rebuilt as a string on every render, so a state change replaces it whole; an app that draws it keeps the nodes, and this is where it is asked. One line, same contract: whoever answers, the header is drawn' },
+  { marker: 'function renderTabs()',
+    name: 'renderTabs — asks the app first, and centring moved out',
+    why: 'the strip, its second level and the hint are one piece on the app side (three containers, one tree), and where the strip is scrolled to is a fact about the page, not about who drew the markup - centerActiveTab() runs for both renderers' },
+  { marker: 'function renderSubs()',
+    name: 'renderSubs — asks the app first',
+    why: 'the second level is drawn by the app when the app owns the strip; the action table calls this one directly, so it has to ask too and not write over a React tree' },
+  { marker: 'function renderWhy()',
+    name: 'renderWhy — asks the app first',
+    why: 'the hint popover is drawn by the app when the app owns the strip, and UI.whyOpen is still core-side state that decides whether it is open' },
+  { marker: 'var APP_SHELL = {};', addition: true,
+    name: 'APP_SHELL — which pieces of the shell the app draws',
+    why: 'declared rather than guessed, so the shell can move over one piece at a time and anything unclaimed stays markup' },
+  { marker: 'var SHELL_DRAW = null;', addition: true,
+    name: 'SHELL_DRAW — the app\u2019s shell drawer, null in the single file',
+    why: 'the single file has no app, so APP_SHELL is empty and every piece is drawn by markup exactly as before' },
+  { marker: 'function setAppShell(map){', addition: true,
+    name: 'setAppShell — the app declares the pieces it draws',
+    why: 'the same seam as setAppGroups for routes: a declaration, and the gate it feeds checks the declaration against what was actually drawn' },
+  { marker: 'function setShellDrawer(fn){', addition: true,
+    name: 'setShellDrawer — the app\u2019s shell drawer',
+    why: 'called whenever the ui would write that piece, and it re-renders the app\u2019s roots from live state; setShellDrawer(null) releases every container first, like setRouteDrawer(null)' },
+  { marker: 'function shellOwned(piece){', addition: true,
+    name: 'shellOwned — is this piece the app\u2019s?',
+    why: 'one place that answers, so no caller can decide for itself and disagree' },
+  { marker: 'function shellDraw(piece, hosts){', addition: true,
+    name: 'shellDraw — ask the app to draw one piece',
+    why: 'a drawer that throws said it could and could not: the claim is dropped for the session and markup answers, because a header that disappears on one bad state is worse than one that is merely rebuilt' },
+  { marker: 'function releaseShell(){', addition: true,
+    name: 'releaseShell — let go before markup is written',
+    why: 'a React root left on a container the markup builder is about to overwrite is a crash waiting for the next render' },
+  { marker: 'function shellOwnership(){', addition: true,
+    name: 'shellOwnership — what the app claims, for a gate or a walk to read',
+    why: 'so the answer is asked rather than assumed, the same way routeOwnership() answers for routes' },
+  { marker: 'var APP_PAGE = null;', addition: true,
+    name: 'APP_PAGE — the app\u2019s page drawer, null in the single file',
+    why: 'the loop above the shell: one drawer answering for the header, the strip, the route and the modal at once, so the order the page is built in lives somewhere a component tree can express. The single file has no app, so nothing is claimed and every piece is drawn by markup exactly as before' },
+  { marker: 'function appPageHosts(){', addition: true,
+    name: 'appPageHosts — where the page\u2019s containers are',
+    why: 'the app composes the page and needs all six hosts at once; the ui says where they are, the app fills them' },
+  { marker: 'function setAppPage(fn){', addition: true,
+    name: 'setAppPage — the one way an app asks to draw the whole page',
+    why: 'setPageDrawer() in @ledger/ui is the documented way in, and this is the seam it writes to' },
+  { marker: 'function appDrawsPage(){', addition: true,
+    name: 'appDrawsPage — does the app draw the page?',
+    why: 'the intersection of the three piece claims and the route drawer: an app that has not converted the modal cannot claim the page and silently drop it. A throw drops the claim for the session and the markup path has it back' },
+  { marker: 'function pageOwnership(){', addition: true,
+    name: 'pageOwnership — what the app claims, and why not',
+    why: 'a reason nobody can read is decoration: the gate and the walk ask this rather than guessing, the same way routeOwnership() answers for routes' },
+  { marker: 'function render()', all: true,
+    name: 'render — the loop asks once, before it draws anything',
+    why: 'two lines: the app is asked whether it draws the page, and if it does, render() writes no markup at all - the header, strip, route and modal are one commit in the app\u2019s order. The page-level work underneath (input bindings, disclosure chrome, scroll, focus) is unchanged and still runs either way, because none of it is about who filled the container in' },
+  { marker: 'function renderModal()',
+    name: 'renderModal — asks the app first',
+    why: 'the modal is the last piece of the shell: one dispatcher over about twenty-five types, rewritten into #modalHost on every render, and the part most likely to be on screen while the state changes underneath it. One line, and the dispatcher below is untouched - the single file still has it whole' },
+  { marker: 'function shellClear(', addition: true,
+    name: 'shellClear — the start screen takes the chrome off the containers',
+    why: 'the start screen has no game to show in the strip, and it writes markup into #toprow and #tabs: letting go empties them, and this also removes the host-level styling the app left on the second level and the hint (a hidden row, an open class), so a new run cannot start wearing the last one\u2019s chrome' },
+  { marker: 'function centerActiveTab(){', addition: true,
+    name: 'centerActiveTab — the active tab is brought into view',
+    why: 'its own statement because both renderers need it: it was the last line of renderTabs, which the app now answers with a re-render instead' },
+
+  { marker: 'function viewOutlets()',
+    name: 'viewOutlets — extend and open-a-unit say what the company is short of',
+    why: 'three outlet buttons were disabled on company cash with no figure attached' },
+  { marker: 'function viewEngine()',
+    name: 'viewEngine — insuring an insured company says it is already insured',
+    why: 'the button was disabled in its own success state, which read as broken rather than done' },
+  { marker: 'function viewDeals()',
+    name: 'viewDeals — committing to a deal says the gap, and that the deal expires',
+    why: 'a disabled Commit looked like a dead deal rather than one you cannot afford yet' },
+  { marker: 'function viewLedgerSettings()',
+    name: 'viewLedgerSettings — show-all-tips says there is nothing to restore',
+    why: 'disabled when no tip has been dismissed, and said nothing about it' },
+  { marker: 'function startModal()',
+    name: 'startModal — a season-pinned profile, city and tier say the season is why',
+    why: 'three rows of controls grey out when you join a season, with no explanation on the control; each now names the season and says everyone in it starts the same way' },
+  { marker: 'function diffListHTML()',
+    name: 'diffListHTML — the Active season button says you are playing it',
+    why: 'the one disabled button in the season list is the one that is true' },
+  { marker: 'function viewGroup()',
+    name: 'viewGroup — dividend, upstream loan and the management fee say why they are off',
+    why: 'six disabled controls across the group screens: nothing to declare, no cash to lend, cross-funding comes later, and the 0%-15% rails of the management charge' },
+  /* The Install button was unreachable, in the original file and in the split,
+     and this is the fix. It is declared here rather than only in the notes
+     because the ledger must be able to say what changed and why. */
+  { marker: 'beforeinstallprompt',
+    name: 'the Install button is reachable — the reveal looked up an id nothing has',
+    why: 'the button renders display:none until the browser offers an install prompt, and the code meant to reveal it looked up getElementById("installBtn") — an id no element in the game has ever had, so on any browser that can install the game Settings showed an Install section with a note and no button. Both screens already render from the prompt state; the fix is to re-render when that state changes, which is also the only fix available to a screen that has no DOM node of its own to poke' },
+  /* A typo in the original file, fixed: one extra backslash meant the minus
+     sign in "Living + debt" was printed as the six characters \u2212 on the
+     Overview, for the life of the game. Fourteen other lines in the same file
+     spell the escape correctly. Declared because the ledger may not have a
+     difference it cannot explain. */
+  { marker: '<span class=\"muted\">Living + debt</span><span class=\"mono bad\">',
+    name: 'viewPulse — the minus sign in "Living + debt" is a minus sign',
+    why: 'the string carried two backslashes before u2212 instead of one, so the player was shown the literal text \\u2212 instead of −; the same escape is spelled correctly in fourteen other places in the original, and .harness/escapes.js now looks at every rendered screen for this class of mistake' },
+  { marker: 'function releaseDisclosure(main)', addition: true,
+    name: 'releaseDisclosure — the disclosure chrome comes off before anything draws',
+    why: 'applyDisclosure() appends a chevron to every heading, wraps the card contents in a .discbody and inserts an Expand all row - and had only ever run on a container that innerHTML replaced, so it had no way to run twice. On the React path the container is re-rendered in place and the chrome stacked: four renders put four chevrons in one heading and four Expand all rows on the page. It also re-parents nodes React owns, which is the one thing a React tree cannot survive. The player\'s open/closed state is untouched: it lives in UI.collapsed, not in the DOM' },
+  { marker: 'function applyDisclosure(',
+    name: 'applyDisclosure — starts from a clean container',
+    why: 'the release is called at the top as well, so a pass that somehow runs twice cannot accumulate chrome; it is a no-op on the string path, whose container was replaced a moment ago' },
+  { marker: 'function appDrawsRoute()', addition: true,
+    name: 'appDrawsRoute — the app draws the route when it can draw all of it',
+    why: 'the second half of step 4: a route whose every screen is converted is drawn by the app as one React tree, so a change of state re-renders it in place instead of replacing #main\'s markup. The single file has no app, APP_ROUTE stays null, and render() writes markup exactly as before - the delegation costs one call that returns false' },
+  { marker: 'function releaseAppRoute()', addition: true,
+    name: 'releaseAppRoute — the app lets go of #main before markup is written over it',
+    why: 'a React root whose nodes are replaced behind its back is a crash waiting for the next click; every writer of #main says this first, so a restart cannot leave a stale root on the container' },
+  { marker: 'function setAppRoute(fn)', addition: true,
+    name: 'setAppRoute — the one way an app hands its route drawer in',
+    why: 'the ui keeps the drawer and asks it on every render; setRouteDrawer() in @ledger/ui is the documented way in, and this is the seam it writes to' },
+  { marker: 'var APP_ROUTE = null;', addition: true,
+    name: 'APP_ROUTE — who draws the route, if anyone',
+    why: 'null until an app hands a drawer in through setRouteDrawer(); in the single file it is always null' },
+  { marker: 'function installAvailable()', addition: true,
+    name: 'installAvailable() — one reader of the install-prompt state',
+    why: 'the fact a converted Settings screen has to render from, so an app that draws its own screens asks instead of keeping a second copy of the answer' },
+  { marker: 'PRINT-ALL', name: 'unused', why: 'unused' },
+  /* ── §22.61 progress, onboarding and the profile ───────────────────────── */
+  { marker: 'let SAVE = { at:0, head:null, hardcore:false };', addition: true,
+    name: 'SAVE — what the game knows about its own progress',
+    why: 'the header chip and the record screen need the save state without loading it; this holds the timestamp and the one-line summary the save carries' },
+  { marker: 'function noteSaved(at, head){', addition: true,
+    name: 'noteSaved — the save layer tells the game what it wrote',
+    why: 'one call from save(), so the chip, the resume line and the record screen cannot disagree about when progress was last kept' },
+  { marker: 'function agoLabel(t){', addition: true,
+    name: 'agoLabel — "just now", "4m ago", "2h ago"',
+    why: 'a timestamp is not an answer to "is my progress safe?" in a game played in minutes' },
+  { marker: 'function savedAtLabel(){', addition: true,
+    name: 'savedAtLabel — the clock time of the last save',
+    why: 'the chip title and the profile line both name the moment, and both read it here' },
+  { marker: 'function saveLineHTML(){', addition: true,
+    name: 'saveLineHTML — the header says whether progress is being kept',
+    why: 'the standing question "did that save?" had no answer anywhere in the game. It is a line under the brand and not a chip in the action row, because the row has fourteen pixels of slack in its widest case: a fourth control there wraps the header to three rows and blows the mobile budget by 26px. The line is narrower than the word LEDGER, costs no width, and states the hardcore case in the warning colour' },
+  { marker: 'function resumeLine(){', addition: true,
+    name: 'resumeLine — what was resumed, in one sentence',
+    why: 'a boot that finds a save says so once: name, quarter, net worth, and how old the save is' },
+  { marker: 'function firstMovesHTML(){', addition: true,
+    name: 'firstMovesHTML — the loop and three places to start',
+    why: 'a player\u2019s first quarter is the only screen that has to teach; three buttons to real destinations, then it retires itself for good' },
+  { marker: 'function saveHead(){', addition: true,
+    name: 'saveHead — the one line a save is described by',
+    why: 'written into the save blob, so describing a save never means loading it' },
+  { marker: 'function saveInfo(slot){', addition: true,
+    name: 'saveInfo — what a stored save says about itself',
+    why: 'reads the header without touching the game in memory; returns null for a save written before the header existed rather than inventing a quarter' },
+  { marker: 'function profileHeadHTML(pr, ps){', addition: true,
+    name: 'profileHeadHTML — who you are and whether your progress is safe',
+    why: 'the first card of the record screen: handle, profile id, sync state, save state, and the two buttons that go with them' },
+  { marker: 'let _autoT = null;', addition: true,
+    name: 'the autosave debounce',
+    why: 'one write per burst of moves rather than one per click' },
+  { marker: 'function autosaveSoon(){', addition: true,
+    name: 'autosaveSoon — save after every move, a moment later',
+    why: 'the run is saved after any action that changes it; hardcore is the stated exception and the chip says so' },
+  { marker: 'function autosaveFlush(){', addition: true,
+    name: 'autosaveFlush — write now, when the page is going away',
+    why: 'a debounced save is a save that has not happened yet, and tabs close mid-move' },
+  { marker: 'function renderTopIfCheap(){', addition: true,
+    name: 'renderTopIfCheap — repaint the chip after a save',
+    why: 'the chip is the only thing a save changes on screen, and only the markup path needs the repaint' },
+  { marker: "window.addEventListener('visibilitychange'", addition: true,
+    name: 'the flush on hide',
+    why: 'a backgrounded tab on a phone may never fire beforeunload; visibilitychange is the event that does' },
+  { marker: "window.addEventListener('pagehide'", addition: true,
+    name: 'the flush on pagehide',
+    why: 'the same insurance as visibilitychange, for the navigations that fire one and not the other' },
+  /* ── the redesign, phase 1: Legacy > Settings and the difficulty list ────── */
+  /* ── the redesign, phase 2: Money > Markets ─────────────────────────────── */
+  { marker: 'function viewInvestMarkets(){',
+    name: 'viewInvestMarkets \u2014 the market as a price sheet',
+    why: 'the worst route in the game at 2,566 characters in the way: one sentence of teaching per instrument stacked under thirteen bordered boxes, plus two paragraphs explaining the numbers they sit next to. One compact row per instrument now leads (name, the chips that decide it, the amount box and Buy on the row itself), the thirteen notes are kept whole behind one disclosure, and the two lectures are folds on the cards they belong to. Same thirteen buys, same amount-box ids (the handler reads them out of the DOM), same words' },
+  { marker: 'function assetRowHTML(a){', addition: true, name: 'assetRowHTML \u2014 one instrument, one row' },
+  { marker: 'function assetNotesHTML(){', addition: true,
+    name: 'assetNotesHTML \u2014 the thirteen notes, folded rather than deleted',
+    why: 'the \u201cwhat is this for\u201d sentence belongs to the instrument and was the bulk of the screen. Folding them keeps all thirteen (the audit\u2019s total is unchanged) and puts the comparison \u2014 expected return, volatility, FX-linked, illiquid \u2014 where the eye lands first' },
+  { marker: 'function returnsFoldHTML(){', addition: true, name: 'returnsFoldHTML \u2014 the returns paragraph as a fold inside the market it explains' },
+  /* ── the redesign, phase 3: Money > Group ───────────────────────────────── */
+  { marker: 'function viewGroup(){',
+    name: 'viewGroup \u2014 three lectures folded onto the cards they explain',
+    why: 'a screen with no state and no reading-shaped reason to be long: 1,531 characters in the way, of which 782 were three paragraphs of teaching \u2014 what a group is (307, the longest single block in the game), dividend versus upstream loan, and how a management charge works. Each is kept word for word, folded under a short label on the card it belongs to. 1,531 \u2192 566, total 1,531 \u2192 1,579, so the words moved rather than went' },
+  /* ── the redesign, phase 4: Legacy > People ─────────────────────────────── */
+  { marker: 'function viewPeople(){',
+    name: 'viewPeople \u2014 the cast as rows, and two raw floats rounded',
+    why: '1,817 characters in the way for 24 controls, most of it one line per person: \u201cgenerous, careless \u00b7 means 16.778310123996636/100 \u00b7 standing 22.88567320808015/100\u201d. That is ninety-odd characters carrying two facts, and two of them printed at full float precision \u2014 nobody reads 16.778310123996636, and the value is a fraction of 100 that was simply never rounded. The line is four chips of whole numbers now, the 0\u2013100 scale is stated once in the heading instead of eighteen times in the rows, each person is a hairline row rather than a bordered box, and the card\u2019s opening sentence about mortality sits folded at the foot of the card it is about' },
+  /* ── the redesign, phase 5: Work > Career ───────────────────────────────── */
+  { marker: 'function foldHTML(label, html){', addition: true,
+    name: 'foldHTML \u2014 a folded explanation, in one place, in core',
+    why: 'the same markup had been hand-written on four screens in two phases of this redesign; a fifth copy is where they start to differ. It began in the ui and moved to core the same afternoon, because core\u2019s own strips use it (the open stories on Overview) and the modular build said so out loud: `foldHTML is not defined`, from an integration test about saves crossing between browser and phone. The single-file build hid it completely \u2014 which is what the module build and its tests are for' },
+  { marker: 'function viewCareer(){',
+    name: 'viewCareer \u2014 four explanations folded, including one per action',
+    why: '1,758 characters in the way and almost all of it teaching: four of the six longest blocks were single career actions\u2019 own hints (188, 177, 169, 148 characters), and the rest were three card notes. The actions are rows now, each with its own `Why` fold, and the hint is still what the disabled button says when it refuses \u2014 so a reason is never further away than the control it refuses' },
+  /* ── the redesign, phase 6: Work > Household ────────────────────────────── */
+  { marker: 'function traitsGlossaryHTML(){', addition: true,
+    name: 'traitsGlossaryHTML \u2014 the eight trait sentences, stated once',
+    why: 'each person and each candidate spelled out their trait in full, so the same eight sentences appeared up to five times on one screen. They are the sentences that tell you what a hire does to your house, so they are one tap away \u2014 and the row now carries the trait as a chip' },
+  { marker: 'function viewHousehold(){',
+    name: 'viewHousehold \u2014 the decision leads, the teaching is folded, the rate is a chip',
+    why: '1,605 characters in the way for eight controls: the two longest blocks were both lectures (160 and 287) sitting where a player decides whether to hire anybody, and every candidate repeated the boilerplate \u201cGoing rate for this work is about \u20a6N/mo.\u201d The lectures fold, the going rate and the trait become chips, and the trait glossary is one fold. 1,605 \u2192 lower by the duplication only, which is the point of saying a thing once' },
+  /* ── the redesign, phases 7-9: Deals, Ambition, Property ────────────────── */
+  { marker: 'function viewDeals(){',
+    name: 'viewDeals \u2014 deals as rows, and the background card folded',
+    why: '1,200 characters in the way, 429 of them a card of pure background (three paragraphs of how to think about deals) and the rest a description above the odds it described. Each deal is a row leading with its terms as chips \u2014 quarters, upside, how often they work out, who introduced it, what it asks for \u2014 with its own sentence under **What it is**; the background card keeps its heading (the grouping table names it) and its paragraphs move under **The three rules**. Commit and Pass are untouched, refusal text included' },
+  { marker: 'function viewLegacy(){',
+    name: 'viewLegacy \u2014 three explanations folded, on the screen about what you are aiming at',
+    why: '1,127 characters in the way, of which 346 were teaching: the 201-character paragraph about what nobody mentions at your funeral, the 96-character note on the five constituencies you cannot all please, and the 49-character aside about changing your mind. All three fold onto the cards they belong to; every figure, bar, ambition button and posterity control is untouched' },
+  { marker: 'function viewMoneyProperty(){',
+    name: 'viewMoneyProperty \u2014 what a thing costs and does, before what it feels like',
+    why: '1,111 characters in the way for eleven controls, and all of it was notes: a bordered box per good with a sentence under the name and thirty pixels of height held open for it. Each good is a compact row now \u2014 effects and price as chips, then the Buy button \u2014 and all eleven sentences are kept, in order, in one fold at the foot of the card. Same eleven buttons, same disabled reasons, same prices' },
+  /* ── the redesign, phases 10-12: Position, Budget, Overview ─────────────── */
+  { marker: 'function viewMoneyPosition(){',
+    name: 'viewMoneyPosition \u2014 the credit score becomes a chip, three notes fold',
+    why: '831 characters in the way, and the largest block was 189 characters of philosophy at the foot of a screen about cash: \u201cEvery naira you spend here is a naira that is not compounding somewhere else\u2026\u201d. The credit score moves onto the Borrow heading as a chip (it is a number, and the sentence around it was explaining what it does), and the three notes \u2014 what the tab is asking, why repaying early matters, how borrowing works \u2014 are folds on the cards they belong to. Every figure, both borrow buttons and every Repay button untouched' },
+  { marker: 'function viewMoneyBudget(){',
+    name: 'viewMoneyBudget \u2014 the inflation warning keeps its state and folds its explanation',
+    why: 'a budget screen is sliders and labels, which is what it should be; the one piece of prose was a real state change with two sentences wrapped around it. The warning still says prices rose and still carries the Adjust control; the sentence explaining what that costs you in buying power is one tap away' },
+  { marker: 'function viewOverview(){',
+    name: 'viewOverview \u2014 the surplus note folded, the vignette kept',
+    why: 'the same \u201cliving inside your means\u201d sentence folds on the card that shows the surplus. The 112-character vignette line on the economy card is deliberately NOT folded: it is the game\u2019s voice, and the redesign\u2019s rule is that the voice is the thing worth reading when you do open something' },
+  { marker: 'function threadStrip(){',
+    name: 'threadStrip \u2014 the open-story list, with its note folded',
+    why: 'the 51-character note under the threads \u2014 \u201cThese continue whether you engage with them or not.\u201d \u2014 is teaching about the list above it, so it is a fold. The list itself, and every way in to a thread, is untouched' },
+  /* ── the redesign's final phase: Legacy > Chronicle ─────────────────────── */
+  { marker: 'function viewLedgerChronicle(){',
+    name: 'viewLedgerChronicle \u2014 newest first, and the years folded',
+    why: '3,966 characters in the way in a mature run, by a wide margin the heaviest route in the game: all forty entries at once, in one column, opening on the oldest quarter. The log reads newest-first now, the eight latest entries are the screen, and everything older is grouped by year behind a fold that says how much it holds. The entries themselves are untouched \u2014 same markup, same category, same date, and the same colour that already says whether an entry was good, bad, a warning, macro news or a beginning, which is why no outcome chip was added: the outcome is already on the line' },
+  /* ── the redesign's shell phase: the modals ─────────────────────────────── */
+  { marker: 'function anotherBizModal(){',
+    name: 'anotherBizModal \u2014 companies as rows, descriptions folded',
+    why: '1,633 characters in the way with 13 controls: the heaviest surface outside a route, and heavy for the same reason Money > Property was \u2014 ten companies as bordered boxes each carrying a paragraph, with an opening lecture above them. Name, price and Start lead; the ten sentences are one fold in order; the lecture is a fold. Same ten Start buttons, same disabled reasons and shortfall arithmetic' },
+  { marker: 'function helpModal(){',
+    name: 'helpModal \u2014 the seven rules as a table',
+    why: '1,142 characters in the way as one wall of seven bold-led paragraphs: honest and unreadable, because a player opening Help wants to find the rule they are unsure about and a wall has no index. Rule on the left, meaning on the right, one row each; every sentence kept word for word' },
+  { marker: 'function seasonModal(){',
+    name: 'seasonModal \u2014 three explanatory notes folded onto the controls they explain',
+    why: '1,300 characters in the way on a setup form: what a season is, what joining does, and how a QR code works. The form, the code, the QR, the invite link and every year/quarter button are untouched; the three notes are folds' },
+  { marker: 'function parseSaveRaw(raw){', addition: true,
+    name: 'parseSaveRaw — the shape of a stored save, in one place',
+    why: 'the ui and the app both read a save slot, and the blob\u2019s shape is core\u2019s; the parse was living in the ui while the writer lives behind the host seam. Now the parse is core\u2019s and each side keeps only its own read (localStorage in the page, the app platform layer in the app), so the two cannot disagree about what a stored save says' },
+  { marker: 'function saveSlotRowHTML(slot, label, info){', addition: true,
+    name: 'saveSlotRowHTML — a save slot is a row that says what is in it',
+    why: '\u201cLoad 1\u201d was a button with no way to know what slot 1 held: you pressed it and found out. The row carries the run\u2019s name, quarter and net worth when the slot is filled, and it lives in core because both renderers draw it \u2014 a converted React screen may not import the ui package that called it, so the row would otherwise have been written twice' },
+  { marker: 'function slotRowHTML(slot, label){ return saveSlotRowHTML(', addition: true,
+    name: 'slotRowHTML — the ui\u2019s one-line adapter onto core\u2019s row',
+    why: 'the ui keeps supplying the blob (it has the storage layer) and core keeps drawing the row' },
+  { marker: 'function viewLedgerSettings(){',
+    name: 'viewLedgerSettings — four cards that lead with their controls',
+    why: 'the biggest screen in the game measured at 1,955 characters of text in the way plus ten thousand characters of save string unfolded in the middle of it. The controls move to the top of each card, status becomes one line per row, and three explanations fold behind a `Why`. The save string folds too, which is what machine text is for. No control removed: tools/textaudit.mjs --check fails if an action loses its button' },
+  { marker: 'function diffListHTML(){',
+    name: 'diffListHTML — the tiers as a comparison table',
+    why: 'one bordered block per tier with a full sentence of description is about eight hundred characters of prose that cannot be compared: reading down six paragraphs does not tell you which tier shows the odds or which one allows a reload. The tiers differ in six facts and those facts are fields on the table, so the table draws them. The tier you are playing keeps its sentence; a locked tier keeps its reason in words' },
+  { marker: 'function askNow(ask){', addition: true,
+    name: 'askNow — the decision on the table is written into the state',
+    why: 'a modal is UI and is not saved, so a save written while a decision was open resumed into a quarter with no decision in it: measured in a browser, the bank letter with three options was on screen, the save beside it described that quarter, and after a reload the decision was simply gone' },
+  { marker: 'function askAgain(){', addition: true,
+    name: 'askAgain — a resume puts the decision back on the table',
+    why: 'an event is looked up in the decks by id and a thread stage is derived from the thread record, so the resume is the same letter and the same offer rather than a substitute; an id that cannot be rebuilt is forgotten rather than allowed to lock the game, which is what every save did before this' },
+  { marker: 'function resolveOption(ev, opt){',
+    name: 'resolveOption — answering is what clears the record',
+    why: 'the only place a decision stops waiting; a thread stage that opens next records itself, so what survives in the save is never an answered decision' },
+  { marker: 'function fireEvent(ev){',
+    name: 'fireEvent — an event that opens says so in the state',
+    why: 'the one line that makes an unanswered decision survivable: the modal stays UI, the id goes in the save' },
+  { marker: 'function advanceQuarter(){',
+    name: 'advanceQuarter — a thread stage records its thread',
+    why: 'both places a stage opens name the thread, so a mid-thread save resumes at the stage it was on rather than at the start of the thread' },
+  { marker: 'let RESUME = null;', addition: true,
+    name: 'RESUME — the best run on the device, as the storage layer reports it',
+    why: 'the start screen has to offer the way back into a run that is not in the auto slot, which is every hardcore run: a hardcore run is never auto-saved, so before this a cold start offered such a player nothing and the only way in was to begin a game and find the load buttons' },
+  { marker: 'function noteResume(info){', addition: true,
+    name: 'noteResume — what the device is holding',
+    why: 'written by boot() and by renderStart() from a read of the slots, and cleared by wipe(); the offer is always the disk’s truth rather than a previous session’s memory, so it cannot advertise a run that has been wiped' },
+  { marker: 'function resumeInfo(){', addition: true,
+    name: 'resumeInfo — the reader for the card and the greeting',
+    why: 'the simulation asks the ui what is on the device; one function, so nothing else reaches for the record directly' },
+  { marker: 'function bestSave(){', addition: true,
+    name: 'bestSave — the newest save in any slot',
+    why: 'the auto slot is not the only place a run lives. A hardcore run exists only where the player put it, and an old file carries no `at`, so a slot without one is still offered rather than skipped' },
+  { marker: 'function wipe(){', 
+    name: 'wipe — clearing the slots clears the offer',
+    why: 'the card and the greeting are drawn from what is on the device; wiping the device while a stale offer is remembered would offer a run that is gone' },
+  { marker: 'function save(slot){',
+    name: 'save — the blob carries when it was written and what it describes',
+    why: '`at` and `head` travel with the save so the resume line, the chip and the record screen can describe it without loading it; noteSaved is what tells the game' },
+  { marker: 'function boot(){',
+    name: 'boot — a save is described before it is loaded, and a resume is announced',
+    why: 'the chip and the resume line are about the stored file, so saveInfo reads it first; the greeting is one short toast, not a banner on every screen' },
+  { marker: "document.addEventListener('click'",
+    name: 'the click dispatcher — every move is saved after it runs',
+    why: 'one line at the funnel every action already goes through, so a new action cannot forget to save' },
+  { marker: 'function renderTop(){',
+    name: 'renderTop — the save chip joins the header actions',
+    why: 'the same place the bell and the season chip live, for the same reason: a fact true on every screen belongs in the header once' },
+  { marker: 'function viewOverview(){',
+    name: 'viewOverview — the first-quarter coach',
+    why: 'firstMovesHTML() is the first card on the first quarter of a first run, and nothing at all afterwards' },
+  { marker: 'function viewCareerRecord(){',
+    name: 'viewCareerRecord — the record opens with the profile',
+    why: 'the screen answered "what have you done" but not "who are you" or "is this saved", and those are the two questions a player arrives with' },
+  { marker: 'function profileModal(){',
+    name: 'profileModal — the record is not repeated in the modal',
+    why: 'runs, rating, years and the adaptive tuning are the record screen, in more room and with the run list under them; the modal is now the handle you edit and the account you sign in to' },
+  { marker: 'function startModal(){',
+    name: 'startModal — three steps instead of one wall',
+    why: 'who you are, where you start, how hard: the same facts and the same defaults, but a new player answers three small questions instead of reading four profile blurbs, sixteen trait chips and a season row at once' },
+  { marker: 'function renderStart()',
+    name: 'renderStart — the start screen binds its own inputs',
+    why: 'it draws its own markup and calls renderModal() instead of render(), so bindInputs() never ran on it: the name field had no listener at all and _cfg.name stayed empty however much you typed. Nothing noticed while startgame read the field out of the DOM; the first step that asked _cfg the question found out' },
+  { marker: 'const ACT',
+    name: 'the action table — the five new controls',
+    why: 'goprofile, step, stepnext, stepback and fmdone, and startgame reads the name from the field or from _cfg, because the field is on step one and the run begins on step three' },
+  /* ── FINDINGS F1: the shortfall is on the row ─────────────────────────── */
+  { marker: 'function viewDeals(){',
+    name: 'viewDeals \u2014 a refused Commit says its shortfall on the row',
+    why: 'the reason was a title attribute, and a 390px phone never shows a tooltip: at Q1 both deals cost more than a Fresh Graduate holds, so the first commitment a new player tries was refused with nothing visible beside it. The row now carries the same chip the company picker already uses ("short \u20a6N"); the title stays for desktop' },
+  /* ── FINDINGS F4: today's life, dealt from the date ───────────────────── */
+  { marker: 'const DRAWS = [', addition: true,
+    name: 'DRAWS \u2014 what you were born into, six circumstances',
+    why: 'the five profiles say who you are and are all chosen; a draw says what you were born into, and nobody picks that. Every draw is unequal and none is a free win: each carries what it costs (the loan teaches you to count every naira; Daddy\u2019s name means you never learned to hustle), which is the lesson from the competitor\u2019s birth lottery, where the poor start is compensated with faster learning' },
+  { marker: 'function todayKey(now)', addition: true,
+    name: 'todayKey \u2014 the calendar day in Lagos',
+    why: 'the deal belongs to a day, and the day is Lagos\u2019s (UTC+1, no DST), so a player in Lagos and one abroad are dealt the same life on the same date' },
+  { marker: 'function dayHash(key)', addition: true,
+    name: 'dayHash \u2014 FNV-1a over the day',
+    why: 'the same day deals the same life on every device and in both runtimes, with no server; it draws nothing from the seeded stream' },
+  { marker: 'function todaysLife(key)', addition: true,
+    name: 'todaysLife \u2014 the deal for a day',
+    why: 'profile, draw, seed, city and tier, all from the date: it cannot be re-dealt because there is nothing to re-roll, and everyone who starts today plays the same life on the same terms, so their results compare without a server' },
+  { marker: 'function applyDraw(id)', addition: true,
+    name: 'applyDraw \u2014 the circumstance, applied once at the start',
+    why: 'straight after newGame, touching cash, debt, skills, stand, credit and the family budget only, and writing the deal into the chronicle so the run remembers how it began' },
+  { marker: 'function blankState()',
+    name: 'blankState \u2014 a run remembers whether its start was dealt',
+    why: 'S.dealt is {day, draw} for a dealt run and null otherwise, so the record and a share can say which life it was; an old save without the field reads as not dealt' },
+  { marker: 'function startModal(){',
+    name: 'startModal \u2014 step two offers today\u2019s life before the list',
+    why: 'the one start you cannot pick is offered first, then revealed in place: who you are, what you were born into, what it gives and what it costs. Step three says the tier and city are set by the deal, because a dealt life played on different terms cannot be compared. A season pins its own start and hides the offer' },
+  { marker: 'let _cfg =',
+    name: '_cfg \u2014 the start screen holds the deal until Begin',
+    why: 'dealt is null until the player asks for today\u2019s life, and the deal itself until then; the type is written down because the start screen now carries a nested record' },
+  { marker: 'const ACT',
+    name: 'the action table \u2014 dealtoday, undeal, and Begin plays the deal',
+    why: 'dealtoday asks core for the date\u2019s deal and undeal drops it; startgame begins a dealt run on the deal\u2019s profile, seed, city and tier, applies the draw and saves, and a season still wins over a deal' },
+].filter(e => e.marker !== 'PRINT-ALL');
+
+function statementsOf(script) {
+  const ast = parse(script, { ecmaVersion: 2022, locations: true });
+  const out = [];
+  for (let i = 0; i < ast.body.length; i++) {
+    const n = ast.body[i];
+    const lead = i === 0 ? 0 : ast.body[i - 1].end;
+    out.push({ text: script.slice(lead, n.end), code: script.slice(n.start, n.end) });
+  }
+  return out;
+}
+const scriptOf = html => {
+  const a = html.lastIndexOf('<script>') + 8, b = html.lastIndexOf('</script>');
+  return html.slice(a, b);
+};
+
+const refStmts = statementsOf(scriptOf(read('reference/baseline-single-file.html')));
+/* the sections composed, not the built file: a declaration is a claim about
+   what a section now says, and the build checks that claim against the bundle.
+   Reading dist/ here made the transcriber depend on the tool that checks it. */
+const bunStmts = statementsOf(composeBundle().js);
+const find = (arr, marker) => arr.filter(s => s.text.includes(marker));
+
+const changes = [];
+const problems = [];
+for (const e of EDITS) {
+  const was = e.addition ? [] : find(refStmts, e.marker);
+  const now = find(bunStmts, e.marker);
+  if (!e.addition && !was.length) { problems.push('not in the reference: ' + e.marker); continue; }
+  if (!now.length) { problems.push('not in the bundle: ' + e.marker); continue; }
+  if (!e.all && (was.length > 1 || now.length > 1)) {
+    problems.push('ambiguous marker, ' + was.length + '/' + now.length + ' matches: ' + e.marker);
+    continue;
+  }
+  changes.push({ name: e.name, why: e.why, was: was.map(s => s.text), now: now.map(s => s.text) });
+}
+if (problems.length) {
+  console.log('DECLARED CHANGES CANNOT BE BUILT:');
+  problems.forEach(p => console.log('  ' + p));
+  process.exit(1);
+}
+fs.writeFileSync(ROOT + '/packages/changes.json', JSON.stringify(changes, null, 1));
+/* one copy now: the packages/ file IS the declaration, and bundle.mjs reads it */
+console.log('declared changes  : ' + changes.length);
+for (const c of changes) console.log('  - ' + c.name);

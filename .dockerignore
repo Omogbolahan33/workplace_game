@@ -1,0 +1,14 @@
+# everything that is not part of a build
+node_modules
+**/node_modules
+.next
+**/.next
+**/.next-gate
+dist
+.harness
+tools/node_modules
+ledger-app.zip
+FEATURES.md
+MIGRATION.md
+reference
+.git

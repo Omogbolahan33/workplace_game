@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "types": []
+  },
+  "include": [
+    "index.js", "registry.js", "modules/*.js",
+    "index.d.ts", "dom-extras.d.ts",
+    "../core/core.js", "../core/host.js",
+    "../core/tables/*.ts", "../core/tables-globals.d.ts"
+  ]
+}

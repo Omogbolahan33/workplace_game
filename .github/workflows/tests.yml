@@ -1,0 +1,150 @@
+# Everything this repository claims, on every push.
+#
+# The deliverables are a single HTML file *composed* out of packages, a React app
+# around the same game, and two native shells that carry it. Every rule about
+# them is enforced by a test rather than by review — a statement ledger, declared
+# changes, typed tables, three typechecks, and four browser walks. A test nobody
+# runs is a comment, so they run here.
+#
+# The jobs are split so a failure names the layer:
+#
+#   build        composes the file, syncs every payload, uploads the artifacts
+#   unit         one function at a time, no DOM, no browser — the fast layer
+#   integration  real modules together, and the build's own contracts
+#   e2e          a player's journey in Chromium, and the design measured at 390px
+#   gates        the invariant suite: 41 gates that make drift impossible
+#
+# `unit` runs on Node 20 and 22 because it is where a language-level surprise
+# would show up first and it costs seconds. The browser jobs stay on one version:
+# Chromium is pinned to the playwright release either way.
+name: tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  # every job needs the transcriber's dependencies and the harness's
+  NODE_OPTIONS: --max-old-space-size=4096
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: npm, cache-dependency-path: '**/package-lock.json' }
+      - run: npm install
+      - run: npm install --prefix tools
+      - run: sudo apt-get update && sudo apt-get install -y zip
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ledger-single-file
+          path: |
+            ledger-app.zip
+            dist/index.html
+            LEDGER-faces.html
+          if-no-files-found: error
+          retention-days: 14
+
+  unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['20', '22']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '${{ matrix.node }}', cache: npm, cache-dependency-path: '**/package-lock.json' }
+      - run: npm install
+      - run: npm install --prefix tools
+      - run: npm run test:unit
+
+  integration:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: npm, cache-dependency-path: '**/package-lock.json' }
+      - run: npm install
+      - run: npm install --prefix tools
+      # the integration tests check the payloads and the zip, so the build has to
+      # have happened here rather than trusting the artifact: they assert the
+      # files in the tree, and a downloaded zip is not the same claim
+      - run: sudo apt-get update && sudo apt-get install -y zip
+      - run: npm run build
+      - run: npm run test:integration
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: npm, cache-dependency-path: '**/package-lock.json' }
+      - run: npm install
+      - run: npm install --prefix tools
+      - run: npm install --prefix .harness
+      - name: Cache the browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+        working-directory: .harness
+      - run: sudo apt-get update && sudo apt-get install -y zip
+      - run: npm run build
+      - run: npm run test:e2e
+      # a failed layout test writes the picture it failed on
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: e2e-artifacts
+          path: tests/artifacts/
+          retention-days: 7
+
+  gates:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20', cache: npm, cache-dependency-path: '**/package-lock.json' }
+      - run: npm install
+      - run: npm install --prefix tools
+      - run: npm install --prefix .harness
+      - name: Cache the browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+        working-directory: .harness
+      - run: sudo apt-get update && sudo apt-get install -y zip
+      - run: npm run build
+      - run: npm run test:gates
+
+  # one line to look at: did everything this repository claims survive the push
+  summary:
+    if: always()
+    needs: [build, unit, integration, e2e, gates]
+    runs-on: ubuntu-latest
+    steps:
+      - name: What ran
+        run: |
+          echo "build       ${{ needs.build.result }}"
+          echo "unit        ${{ needs.unit.result }}"
+          echo "integration ${{ needs.integration.result }}"
+          echo "e2e         ${{ needs.e2e.result }}"
+          echo "gates       ${{ needs.gates.result }}"
+      - name: Fail if anything failed
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

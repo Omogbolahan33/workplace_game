@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "lib": [
+      "es2022",
+      "dom",
+      "dom.iterable"
+    ],
+    "types": [],
+    "incremental": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "../../packages/core/core.js",
+    "../../packages/core/tables-globals.d.ts",
+    "../../packages/core/tables/*.ts",
+    ".next/gate/types/**/*.ts",
+    ".next/types/**/*.ts",
+    "app/**/*.js",
+    "app/**/*.jsx",
+    "screens/**/*.jsx",
+    "shell/**/*.jsx",
+    ".next/gate/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

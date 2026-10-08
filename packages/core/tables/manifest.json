@@ -1,0 +1,344 @@
+[
+  {
+    "name": "R",
+    "section": "00-cities.js",
+    "type": "RShape",
+    "chars": 970
+  },
+  {
+    "name": "TRAITS",
+    "section": "00-cities.js",
+    "type": "TRAITSShape[]",
+    "chars": 1091
+  },
+  {
+    "name": "LAST",
+    "section": "00-cities.js",
+    "type": "string[]",
+    "chars": 290
+  },
+  {
+    "name": "FIRST",
+    "section": "00-cities.js",
+    "type": "string[]",
+    "chars": 258
+  },
+  {
+    "name": "BIZ",
+    "section": "00-cities.js",
+    "type": "BIZShape[]",
+    "chars": 3270
+  },
+  {
+    "name": "GOODS",
+    "section": "00-cities.js",
+    "type": "GOODSShape9[]",
+    "chars": 1810
+  },
+  {
+    "name": "ASSETS",
+    "section": "00-cities.js",
+    "type": "ASSETSShape[]",
+    "chars": 2185
+  },
+  {
+    "name": "PROFILES",
+    "section": "00-cities.js",
+    "type": "PROFILESShape3[]",
+    "chars": 2106
+  },
+  {
+    "name": "CITIES",
+    "section": "00-cities.js",
+    "type": "CITIESShape[]",
+    "chars": 839
+  },
+  {
+    "name": "POLICY_EVENTS",
+    "section": "01-game-state.js",
+    "type": "POLICY_EVENTSShape[]",
+    "chars": 3123
+  },
+  {
+    "name": "DIFFS",
+    "section": "01-game-state.js",
+    "type": "DIFFSShape4",
+    "chars": 2253
+  },
+  {
+    "name": "CAREER",
+    "section": "02-derived-state-personal-finance-career.js",
+    "type": "CAREERShape[]",
+    "chars": 7134
+  },
+  {
+    "name": "LEVER_KINDS",
+    "section": "03-startbizcost-one-price-for-every-picker.js",
+    "type": "LEVER_KINDSShape2",
+    "chars": 1591
+  },
+  {
+    "name": "EDU",
+    "section": "03-startbizcost-one-price-for-every-picker.js",
+    "type": "EDUShape",
+    "chars": 101
+  },
+  {
+    "name": "HOUSE_PERKS",
+    "section": "04-bizcapacity.js",
+    "type": "HOUSE_PERKSShape2",
+    "chars": 708
+  },
+  {
+    "name": "HOUSE_ROLES",
+    "section": "04-bizcapacity.js",
+    "type": "HOUSE_ROLESShape19",
+    "chars": 2134
+  },
+  {
+    "name": "STAFF_ROLES",
+    "section": "04-bizcapacity.js",
+    "type": "STAFF_ROLESShape2",
+    "chars": 445
+  },
+  {
+    "name": "BIZ_STAGES",
+    "section": "04-bizcapacity.js",
+    "type": "BIZ_STAGESShape2",
+    "chars": 587
+  },
+  {
+    "name": "LIFE_EVENTS",
+    "section": "05-investments-goods.js",
+    "type": "LIFE_EVENTSShape96[]",
+    "chars": 24086
+  },
+  {
+    "name": "BIZ_EVENTS",
+    "section": "06-events-business-deck.js",
+    "type": "BIZ_EVENTSShape61[]",
+    "chars": 15647
+  },
+  {
+    "name": "MORE_EVENTS",
+    "section": "07-events-life-deck.js",
+    "type": "MORE_EVENTSShape112[]",
+    "chars": 46565
+  },
+  {
+    "name": "GOV_EVENTS",
+    "section": "08-events-reactive-to-people.js",
+    "type": "GOV_EVENTSShape3[]",
+    "chars": 39140
+  },
+  {
+    "name": "SEASON_AXES",
+    "section": "09-resolving-decisions.js",
+    "type": "SEASON_AXESShape[]",
+    "chars": 776
+  },
+  {
+    "name": "PRINCIPLES",
+    "section": "09-resolving-decisions.js",
+    "type": "PRINCIPLESShape",
+    "chars": 4992
+  },
+  {
+    "name": "SUBS",
+    "section": "11-cloudpull.js",
+    "type": "SUBSShape2",
+    "chars": 948
+  },
+  {
+    "name": "TABS",
+    "section": "11-cloudpull.js",
+    "type": "TABSShape[]",
+    "chars": 200
+  },
+  {
+    "name": "ROUTE_WHY",
+    "section": "12-main.js",
+    "type": "ROUTE_WHYShape",
+    "chars": 3078
+  },
+  {
+    "name": "ROUTE_GROUPS",
+    "section": "13-route-why-and-the-screen-hint.js",
+    "type": "ROUTE_GROUPSShape4",
+    "chars": 3924
+  },
+  {
+    "name": "BUDGET_KEYS",
+    "section": "14-quartersnapshot.js",
+    "type": "string[][]",
+    "chars": 629
+  },
+  {
+    "name": "FAVOURS",
+    "section": "16-era-chip.js",
+    "type": "FAVOURSShape2",
+    "chars": 4820
+  },
+  {
+    "name": "ERA_TONE",
+    "section": "16-era-chip.js",
+    "type": "ERA_TONEShape",
+    "chars": 139
+  },
+  {
+    "name": "NEG_TERM_POOL",
+    "section": "17-negotiation.js",
+    "type": "NEG_TERM_POOLShape[]",
+    "chars": 1046
+  },
+  {
+    "name": "NEG_TACTICS",
+    "section": "17-negotiation.js",
+    "type": "NEG_TACTICSShape[]",
+    "chars": 1367
+  },
+  {
+    "name": "CONTRACT_CLIENTS",
+    "section": "18-contracts-and-fulfilment.js",
+    "type": "string[]",
+    "chars": 319
+  },
+  {
+    "name": "CONTRACT_KINDS",
+    "section": "18-contracts-and-fulfilment.js",
+    "type": "CONTRACT_KINDSShape[]",
+    "chars": 484
+  },
+  {
+    "name": "NOTIF_TIERS",
+    "section": "19-what-next-agenda.js",
+    "type": "NOTIF_TIERSShape[]",
+    "chars": 215
+  },
+  {
+    "name": "NEXT_DEST",
+    "section": "19-what-next-agenda.js",
+    "type": "NEXT_DESTShape2",
+    "chars": 1210
+  },
+  {
+    "name": "MASKS",
+    "section": "24-seadraftcode.js",
+    "type": "((a0: any, a1: any) => boolean)[]",
+    "chars": 331
+  },
+  {
+    "name": "QR_M",
+    "section": "24-seadraftcode.js",
+    "type": "Array<null | QR_MShape | QR_MShape2>",
+    "chars": 309
+  },
+  {
+    "name": "SEED_N",
+    "section": "24-seadraftcode.js",
+    "type": "string[]",
+    "chars": 94
+  },
+  {
+    "name": "SEED_A",
+    "section": "24-seadraftcode.js",
+    "type": "string[]",
+    "chars": 93
+  },
+  {
+    "name": "BID_BUYERS",
+    "section": "26-governance-register-board.js",
+    "type": "BID_BUYERSShape[]",
+    "chars": 797
+  },
+  {
+    "name": "LOBBY_MODES",
+    "section": "26-governance-register-board.js",
+    "type": "LOBBY_MODESShape2",
+    "chars": 831
+  },
+  {
+    "name": "RES_KINDS",
+    "section": "26-governance-register-board.js",
+    "type": "RES_KINDSShape2",
+    "chars": 2107
+  },
+  {
+    "name": "BOARD_ARCHETYPES",
+    "section": "26-governance-register-board.js",
+    "type": "BOARD_ARCHETYPESShape[]",
+    "chars": 2823
+  },
+  {
+    "name": "GOV_SUBS",
+    "section": "27-the-pa-and-the-numbers.js",
+    "type": "GOV_SUBSShape[]",
+    "chars": 228
+  },
+  {
+    "name": "COVENANT_KINDS",
+    "section": "28-votes-and-decisions.js",
+    "type": "COVENANT_KINDSShape2",
+    "chars": 823
+  },
+  {
+    "name": "SECTOR_MULT",
+    "section": "28-votes-and-decisions.js",
+    "type": "SECTOR_MULTShape",
+    "chars": 172
+  },
+  {
+    "name": "ROLE_POOL",
+    "section": "29-the-cast-who-remembers.js",
+    "type": "Array<Array<string | number>>",
+    "chars": 177
+  },
+  {
+    "name": "CAST_TRAITS",
+    "section": "29-the-cast-who-remembers.js",
+    "type": "string[]",
+    "chars": 185
+  },
+  {
+    "name": "ROLES",
+    "section": "29-the-cast-who-remembers.js",
+    "type": "ROLESShape2",
+    "chars": 1073
+  },
+  {
+    "name": "ARCS",
+    "section": "30-eras-you-live-through.js",
+    "type": "ARCSShape5",
+    "chars": 132067
+  },
+  {
+    "name": "ERAS",
+    "section": "30-eras-you-live-through.js",
+    "type": "ERASShape4[]",
+    "chars": 1535
+  },
+  {
+    "name": "SWANS",
+    "section": "31-afterthreadchoice.js",
+    "type": "SWANSShape[]",
+    "chars": 3168
+  },
+  {
+    "name": "RIVAL_NAMES",
+    "section": "31-afterthreadchoice.js",
+    "type": "string[]",
+    "chars": 133
+  },
+  {
+    "name": "AMBITIONS",
+    "section": "31-afterthreadchoice.js",
+    "type": "AMBITIONSShape[]",
+    "chars": 1868
+  },
+  {
+    "name": "DEAL_TYPES",
+    "section": "31-afterthreadchoice.js",
+    "type": "DEAL_TYPESShape[]",
+    "chars": 3042
+  }
+]

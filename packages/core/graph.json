@@ -1,0 +1,352 @@
+{
+ "00-cities.js": {
+  "needs": [
+   "01-game-state.js: S"
+  ],
+  "externals": []
+ },
+ "01-game-state.js": {
+  "needs": [
+   "10-ensureprofile.js: computeTune, ensureProfile, skillRating",
+   "02-derived-state-personal-finance-career.js: log, needs, recompute",
+   "00-cities.js: clamp, fmt, pct",
+   "29-the-cast-who-remembers.js: buildCast",
+   "30-eras-you-live-through.js: eraFx, initEra",
+   "31-afterthreadchoice.js: genRival, refreshDeals",
+   "22-everyday-life-vignette.js: makeVignette",
+   "04-bizcapacity.js: genCandidate",
+   "09-resolving-decisions.js: snapshot",
+   "host-shims.js: save"
+  ],
+  "externals": []
+ },
+ "02-derived-state-personal-finance-career.js": {
+  "needs": [
+   "01-game-state.js: D, S, TX",
+   "00-cities.js: clamp, dateLabel, esc, fmt, pct",
+   "03-startbizcost-one-price-for-every-picker.js: bizList, marketMonthly, outletAvgCond",
+   "04-bizcapacity.js: houseMonthlyYou, houseTimeBoost, staffSupport",
+   "host-shims.js: toast"
+  ],
+  "externals": []
+ },
+ "03-startbizcost-one-price-for-every-picker.js": {
+  "needs": [
+   "01-game-state.js: S",
+   "02-derived-state-personal-finance-career.js: CITY, log, recompute",
+   "04-bizcapacity.js: houseMonthlyBiz",
+   "00-cities.js: clamp, esc, fmt",
+   "26-governance-register-board.js: addHolder, ensureGov, formBoard, grantPct",
+   "host-shims.js: render, toast",
+   "28-votes-and-decisions.js: confirmBox"
+  ],
+  "externals": []
+ },
+ "04-bizcapacity.js": {
+  "needs": [
+   "03-startbizcost-one-price-for-every-picker.js: allocateOutlets, bizById, bizList, channelCut, channelDemandMult, closeBiz, commitNew, companyCulture, connBonus, leverActive, marketSalary, outletAvgCond, outletCount, outletRent, outletScale, ownerTime, shiftCapMult, shiftWageMult, staffCover, staffMonthly, staffProd, startBizCost, stepCommitments, stepOutlets, supplyCogsMult, theftRate, traitOf",
+   "01-game-state.js: D, S, UI, pushNews",
+   "26-governance-register-board.js: addHolder, boardSkill, buyoutExternal, doBuyoutExternal, ensureGov, extHolders, issueTo, totalShares",
+   "00-cities.js: clamp, esc, fmt, pct",
+   "02-derived-state-personal-finance-career.js: CITY, log, tx",
+   "18-contracts-and-fulfilment.js: contractCost, contractRevenue, stepContracts",
+   "host-shims.js: render, toast",
+   "28-votes-and-decisions.js: confirmBox"
+  ],
+  "externals": []
+ },
+ "05-investments-goods.js": {
+  "needs": [
+   "host-shims.js: toast",
+   "00-cities.js: clamp, fmt, pct",
+   "01-game-state.js: S",
+   "02-derived-state-personal-finance-career.js: CITY, log, recompute, tx",
+   "30-eras-you-live-through.js: eraFx"
+  ],
+  "externals": []
+ },
+ "06-events-business-deck.js": {
+  "needs": [],
+  "externals": []
+ },
+ "07-events-life-deck.js": {
+  "needs": [],
+  "externals": []
+ },
+ "08-events-reactive-to-people.js": {
+  "needs": [
+   "26-governance-register-board.js: boardOf, extHolders"
+  ],
+  "externals": []
+ },
+ "09-resolving-decisions.js": {
+  "needs": [
+   "00-cities.js: START_YEAR, clamp, dateLabel, fmt",
+   "01-game-state.js: D, S, TX, UI, stepMarket",
+   "05-investments-goods.js: applyEff, flushPending, stepAssets",
+   "02-derived-state-personal-finance-career.js: bizValue, budgetMonthly, debtTotal, freedomIndex, log, netWorth, recompute, stepPersonal, tx",
+   "08-events-reactive-to-people.js: ALL_EVENTS",
+   "host-shims.js: cloudSyncBackground, render, renderThreadStage, save, toast",
+   "30-eras-you-live-through.js: dueThread, maybeStartArc, stepEra",
+   "31-afterthreadchoice.js: maybeSwan, refreshDeals, resolveDeals, stepRival",
+   "04-bizcapacity.js: genCandidate, genPartnerOffer, simBusiness, stepHouse",
+   "26-governance-register-board.js: stepGovernance",
+   "28-votes-and-decisions.js: stepGroup",
+   "22-everyday-life-vignette.js: makeVignette",
+   "29-the-cast-who-remembers.js: stepCast",
+   "18-contracts-and-fulfilment.js: refreshContractOffers",
+   "10a-cloud-api.js: seasonSubmit",
+   "10-ensureprofile.js: appendRun, captureRun"
+  ],
+  "externals": []
+ },
+ "10-ensureprofile.js": {
+  "needs": [
+   "09-resolving-decisions.js: MAX_RUNS, PROF, blankProfile, finalReport",
+   "host-shims.js: loadProfile, saveProfile, toast",
+   "00-cities.js: clamp",
+   "02-derived-state-personal-finance-career.js: recompute",
+   "01-game-state.js: S",
+   "03-startbizcost-one-price-for-every-picker.js: bizList"
+  ],
+  "externals": []
+ },
+ "10a-cloud-api.js": {
+  "needs": [
+   "host-shims.js: Q, fetch, render, saveProfile, toast",
+   "01-game-state.js: S, UI",
+   "09-resolving-decisions.js: PROF, scoreRun",
+   "10-ensureprofile.js: ensureProfile, mergeProfiles"
+  ],
+  "externals": []
+ },
+ "11-profilesummary-and-strings.js": {
+  "needs": [
+   "10-ensureprofile.js: ensureProfile, skillBand, skillRating",
+   "01-game-state.js: S",
+   "02-derived-state-personal-finance-career.js: recompute",
+   "host-shims.js: render, toast",
+   "00-cities.js: esc"
+  ],
+  "externals": []
+ },
+ "12-main.js": {
+  "needs": [
+   "01-game-state.js: S, UI",
+   "11-profilesummary-and-strings.js: subsFor",
+   "00-cities.js: esc"
+  ],
+  "externals": []
+ },
+ "13-route-why-and-the-screen-hint.js": {
+  "needs": [
+   "12-main.js: routeKey, whyHTML",
+   "01-game-state.js: S, UI",
+   "host-shims.js: viewAgenda, viewBiz, viewCareer, viewCareerRecord, viewCommitments, viewContracts, viewDeals, viewEngine, viewGovernance, viewGroup, viewHousehold, viewInvestMarkets, viewInvestPortfolio, viewLedgerChronicle, viewLedgerSettings, viewLegacy, viewLevers, viewLife, viewMoneyBudget, viewMoneyPosition, viewMoneyProperty, viewOutlets, viewOverview, viewPeople, viewRival, viewSeason, viewStaffDeep, viewWorkingCapital",
+   "18-contracts-and-fulfilment.js: portfolioBar",
+   "09-resolving-decisions.js: scoreRun, seasonStatus",
+   "00-cities.js: bar, esc"
+  ],
+  "externals": []
+ },
+ "14-quartersnapshot.js": {
+  "needs": [
+   "01-game-state.js: S, UI",
+   "02-derived-state-personal-finance-career.js: netWorth",
+   "00-cities.js: bar, dateLabel, esc, fmt",
+   "22-everyday-life-vignette.js: modalHTML",
+   "28-votes-and-decisions.js: govDot"
+  ],
+  "externals": []
+ },
+ "15-burn-runway-and-risk.js": {
+  "needs": [
+   "02-derived-state-personal-finance-career.js: budgetMonthly, debtTotal, goodsUpkeep, netWorth, passiveMonthly, salaryMonthly",
+   "01-game-state.js: S",
+   "00-cities.js: esc, fmt, pct",
+   "28-votes-and-decisions.js: covenantBreaches, lastQ",
+   "26-governance-register-board.js: openResolutions",
+   "11-profilesummary-and-strings.js: bigStat"
+  ],
+  "externals": []
+ },
+ "16-era-chip.js": {
+  "needs": [
+   "01-game-state.js: S, UI",
+   "30-eras-you-live-through.js: eraById",
+   "00-cities.js: dateLabel, esc, foldHTML",
+   "29-the-cast-who-remembers.js: castOf"
+  ],
+  "externals": []
+ },
+ "17-negotiation.js": {
+  "needs": [
+   "00-cities.js: clamp, esc, fmt",
+   "01-game-state.js: S, UI",
+   "host-shims.js: render",
+   "22-everyday-life-vignette.js: modalHTML"
+  ],
+  "externals": []
+ },
+ "18-contracts-and-fulfilment.js": {
+  "needs": [
+   "01-game-state.js: S",
+   "02-derived-state-personal-finance-career.js: CITY, bizValueTotal, log",
+   "00-cities.js: clamp, esc, fmt, foldHTML, pct",
+   "03-startbizcost-one-price-for-every-picker.js: bizById, bizList, marketSalary, outletCount, staffCover, startBizCost",
+   "17-negotiation.js: startNego",
+   "26-governance-register-board.js: ensureGov, freeSeats, openResolutions",
+   "22-everyday-life-vignette.js: modalHTML",
+   "04-bizcapacity.js: hasGM, houseSalaryFor, outletStaff"
+  ],
+  "externals": []
+ },
+ "19-what-next-agenda.js": {
+  "needs": [
+   "11-profilesummary-and-strings.js: subsFor",
+   "18-contracts-and-fulfilment.js: agendaItems",
+   "01-game-state.js: S, UI",
+   "26-governance-register-board.js: boardOf, extHolders, openResolutions, seatEntitlement",
+   "02-derived-state-personal-finance-career.js: hoursBudget, hoursLeft",
+   "00-cities.js: esc, fmt",
+   "04-bizcapacity.js: cccOf, houseMonthly, houseMonthlyYou, housePerkCost, priceBand",
+   "03-startbizcost-one-price-for-every-picker.js: bizById, commitBreak, commitDropCost, leverActive, leverOf, leverPending, marketSalary, supplyOverpay",
+   "30-eras-you-live-through.js: eraById",
+   "16-era-chip.js: eraFxLine, eraLeft"
+  ],
+  "externals": []
+ },
+ "20-runinfomodal.js": {
+  "needs": [
+   "10-ensureprofile.js: ensureProfile",
+   "22-everyday-life-vignette.js: modalHTML",
+   "00-cities.js: esc, fmt"
+  ],
+  "externals": []
+ },
+ "20a-profile-and-cloud-modal.js": {
+  "needs": [
+   "10-ensureprofile.js: ensureProfile",
+   "11-profilesummary-and-strings.js: profileSummary",
+   "00-cities.js: esc",
+   "10a-cloud-api.js: CLOUD_SQL, cloudCfg, cloudReady",
+   "22-everyday-life-vignette.js: modalHTML"
+  ],
+  "externals": []
+ },
+ "21-property-and-rent.js": {
+  "needs": [
+   "02-derived-state-personal-finance-career.js: freedomIndex, netWorth",
+   "00-cities.js: bar, dateLabel, esc, fmt",
+   "01-game-state.js: S",
+   "30-eras-you-live-through.js: eraById",
+   "31-afterthreadchoice.js: ambitionOf, ambitionPct",
+   "22-everyday-life-vignette.js: modalHTML",
+   "host-shims.js: buildStampInfo"
+  ],
+  "externals": []
+ },
+ "22-everyday-life-vignette.js": {
+  "needs": [
+   "01-game-state.js: S"
+  ],
+  "externals": []
+ },
+ "23-startmodal.js": {
+  "needs": [
+   "00-cities.js: START_YEAR, dateLabel, esc, fmt",
+   "23a-progress-and-onboarding.js: SAVE, agoLabel, resumeInfo",
+   "25-seasonrowhtml.js: M_city, M_diff, M_name, M_prof, seasonRowHTML",
+   "01-game-state.js: DRAWS, tierLockNote, tierUnlocked",
+   "22-everyday-life-vignette.js: modalHTML",
+   "host-shims.js: location"
+  ],
+  "externals": []
+ },
+ "23a-progress-and-onboarding.js": {
+  "needs": [
+   "01-game-state.js: S",
+   "00-cities.js: dateLabel, esc, fmt",
+   "10a-cloud-api.js: cloudCfg, cloudReady",
+   "11-profilesummary-and-strings.js: profileSummary"
+  ],
+  "externals": []
+ },
+ "24-seadraftcode.js": {
+  "needs": [
+   "23-startmodal.js: _sea, seaCode"
+  ],
+  "externals": []
+ },
+ "25-seasonrowhtml.js": {
+  "needs": [
+   "23-startmodal.js: _cfg, _sea, seaCity, seaDifficulty, seaPins, seaProfile, seasonLink",
+   "09-resolving-decisions.js: finalReport, seasonTurnFor",
+   "00-cities.js: START_YEAR, esc, fmt, foldHTML",
+   "24-seadraftcode.js: qrSVG, seaDraftCode, seedName, seedOffers",
+   "22-everyday-life-vignette.js: modalHTML",
+   "host-shims.js: seasonCanScan",
+   "01-game-state.js: S, tierLockNote, tierUnlocked",
+   "02-derived-state-personal-finance-career.js: freedomIndex, netWorth",
+   "13-route-why-and-the-screen-hint.js: scoreBlock",
+   "10-ensureprofile.js: ensureProfile"
+  ],
+  "externals": []
+ },
+ "26-governance-register-board.js": {
+  "needs": [
+   "01-game-state.js: S, UI",
+   "00-cities.js: clamp, dateLabel, fmt, pct",
+   "02-derived-state-personal-finance-career.js: bizValue, log",
+   "28-votes-and-decisions.js: facilityPackage, planGrade, planVariance, topUpPool, vestedOptions",
+   "03-startbizcost-one-price-for-every-picker.js: bizList, closeBiz, dropBiz, marketSalary",
+   "host-shims.js: render",
+   "04-bizcapacity.js: formalizeBiz, genCandidate"
+  ],
+  "externals": []
+ },
+ "27-the-pa-and-the-numbers.js": {
+  "needs": [
+   "00-cities.js: esc, fmt, pct"
+  ],
+  "externals": []
+ },
+ "28-votes-and-decisions.js": {
+  "needs": [
+   "01-game-state.js: S, UI",
+   "03-startbizcost-one-price-for-every-picker.js: bizById, bizList",
+   "00-cities.js: clamp, esc, fmt, pct",
+   "26-governance-register-board.js: addHolder, ensureGov, extHolders, grantPct, holderById, holderPct, liquidationWaterfall, openResolutions, resMeta, syncCapTable, totalShares, yourPct",
+   "02-derived-state-personal-finance-career.js: bizValue, log",
+   "host-shims.js: render"
+  ],
+  "externals": []
+ },
+ "29-the-cast-who-remembers.js": {
+  "needs": [
+   "01-game-state.js: S",
+   "00-cities.js: clamp, dateLabel, esc",
+   "02-derived-state-personal-finance-career.js: log"
+  ],
+  "externals": []
+ },
+ "30-eras-you-live-through.js": {
+  "needs": [
+   "01-game-state.js: S, pushNews",
+   "02-derived-state-personal-finance-career.js: log",
+   "29-the-cast-who-remembers.js: castByRole, castOf, pickInstigator",
+   "03-startbizcost-one-price-for-every-picker.js: dropBiz"
+  ],
+  "externals": []
+ },
+ "31-afterthreadchoice.js": {
+  "needs": [
+   "29-the-cast-who-remembers.js: castOf, pickInstigator, relate",
+   "01-game-state.js: D, S, pushNews",
+   "02-derived-state-personal-finance-career.js: log, netWorth",
+   "00-cities.js: clamp, fmt",
+   "host-shims.js: toast"
+  ],
+  "externals": []
+ }
+}

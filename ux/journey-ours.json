@@ -1,0 +1,239 @@
+{
+ "url": "http://127.0.0.1:8080/index.html",
+ "viewport": "390×844",
+ "fixture": "name Tunde · Lagos · Fresh Graduate · Realistic · default seed, no season",
+ "total_taps": 48,
+ "seconds_to_first_quarter": 2.6,
+ "taps_to_first_quarter": 3,
+ "taps_to_first_commitment": 5,
+ "taps_per_quarter_steady": 2.83,
+ "interruptions_per_quarter": 1.83,
+ "what_interrupts": [
+  "Closing the quarter",
+  "Your father’s blood pressure is not a jo",
+  "The pledge card",
+  "A business plan, sort of"
+ ],
+ "at_q1_on_deals": {
+  "live": 11,
+  "dead": 1,
+  "deadSample": [
+   "takedeal"
+  ]
+ },
+ "first_commitment": "FIRST COMMITMENT: refused — the control is disabled",
+ "destination_costs": [
+  {
+   "destination": "Money › Budget",
+   "taps": 2,
+   "reached": true
+  },
+  {
+   "destination": "Money › Position",
+   "taps": 2,
+   "reached": true
+  },
+  {
+   "destination": "Money › Markets",
+   "taps": 2,
+   "reached": true
+  },
+  {
+   "destination": "Money › Property",
+   "taps": 2,
+   "reached": true
+  },
+  {
+   "destination": "Money › Group",
+   "taps": 2,
+   "reached": true
+  },
+  {
+   "destination": "Work › Business",
+   "taps": 2,
+   "reached": true
+  },
+  {
+   "destination": "Work › Household",
+   "taps": 2,
+   "reached": true
+  },
+  {
+   "destination": "Work › Rival",
+   "taps": 2,
+   "reached": true
+  },
+  {
+   "destination": "Legacy › Record",
+   "taps": 2,
+   "reached": true
+  },
+  {
+   "destination": "Legacy › Chronicle",
+   "taps": 2,
+   "reached": true
+  },
+  {
+   "destination": "Legacy › Ambition",
+   "taps": 2,
+   "reached": true
+  }
+ ],
+ "loop": [
+  {
+   "quarter": "Q2",
+   "taps": 3,
+   "interruptions": 2,
+   "what": [
+    "Closing the quarter",
+    "Your father’s blood pressure is not a jo"
+   ]
+  },
+  {
+   "quarter": "Q3",
+   "taps": 3,
+   "interruptions": 2,
+   "what": [
+    "Closing the quarter",
+    "The pledge card"
+   ]
+  },
+  {
+   "quarter": "Q4",
+   "taps": 2,
+   "interruptions": 1,
+   "what": [
+    "Closing the quarter"
+   ]
+  },
+  {
+   "quarter": "Q5",
+   "taps": 3,
+   "interruptions": 2,
+   "what": [
+    "Closing the quarter",
+    "A business plan, sort of"
+   ]
+  },
+  {
+   "quarter": "Q6",
+   "taps": 3,
+   "interruptions": 2,
+   "what": [
+    "Closing the quarter",
+    "A business plan, sort of"
+   ]
+  },
+  {
+   "quarter": "Q7",
+   "taps": 3,
+   "interruptions": 2,
+   "what": [
+    "Closing the quarter",
+    "A business plan, sort of"
+   ]
+  }
+ ],
+ "milestones": [
+  {
+   "milestone": "cold open — the deal is already on screen",
+   "taps": 0,
+   "seconds": 0.8,
+   "screen": "?",
+   "modal": "untitled",
+   "actions_on_screen": 3,
+   "next_action_offered": true,
+   "note": "zero taps: the start modal is the landing state"
+  },
+  {
+   "milestone": "step 2 of 3 — difficulty and the finish line",
+   "taps": 1,
+   "seconds": 1.2,
+   "screen": "?",
+   "modal": "untitled",
+   "actions_on_screen": 3,
+   "next_action_offered": true,
+   "note": "a player who only wants to play is two taps from it"
+  },
+  {
+   "milestone": "step 3 of 3 — the rules table",
+   "taps": 2,
+   "seconds": 1.7,
+   "screen": "?",
+   "modal": "untitled",
+   "actions_on_screen": 4,
+   "next_action_offered": true,
+   "note": "the rules are shown, not hidden: good, and reversible via Back"
+  },
+  {
+   "milestone": "Q1 2026 — the run has started",
+   "taps": 3,
+   "seconds": 2.6,
+   "screen": "Overview",
+   "modal": null,
+   "actions_on_screen": 4,
+   "next_action_offered": true,
+   "note": "the screen states the loop and offers one gold action"
+  },
+  {
+   "milestone": "Money › Deals",
+   "taps": 5,
+   "seconds": 3.5,
+   "screen": "Money › Deals",
+   "modal": null,
+   "actions_on_screen": 4,
+   "next_action_offered": true,
+   "note": "where the game’s own agenda points at Q1: \"2 deals are open\""
+  },
+  {
+   "milestone": "standing on Money › Deals at Q1",
+   "taps": 5,
+   "seconds": 3.5,
+   "screen": "Money › Deals",
+   "modal": null,
+   "actions_on_screen": 4,
+   "next_action_offered": true,
+   "note": "11 live controls, 1 disabled on this screen (takedeal)"
+  },
+  {
+   "milestone": "FIRST COMMITMENT: refused — the control is disabled",
+   "taps": 6,
+   "seconds": 3.9,
+   "screen": "Money › Deals",
+   "modal": null,
+   "actions_on_screen": 4,
+   "next_action_offered": true,
+   "note": "disabled, and its reason lives in a title tooltip: \"Needs ₦3.61m · you have ₦180k · short ₦3.43m · pass it and i…\""
+  },
+  {
+   "milestone": "Work › Career",
+   "taps": 8,
+   "seconds": 4.7,
+   "screen": "Work › Career",
+   "modal": null,
+   "actions_on_screen": 3,
+   "next_action_offered": true,
+   "note": "seven actions, each costing hours"
+  },
+  {
+   "milestone": "FIRST CAREER ACTION — spent hours, not money",
+   "taps": 9,
+   "seconds": 5.2,
+   "screen": "Work › Career",
+   "modal": null,
+   "actions_on_screen": 3,
+   "next_action_offered": true,
+   "note": "the screen says: 208 of 260 hours left"
+  },
+  {
+   "milestone": "six quarters of steady play",
+   "taps": 26,
+   "seconds": 14.8,
+   "screen": "Work › Career",
+   "modal": null,
+   "actions_on_screen": 3,
+   "next_action_offered": true,
+   "note": "what one quarter costs, over and over"
+  }
+ ]
+}

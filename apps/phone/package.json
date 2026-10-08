@@ -1,0 +1,25 @@
+{
+  "name": "@ledger/phone",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The store build: the same single file, in a native shell, with a share sheet and a splash screen.",
+  "scripts": {
+    "add:android": "cap add android",
+    "add:ios": "cap add ios",
+    "assets": "node ../../tools/native-assets.mjs",
+    "build:android": "cap sync android && cd android && ./gradlew assembleRelease",
+    "open:android": "cap open android",
+    "open:ios": "cap open ios",
+    "sync": "cap sync"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}

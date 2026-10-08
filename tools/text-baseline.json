@@ -1,0 +1,599 @@
+{
+ "at": "2026-09-23T09:04:36.668Z",
+ "early": {
+  "money/markets#viewInvestMarkets": {
+   "chars": 2566,
+   "read": 2566,
+   "controls": 13,
+   "acts": [
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy"
+   ],
+   "figures": 39,
+   "cards": 3
+  },
+  "legacy/settings#viewLedgerSettings": {
+   "chars": 1955,
+   "read": 1955,
+   "controls": 20,
+   "acts": [
+    "copyexp|Copy",
+    "import|Import from box",
+    "load|Load 1",
+    "load|Load 2",
+    "load|Load 3",
+    "restart|Abandon run",
+    "save|Save slot 1",
+    "save|Save slot 2",
+    "save|Save slot 3",
+    "setcity|Abuja",
+    "setcity|Accra",
+    "setcity|Lagos",
+    "setcity|London",
+    "setcity|Nairobi",
+    "setcity|New York",
+    "setdiff|Switch",
+    "setdiff|Switch",
+    "setdiff|Switch",
+    "showwhy|Show all tips again"
+   ],
+   "figures": 9,
+   "cards": 4
+  },
+  "legacy/people#viewPeople": {
+   "chars": 1817,
+   "read": 1817,
+   "controls": 27,
+   "acts": [
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "favour|Ask for an introduction",
+    "favour|Ask them to cover the family contributio",
+    "favour|Ask them to cover the family contributio",
+    "favour|Ask them to put in money",
+    "favour|Ask them to put in money",
+    "favour|Ask them to speak for you",
+    "favour|Ask them to work for you cheaply",
+    "favour|Ask what they are hearing",
+    "give|Send money",
+    "give|Send money",
+    "give|Send money",
+    "give|Send money",
+    "give|Send money",
+    "give|Send money",
+    "give|Send money",
+    "give|Send money",
+    "spend|Be seen (₦173k)",
+    "spend|Help family (₦216k)",
+    "spend|Private care (₦317k)"
+   ],
+   "figures": 25,
+   "cards": 3
+  },
+  "work/career#viewCareer": {
+   "chars": 1758,
+   "read": 1758,
+   "controls": 7,
+   "acts": [
+    "career|Do it",
+    "career|Do it",
+    "career|Do it",
+    "career|Do it",
+    "career|Do it",
+    "career|Do it",
+    "career|Do it"
+   ],
+   "figures": 14,
+   "cards": 4
+  },
+  "work/household#viewHousehold": {
+   "chars": 1605,
+   "read": 1605,
+   "controls": 8,
+   "acts": [
+    "houseask|Take at ₦203k/mo",
+    "houseask|Take at ₦295k/mo",
+    "houseask|Take at ₦302k/mo",
+    "houseask|Take at ₦431k/mo",
+    "housenego|Make an offer",
+    "housenego|Make an offer",
+    "housenego|Make an offer",
+    "housenego|Make an offer"
+   ],
+   "figures": 8,
+   "cards": 2
+  },
+  "money/group#viewGroup": {
+   "chars": 1531,
+   "read": 1531,
+   "controls": 0,
+   "acts": [],
+   "figures": 8,
+   "cards": 5
+  },
+  "money/deals#viewDeals": {
+   "chars": 1200,
+   "read": 1200,
+   "controls": 4,
+   "acts": [
+    "passdeal|Pass",
+    "passdeal|Pass",
+    "takedeal|Commit ₦3.32m",
+    "takedeal|Commit ₦4.60m"
+   ],
+   "figures": 4,
+   "cards": 5
+  },
+  "legacy/ambition#viewLegacy": {
+   "chars": 1127,
+   "read": 1127,
+   "controls": 7,
+   "acts": [
+    "makewill|Draw up a will",
+    "setambition|Build something that outlasts you",
+    "setambition|Build the biggest thing you can",
+    "setambition|Buy back what was lost",
+    "setambition|Clean millionaire by 40",
+    "setambition|Never need anyone again",
+    "trust|Set up a family trust"
+   ],
+   "figures": 12,
+   "cards": 4
+  },
+  "money/property#viewMoneyProperty": {
+   "chars": 1111,
+   "read": 1111,
+   "controls": 11,
+   "acts": [
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy"
+   ],
+   "figures": 45,
+   "cards": 1
+  },
+  "overview#viewOverview": {
+   "chars": 898,
+   "read": 898,
+   "controls": 1,
+   "acts": [
+    "advance|Advance to Q2 2029 ▸"
+   ],
+   "figures": 29,
+   "cards": 6
+  },
+  "money/budget#viewMoneyBudget": {
+   "chars": 855,
+   "read": 855,
+   "controls": 6,
+   "acts": [
+    "infladj|Adjust for inflation",
+    "infladj|Adjust for inflation (+44%)",
+    "preset|Balanced",
+    "preset|Invest in myself",
+    "preset|Status & family",
+    "preset|Survival mode"
+   ],
+   "figures": 15,
+   "cards": 1
+  },
+  "money/position#viewMoneyPosition": {
+   "chars": 831,
+   "read": 831,
+   "controls": 2,
+   "acts": [
+    "borrow|Bank loan",
+    "borrow|Private lender (30%/qtr)"
+   ],
+   "figures": 11,
+   "cards": 3
+  },
+  "work/life#viewLife": {
+   "chars": 695,
+   "read": 695,
+   "controls": 0,
+   "acts": [],
+   "figures": 17,
+   "cards": 4
+  },
+  "legacy/chronicle#viewLedgerChronicle": {
+   "chars": 684,
+   "read": 684,
+   "controls": 0,
+   "acts": [],
+   "figures": 7,
+   "cards": 1
+  },
+  "legacy/record#viewCareerRecord": {
+   "chars": 632,
+   "read": 632,
+   "controls": 3,
+   "acts": [
+    "goto|Save slots",
+    "profile|Profile, sync & export",
+    "profile|Sync & sign in"
+   ],
+   "figures": 2,
+   "cards": 2
+  },
+  "legacy/season#viewSeason": {
+   "chars": 335,
+   "read": 335,
+   "controls": 0,
+   "acts": [],
+   "figures": 0,
+   "cards": 1
+  },
+  "money/markets#viewInvestPortfolio": {
+   "chars": 272,
+   "read": 272,
+   "controls": 0,
+   "acts": [],
+   "figures": 2,
+   "cards": 1
+  },
+  "work/rival#viewRival": {
+   "chars": 160,
+   "read": 160,
+   "controls": 0,
+   "acts": [],
+   "figures": 2,
+   "cards": 1
+  },
+  "work/levers#viewLevers": {
+   "chars": 148,
+   "read": 148,
+   "controls": 0,
+   "acts": [],
+   "figures": 0,
+   "cards": 1
+  },
+  "governance#viewGovernance": {
+   "chars": 63,
+   "read": 63,
+   "controls": 0,
+   "acts": [],
+   "figures": 0,
+   "cards": 1
+  },
+  "governance/pack#viewGovernance": {
+   "chars": 63,
+   "read": 63,
+   "controls": 0,
+   "acts": [],
+   "figures": 0,
+   "cards": 1
+  },
+  "governance/register#viewGovernance": {
+   "chars": 63,
+   "read": 63,
+   "controls": 0,
+   "acts": [],
+   "figures": 0,
+   "cards": 1
+  }
+ },
+ "trading": {
+  "legacy/chronicle#viewLedgerChronicle": {
+   "chars": 3966,
+   "read": 3966,
+   "controls": 0,
+   "acts": [],
+   "figures": 38,
+   "cards": 1
+  },
+  "money/markets#viewInvestMarkets": {
+   "chars": 2542,
+   "read": 2542,
+   "controls": 13,
+   "acts": [
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy",
+    "buyasset|Buy"
+   ],
+   "figures": 39,
+   "cards": 3
+  },
+  "legacy/settings#viewLedgerSettings": {
+   "chars": 1955,
+   "read": 1955,
+   "controls": 20,
+   "acts": [
+    "copyexp|Copy",
+    "import|Import from box",
+    "load|Load 1",
+    "load|Load 2",
+    "load|Load 3",
+    "restart|Abandon run",
+    "save|Save slot 1",
+    "save|Save slot 2",
+    "save|Save slot 3",
+    "setcity|Abuja",
+    "setcity|Accra",
+    "setcity|Lagos",
+    "setcity|London",
+    "setcity|Nairobi",
+    "setcity|New York",
+    "setdiff|Switch",
+    "setdiff|Switch",
+    "setdiff|Switch",
+    "showwhy|Show all tips again"
+   ],
+   "figures": 9,
+   "cards": 4
+  },
+  "legacy/people#viewPeople": {
+   "chars": 1813,
+   "read": 1813,
+   "controls": 27,
+   "acts": [
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "cutoff|Let it lapse",
+    "favour|Ask for an introduction",
+    "favour|Ask them to cover the family contributio",
+    "favour|Ask them to cover the family contributio",
+    "favour|Ask them to put in money",
+    "favour|Ask them to put in money",
+    "favour|Ask them to speak for you",
+    "favour|Ask them to work for you cheaply",
+    "favour|Ask what they are hearing",
+    "give|Send money",
+    "give|Send money",
+    "give|Send money",
+    "give|Send money",
+    "give|Send money",
+    "give|Send money",
+    "give|Send money",
+    "give|Send money",
+    "spend|Be seen (₦864k)",
+    "spend|Help family (₦1.08m)",
+    "spend|Private care (₦1.58m)"
+   ],
+   "figures": 25,
+   "cards": 3
+  },
+  "work/career#viewCareer": {
+   "chars": 1760,
+   "read": 1760,
+   "controls": 7,
+   "acts": [
+    "career|Do it",
+    "career|Do it",
+    "career|Do it",
+    "career|Do it",
+    "career|Do it",
+    "career|Do it",
+    "career|Do it"
+   ],
+   "figures": 14,
+   "cards": 4
+  },
+  "work/household#viewHousehold": {
+   "chars": 1537,
+   "read": 1537,
+   "controls": 8,
+   "acts": [
+    "houseask|Take at ₦1.05m/mo",
+    "houseask|Take at ₦1.30m/mo",
+    "houseask|Take at ₦2.74m/mo",
+    "houseask|Take at ₦792k/mo",
+    "housenego|Make an offer",
+    "housenego|Make an offer",
+    "housenego|Make an offer",
+    "housenego|Make an offer"
+   ],
+   "figures": 9,
+   "cards": 2
+  },
+  "money/group#viewGroup": {
+   "chars": 1531,
+   "read": 1531,
+   "controls": 0,
+   "acts": [],
+   "figures": 8,
+   "cards": 5
+  },
+  "money/deals#viewDeals": {
+   "chars": 1184,
+   "read": 1184,
+   "controls": 4,
+   "acts": [
+    "passdeal|Pass",
+    "passdeal|Pass",
+    "takedeal|Commit ₦45.75m",
+    "takedeal|Commit ₦51.85m"
+   ],
+   "figures": 4,
+   "cards": 5
+  },
+  "legacy/ambition#viewLegacy": {
+   "chars": 1128,
+   "read": 1128,
+   "controls": 7,
+   "acts": [
+    "makewill|Draw up a will",
+    "setambition|Build something that outlasts you",
+    "setambition|Build the biggest thing you can",
+    "setambition|Buy back what was lost",
+    "setambition|Clean millionaire by 40",
+    "setambition|Never need anyone again",
+    "trust|Set up a family trust"
+   ],
+   "figures": 12,
+   "cards": 4
+  },
+  "money/property#viewMoneyProperty": {
+   "chars": 1113,
+   "read": 1113,
+   "controls": 11,
+   "acts": [
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy",
+    "buygood|Buy"
+   ],
+   "figures": 45,
+   "cards": 1
+  },
+  "work/life#viewLife": {
+   "chars": 949,
+   "read": 949,
+   "controls": 0,
+   "acts": [],
+   "figures": 19,
+   "cards": 4
+  },
+  "overview#viewOverview": {
+   "chars": 878,
+   "read": 878,
+   "controls": 1,
+   "acts": [
+    "advance|Advance to Q2 2036 ▸"
+   ],
+   "figures": 29,
+   "cards": 6
+  },
+  "money/budget#viewMoneyBudget": {
+   "chars": 864,
+   "read": 864,
+   "controls": 6,
+   "acts": [
+    "infladj|Adjust for inflation",
+    "infladj|Adjust for inflation (+620%)",
+    "preset|Balanced",
+    "preset|Invest in myself",
+    "preset|Status & family",
+    "preset|Survival mode"
+   ],
+   "figures": 15,
+   "cards": 1
+  },
+  "money/position#viewMoneyPosition": {
+   "chars": 837,
+   "read": 837,
+   "controls": 2,
+   "acts": [
+    "borrow|Bank loan",
+    "borrow|Private lender (30%/qtr)"
+   ],
+   "figures": 11,
+   "cards": 3
+  },
+  "legacy/record#viewCareerRecord": {
+   "chars": 632,
+   "read": 632,
+   "controls": 3,
+   "acts": [
+    "goto|Save slots",
+    "profile|Profile, sync & export",
+    "profile|Sync & sign in"
+   ],
+   "figures": 1,
+   "cards": 2
+  },
+  "legacy/season#viewSeason": {
+   "chars": 335,
+   "read": 335,
+   "controls": 0,
+   "acts": [],
+   "figures": 0,
+   "cards": 1
+  },
+  "money/markets#viewInvestPortfolio": {
+   "chars": 274,
+   "read": 274,
+   "controls": 0,
+   "acts": [],
+   "figures": 2,
+   "cards": 1
+  },
+  "work/rival#viewRival": {
+   "chars": 160,
+   "read": 160,
+   "controls": 0,
+   "acts": [],
+   "figures": 2,
+   "cards": 1
+  },
+  "work/levers#viewLevers": {
+   "chars": 148,
+   "read": 148,
+   "controls": 0,
+   "acts": [],
+   "figures": 0,
+   "cards": 1
+  },
+  "governance#viewGovernance": {
+   "chars": 63,
+   "read": 63,
+   "controls": 0,
+   "acts": [],
+   "figures": 0,
+   "cards": 1
+  },
+  "governance/pack#viewGovernance": {
+   "chars": 63,
+   "read": 63,
+   "controls": 0,
+   "acts": [],
+   "figures": 0,
+   "cards": 1
+  },
+  "governance/register#viewGovernance": {
+   "chars": 63,
+   "read": 63,
+   "controls": 0,
+   "acts": [],
+   "figures": 0,
+   "cards": 1
+  }
+ }
+}

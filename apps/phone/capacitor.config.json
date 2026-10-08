@@ -1,0 +1,30 @@
+{
+  "appId": "com.ledger.game",
+  "appName": "LEDGER",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "backgroundColor": "#080b10",
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#080b10",
+    "webContentsDebuggingEnabled": true
+  },
+  "ios": {
+    "contentInset": "always",
+    "backgroundColor": "#080b10",
+    "preferredContentMode": "mobile"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 400,
+      "backgroundColor": "#080b10",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_CROP"
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#080b10",
+      "overlaysWebView": false
+    }
+  }
+}

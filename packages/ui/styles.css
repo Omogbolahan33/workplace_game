@@ -1,0 +1,428 @@
+
+:root{
+  --bg:#080b10; --panel:#10161f; --panel2:#0c121a; --panel3:#151d28;
+  --line:#1e2a38; --line2:#2a3a4c; --txt:#e8eef5; --dim:#8b9bb0; --dim2:#5f7080;
+  --acc:#f5b301; --acc2:#ffe08a; --good:#2fd47a; --bad:#ff5f6d; --info:#5aa9ff;
+  --purple:#a78bfa; --warn:#ff9f43;
+  --r:10px;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+  font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:15px;line-height:1.5;overscroll-behavior-y:none}
+body{padding-bottom:60px}
+h1,h2,h3,h4{margin:0;font-weight:650;letter-spacing:-.01em}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+input,select,textarea{font:inherit;color:inherit}
+.hidden{display:none !important}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+
+/* ---------- shell ---------- */
+#top{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,#0a0e14,#0a0e14f2);
+  border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+.toprow{max-width:1180px;margin:0 auto;padding:8px 12px;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap}
+.brandwrap{display:flex;align-items:baseline;gap:10px;min-width:0;order:1}
+.brand{font-weight:800;letter-spacing:.14em;font-size:14px;color:var(--acc);white-space:nowrap}
+.brand small{letter-spacing:.03em;font-size:11px;color:var(--dim);font-weight:500;white-space:nowrap}
+/* The save state, under the brand. 11px because that is the floor this game
+   holds itself to, and shorter than the word LEDGER above it, so the header's
+   width does not move. It is a control — tapping it opens the record — and its
+   hit area is padded out to 30px on a phone below. */
+.saveline{display:block;font-size:11px;line-height:1.15;color:var(--dim);white-space:nowrap;
+  background:none;border:0;padding:0;font-family:inherit;letter-spacing:.02em;cursor:pointer;text-align:left}
+.saveline.warn{color:var(--warn)}
+/* The five numbers, as one group so they wrap together rather than one at a
+   time - which is what made the old header look scattered. */
+.stats{display:flex;order:2;flex:1 1 auto;min-width:0}
+.hstat{display:flex;flex-direction:column;line-height:1.15;flex:1 1 0;min-width:0;
+  padding:0 10px;border-left:1px solid var(--line)}
+.hstat:first-child{border-left:0;padding-left:0}
+.hstat b{font-size:13.5px;font-variant-numeric:tabular-nums;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis}
+.hstat span{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.04em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* position:relative so the bell's panel anchors to the right edge of the
+   action group, not to the 30px button - anchored to the button it hung 176px
+   off the left of a 390px screen. */
+.acts{display:flex;align-items:center;gap:6px;order:3;margin-left:auto;position:relative}
+.acts .icn{display:none}
+/* Season chip. It used to be a three-line paragraph dropped into the top of
+   every screen; it belongs in the header, and it belongs small. */
+/* Not a positioning context: its popover anchors to .acts, whose right edge
+   is the right edge of the row. Anchored to the chip it hung off the left of
+   a 390px screen, which is exactly what the bell panel did before it. */
+.seachip{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);
+  border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap;cursor:default}
+.seachip b{color:var(--acc);font-weight:650;font-variant-numeric:tabular-nums}
+.seachip.warn{border-color:var(--warn)} .seachip.warn b{color:var(--warn)}
+.seapop{display:none;position:absolute;right:0;top:calc(100% + 7px);width:min(250px,calc(100vw - 32px));
+  background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 11px;
+  font-size:12px;line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.45);z-index:60;text-align:left;white-space:normal}
+.seachip.open .seapop{display:block}
+@media (hover:hover) and (pointer:fine){ .seachip:hover .seapop{display:block} }
+/* Era chip (§22.14). The era used to be a card at the top of four different
+   screens - Overview, People, Deals and the money screen - carrying the same
+   one-line explanation every time. Same argument as the notifications: it is
+   run-wide context, so it belongs in the header beside the season chip, and
+   the one number you need at a glance is how long is left. */
+.erachip{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim);
+  border:1px solid var(--line);border-radius:999px;padding:4px 10px;white-space:nowrap;
+  cursor:default;flex:none;min-height:30px}
+.erachip i{width:6px;height:6px;border-radius:50%;flex:none}
+.erachip b{font-weight:650;font-variant-numeric:tabular-nums}
+.erachip .eraname{color:var(--dim)}
+.erapop{display:none;position:absolute;right:0;top:calc(100% + 7px);width:min(270px,calc(100vw - 32px));
+  background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 11px;
+  font-size:12px;line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.45);z-index:60;text-align:left;white-space:normal}
+.erachip.open .erapop{display:block}
+@media (hover:hover) and (pointer:fine){ .erachip:hover .erapop{display:block} }
+.erafx{font-family:var(--mono);font-size:11px;color:var(--dim);margin-top:6px;
+  padding-top:6px;border-top:1px solid var(--line);line-height:1.6}
+@media (hover:none){ .seachip.open .seapop{display:block} }
+/* ---------------------------------------------------------------------------
+   Notification centre (§22.13).
+
+   "What next" used to be a card at the top of every screen: the same sentence
+   on twenty screens, and the one thing it could never do was count. It is a
+   bell in the header now. The badge is the at-a-glance part; the list is the
+   part you open. Hover previews it where there is a pointer, tap pins it
+   where there is not, and it never costs the page any height.
+   --------------------------------------------------------------------------- */
+.bellwrap{display:flex;align-items:center;flex:none}
+/* 30px, not 26: the mobile gate refuses any control under 30px tall, and it
+   is right - this is a thumb target, not decoration. */
+.bellbtn{position:relative;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);
+  background:transparent;color:var(--dim);display:flex;align-items:center;justify-content:center;
+  cursor:pointer;padding:0;flex:none}
+.bellbtn:hover,.bellwrap.on .bellbtn{border-color:var(--acc);color:var(--acc)}
+.bellbtn svg{width:15px;height:15px;display:block}
+.bellbadge{position:absolute;top:-5px;right:-6px;min-width:15px;height:15px;border-radius:999px;
+  background:var(--warn);color:#0b0d10;font-size:11px;font-weight:800;line-height:16px;
+  padding:0 4px;font-variant-numeric:tabular-nums;text-align:center;
+  box-shadow:0 0 0 2px var(--panel)}
+.bellbadge.bad{background:var(--bad)}
+.bellpop{display:none;position:absolute;right:0;top:calc(100% + 7px);width:min(340px,calc(100vw - 24px));
+  background:var(--card);border:1px solid var(--line);border-radius:11px;
+  box-shadow:0 14px 40px rgba(0,0,0,.5);z-index:70;text-align:left;overflow:hidden}
+/* The panel opens on .on (a click) everywhere, and on hover only where there
+   is a real pointer. A bare :hover rule sticks after a tap on a touch screen
+   and leaves the panel hanging over the page. */
+.bellwrap.on .bellpop{display:block}
+@media (hover:hover) and (pointer:fine){ .bellwrap:hover .bellpop{display:block} }
+.bellhead{padding:9px 12px;border-bottom:1px solid var(--line);font-size:11px;
+  text-transform:uppercase;letter-spacing:.09em;color:var(--dim);
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+.bellbody{max-height:min(58vh,430px);overflow-y:auto;padding:2px 11px 10px}
+.belltier{font-size:11px;text-transform:uppercase;letter-spacing:.09em;margin:11px 0 6px;
+  display:flex;align-items:center;gap:6px}
+.belltier i{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.belltier b{font-weight:700} .belltier .muted{color:var(--dim);font-weight:400}
+.nitem{border-left:2px solid var(--line);padding:2px 0 3px 9px;margin-bottom:8px}
+.nitem .small{font-size:12.5px;line-height:1.45}
+.nitem .row{margin-top:5px}
+.nfoot{border-top:1px solid var(--line);padding:8px 11px;font-size:11.5px;color:var(--dim);
+  display:flex;align-items:center;justify-content:space-between;gap:8px}
+@media(max-width:640px){
+  .toprow{gap:7px 10px;padding:7px 10px}
+  /* the countdown and the tone dot survive; the name is one tap away */
+  .erachip .eraname{display:none}
+  /* "How to play" is one tap deeper on a phone - it is the first button in
+     Settings now. Losing it here is what keeps brand and actions on one line
+     once the era and the season are both showing. */
+  .acts .helpbtn{display:none}
+  .acts{gap:4px}
+  /* The season chip said "0 left" in the width that keeps the actions on one
+     line. The number stays and so does the warning colour; the word is in the
+     popover the chip opens, which is where a player goes to read the deadline.
+     Together with the chip padding this is 30px of the 16px the header was
+     over - measured at 390x844, widest case (era and season both showing). */
+  .seachip .sealbl{display:none}
+  .erachip,.seachip{padding:4px 7px}
+  /* word to glyph: 75px to 30px, and the 45px is what the era chip cost */
+  .acts .setbtn .lbl{display:none}
+  .acts .setbtn .icn{display:inline;font-size:15px;line-height:1}
+  /* the chips are tap targets too, and 27px is under the thumb minimum */
+  .erachip,.seachip{min-height:30px}
+  /* the city and difficulty are in Settings and on the season chip's popover;
+     in the header they cost the width that keeps the actions on one line */
+  .brandwrap{order:1} .acts{order:2} .stats{order:3;flex:1 1 100%;margin-top:2px}
+  .brandsub{display:none}
+  /* The save line takes the sub's place. As a flex sibling it would cost its own
+     width beside LEDGER - 76px - and push the action row onto a third line (the
+     header was 121px, budget 95). Stacked, the brand block is as wide as the
+     wider of the two words and the header stays two rows. */
+  .brandwrap{flex-direction:column;align-items:flex-start;gap:0}
+  /* The status line is a control, and a 13px line is not a tap target. The padded
+     box is 30px tall with a negative bottom margin of the same 17px, so the thumb
+     gets its 30px and the header keeps its two rows. */
+  .saveline{padding:0 0 19px;margin-bottom:-19px}
+  /* The labels were 8.5px on a phone: five words nobody can read - "Net worth",
+     "Freedom" - under numbers that are the point of the row. 11px is the floor
+     this game holds itself to everywhere (the e2e layout spec fails under it),
+     and it is still subordinate to the number above it, which is 12.5px bold. */
+  .hstat{padding:0 7px} .hstat b{font-size:12.5px} .hstat span{font-size:11px}
+}
+.tabs{max-width:1180px;margin:0 auto;display:flex;gap:2px;padding:0 8px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:9px 13px;font-size:12.5px;color:var(--dim);border-bottom:2px solid transparent;white-space:nowrap;font-weight:550}
+#subrow{display:flex;align-items:center;gap:6px;padding:0 12px;border-bottom:1px solid var(--line)}
+.subs{flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto;padding:6px 0 0;scrollbar-width:none}
+/* The screen hint. It used to be a paragraph card above every screen, which
+   meant reading the same three lines for the hundredth time to get to the
+   numbers. Now it is a question mark in the header: hover or tap for it, and
+   it costs nothing when you already know. */
+#why{flex:none;margin-left:auto;position:relative;display:flex;align-items:center}
+.whyq{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:transparent;
+  color:var(--dim);font-size:12.5px;font-weight:700;line-height:1;cursor:pointer;padding:0;
+  display:flex;align-items:center;justify-content:center}
+.whyq:hover{border-color:var(--acc);color:var(--acc)}
+.whypop{display:none;position:absolute;right:0;top:30px;width:min(310px,calc(100vw - 32px));
+  background:var(--card);border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:10px;
+  padding:11px 12px;font-size:13px;line-height:1.55;box-shadow:0 10px 30px rgba(0,0,0,.45);z-index:60;text-align:left}
+#why.open .whypop{display:block}
+/* hover only where there is a real pointer - on touch, :hover sticks after a
+   tap and would leave the popover hanging open */
+@media (hover:hover) and (pointer:fine){ #why:hover .whypop{display:block} }
+@media (hover:none){ #why.open .whypop{display:block} }
+.subs::-webkit-scrollbar{display:none}
+.sub{padding:5px 11px;font-size:11.5px;color:var(--dim);background:transparent;
+  border:1px solid var(--line);border-radius:999px;white-space:nowrap;cursor:pointer;font-weight:500}
+.sub.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.tab.on{color:var(--acc);border-bottom-color:var(--acc)}
+.tab .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--bad);margin-left:5px;vertical-align:middle;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+#main{max-width:1180px;margin:0 auto;padding:14px 12px 40px}
+
+/* ---------- cards ---------- */
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(165px,1fr))}
+/* The lever map. minmax(258px) gives one column on a phone and four on a
+   laptop; the columns are parallel, so they must not stack into a list. */
+.levers{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(258px,1fr))}
+.levers .card{margin-top:0;height:100%}
+.lrow{border-left:2px solid var(--line);padding:3px 0 4px 9px;margin-bottom:9px}
+.lrow .between b{font-size:12.5px}
+.ltake{border:1px solid var(--line);border-radius:9px;padding:9px 10px;margin-bottom:8px}
+.ltake .between b{font-size:12.5px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.card.flat{background:var(--panel2)}
+.card.sect{padding:0;overflow:hidden}
+.sectHead{display:flex;align-items:center;gap:9px;width:100%;text-align:left;
+  background:none;border:0;padding:12px 14px;font:inherit;color:var(--txt);cursor:pointer}
+.sectHead:hover{background:var(--panel3)}
+.sectHead .sectchev{color:var(--dim);font-size:10px;width:9px;flex:none}
+.sectHead b{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:600}
+.sectHead .sectnote{margin-left:auto;font-size:11px;color:var(--dim2);font-weight:400;letter-spacing:0;text-transform:none}
+/* P5 what-next rail, and the flash that marks the card it pointed at. */
+.nextrail{background:linear-gradient(180deg,var(--panel3),var(--panel));padding:11px 12px}
+.nextrail .small{font-size:12.5px}
+@keyframes nxflash{0%{box-shadow:none}14%{box-shadow:0 0 0 2px var(--acc)}100%{box-shadow:none}}
+.card.flash{animation:nxflash 1.8s ease-out 1}
+.secttags{font-size:11px;color:var(--dim);background:var(--panel3);
+  border:1px solid var(--line);padding:2px 7px;border-radius:20px;
+  letter-spacing:0;text-transform:none;font-weight:400;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;max-width:58%}
+.sectBody{padding:0 14px 14px}
+.sectBody>.card{margin-bottom:12px;background:var(--panel2)}
+.sectBody>*:last-child{margin-bottom:0}
+.card h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.card h3 .tag{margin-left:auto;font-size:11px;letter-spacing:.04em;text-transform:none;color:var(--dim2);background:var(--panel3);padding:2px 7px;border-radius:20px;border:1px solid var(--line)}
+.row{display:flex;gap:10px;align-items:center}
+.between{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.wrap{flex-wrap:wrap}
+hr.sep{border:0;border-top:1px solid var(--line);margin:12px 0}
+.muted{color:var(--dim)}
+.small{font-size:12.5px}
+.tiny{font-size:11px;color:var(--dim)}
+.big{font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.mid{font-size:18px;font-weight:650;font-variant-numeric:tabular-nums}
+.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}.acc{color:var(--acc)}.info{color:var(--info)}
+
+/* ---------- buttons ---------- */
+.btn{background:var(--panel3);border:1px solid var(--line);padding:8px 13px;border-radius:8px;font-size:13px;font-weight:550;transition:.13s}
+.btn:hover{background:#1c2634;border-color:#31465c}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(180deg,#f5b301,#d99a00);color:#20160a;border-color:#f5b301;font-weight:700}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.good{background:rgba(47,212,122,.12);border-color:rgba(47,212,122,.4);color:var(--good)}
+.btn.bad{background:rgba(255,95,109,.1);border-color:rgba(255,95,109,.35);color:var(--bad)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:5px 9px;font-size:12px;border-radius:7px}
+.btn.xs{padding:3px 7px;font-size:11px;border-radius:6px}
+/* A fingertip, at every width. The phone block below grew .xs and .sm, which
+   fixed the buttons that were merely small - but four controls are the size they
+   are on *any* device: the "?" on a card (24x24), the "?" in the header (27x30),
+   Expand all / Collapse all (25 tall) and the era chip (27 tall). A tap target
+   that only becomes a tap target under 640px is a tap target that a tablet, a
+   laptop trackpad and a hovering thumb never get. Nothing was removed to make
+   room: these are minimums, and a control already bigger than them is unchanged. */
+.btn{min-height:30px}
+.btn.sm,.btn.xs{min-width:30px}
+.btn:disabled{opacity:.38;cursor:not-allowed}
+.btn.block{width:100%}
+.btn.wide{flex:1}
+
+/* ---------------------------------------------------------------------------
+   One floor for type: 11px.
+   ---------------------------------------------------------------------------
+   The game had eight sizes under 11px - 8.5, 9, 9.5, 10, 10.5 - scattered across
+   metric labels, table headings, tags and tier headings. Every one of them was
+   readable on the machine it was written on and none of them on a phone in a
+   hand. The sizes above are raised to the floor; the marks that are glyphs and
+   not words (the section chevron, the card chevron, the dot on a chip) keep
+   theirs, because a mark does not need to be read. `.harness` has no opinion
+   about any of this: the claim is enforced in a browser, at 390px, on every tab
+   - tests/e2e/layout-and-copy.test.js. */
+/* ---------- bars ---------- */
+.bar{height:6px;border-radius:6px;background:#182231;overflow:hidden;flex:1;min-width:40px}
+.bar>i{display:block;height:100%;border-radius:6px;transition:width .4s ease}
+.statline{display:grid;grid-template-columns:78px 1fr 42px;gap:8px;align-items:center;font-size:12px;margin-bottom:7px}
+.statline .lbl{color:var(--dim)}
+.statline .val{text-align:right;font-variant-numeric:tabular-nums;font-size:11.5px}
+
+/* ---------- table ---------- */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);font-weight:600;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:7px 8px;border-bottom:1px solid #16202c;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+/* A table wider than a phone scrolls sideways inside its own box rather than
+   pushing the page: the same rule the mobile gate holds every screen to, and
+   the reason a comparison table is safe on a 390px screen at all. */
+/* A folded explanation: the label is always there, the paragraph is not.
+   This is the redesign's central move (§REDESIGN.md, move 3) — teaching is
+   available, not in the way. Native <details>, so it needs no action, no
+   handler, and no state: the browser remembers whether it is open. */
+.fold{margin-top:9px;border-top:1px solid #16202c;padding-top:7px}
+.fold summary{cursor:pointer;font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  font-weight:600;color:var(--dim);list-style:none}
+.fold summary::-webkit-details-marker{display:none}
+.fold summary::after{content:"\25be";margin-left:5px;font-size:9px}
+.fold[open] summary::after{content:"\25b4"}
+.fold[open] summary{color:var(--acc)}
+.fold>div{padding-top:7px;font-size:12.5px;line-height:1.55;color:var(--dim)}
+/* One instrument, one row (Money > Markets, redesign phase 2). The bordered box
+   per asset cost a box every time — thirteen of them read as a wall. A hairline
+   between rows reads as a price sheet, which is what the screen is. */
+.mrow{padding:8px 0;border-bottom:1px solid #16202c}
+.mrow:last-child{border-bottom:0}
+.tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tblwrap table{min-width:100%;white-space:nowrap}
+/* the row you are in, in a table that is about which row you are in */
+tr.on td{background:rgba(245,183,49,.07)}
+
+/* ---------- chips / pills ---------- */
+.chip{display:inline-block;padding:3px 8px;border-radius:20px;font-size:11px;border:1px solid var(--line);background:var(--panel3);color:var(--dim);font-weight:600;letter-spacing:.03em}
+.chip.g{color:var(--good);border-color:rgba(47,212,122,.35);background:rgba(47,212,122,.09)}
+.chip.r{color:var(--bad);border-color:rgba(255,95,109,.35);background:rgba(255,95,109,.09)}
+.chip.y{color:var(--warn);border-color:rgba(255,159,67,.35);background:rgba(255,159,67,.09)}
+.chip.b{color:var(--info);border-color:rgba(90,169,255,.35);background:rgba(90,169,255,.09)}
+.chip.p{color:var(--purple);border-color:rgba(167,139,250,.35);background:rgba(167,139,250,.09)}
+
+/* ---------- sliders ---------- */
+.slider{display:grid;grid-template-columns:100px 1fr 78px;gap:9px;align-items:center;margin-bottom:9px;font-size:12.5px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;outline:none;cursor:pointer;touch-action:none;margin:0;padding:0;display:block}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:6px;background:#1b2534}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-7px;border-radius:50%;background:var(--acc);cursor:pointer;border:2px solid #0b0f15}
+input[type=range]::-moz-range-track{height:6px;border-radius:6px;background:#1b2534}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--acc);cursor:pointer;border:2px solid #0b0f15}
+input[type=range]:focus::-webkit-slider-thumb{box-shadow:0 0 0 4px rgba(120,170,255,.30)}
+input[type=range]:focus::-moz-range-thumb{box-shadow:0 0 0 4px rgba(120,170,255,.30)}
+input[type=text],input[type=email],input[type=password],select,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+input[type=text]:focus,input[type=email]:focus,input[type=password]:focus,select:focus,textarea:focus{outline:0;border-color:#3d5876}
+
+/* ---------- modal ---------- */
+#modal{position:fixed;inset:0;background:#03060ab5;backdrop-filter:blur(3px);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px}
+.modalbox{background:var(--panel);border:1px solid #26364a;border-radius:14px;max-width:660px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 30px 80px #000a}
+.modalbox .head{padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.modalbox .body{padding:16px 18px}
+.modalbox .foot{padding:12px 18px 18px;display:flex;gap:9px;flex-wrap:wrap}
+.opt{display:block;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:11px 13px;margin-bottom:9px;transition:.13s}
+.opt:hover{border-color:var(--acc);background:#161f2b;transform:translateX(2px)}
+.opt .ol{font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:8px}
+.opt .od{font-size:12px;color:var(--dim);margin-top:4px;line-height:1.45}
+.opt .odds{margin-left:auto;font-size:11px;color:var(--info);font-weight:600;white-space:nowrap}
+
+/* ---------- misc ---------- */
+.vignette{background:linear-gradient(135deg,#131c27,#0d141d);border:1px solid var(--line);border-left:3px solid var(--acc);
+  border-radius:0 var(--r) var(--r) 0;padding:12px 14px;font-size:13.5px;line-height:1.65}
+.ticker{display:flex;gap:16px;overflow-x:auto;padding:8px 12px;border-top:1px solid var(--line);font-size:11.5px;scrollbar-width:none}
+.ticker::-webkit-scrollbar{display:none}
+.ticker div{white-space:nowrap;color:var(--dim)}
+.ticker b{color:var(--txt);font-variant-numeric:tabular-nums}
+.flash{animation:flash 1.6s ease}
+@keyframes flash{0%{background:rgba(245,179,1,.22)}100%{background:transparent}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:300;background:#16202c;border:1px solid #2c3e54;
+  padding:10px 16px;border-radius:30px;font-size:13px;box-shadow:0 10px 30px #000a;max-width:92vw;text-align:center}
+.tutorial{background:linear-gradient(135deg,rgba(90,169,255,.09),rgba(90,169,255,.02));border:1px solid rgba(90,169,255,.28);
+  border-radius:9px;padding:9px 11px;font-size:12px;color:#b9d4f5;margin-top:9px;line-height:1.5}
+.principle{background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.25);border-radius:9px;padding:9px 11px;font-size:12px;color:#cfc0f7;margin-top:9px}
+.logline{border-left:2px solid var(--line);padding:6px 0 6px 12px;margin-bottom:10px;font-size:12.5px}
+.logline .t{font-size:11px;color:var(--dim);letter-spacing:.05em;text-transform:uppercase}
+.spark{display:block;width:100%;height:58px}
+.kv{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;padding:5px 0;border-bottom:1px solid #16202c}
+.kv:last-child{border-bottom:0}
+.persbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+@media(max-width:640px){
+  .big{font-size:22px}.toprow{gap:10px;padding:7px 10px}
+  .hstat{min-width:56px}.hstat b{font-size:12.5px}
+  .hstat.sec{display:none}
+  .slider{grid-template-columns:82px 1fr 64px;font-size:12px}
+  .statline{grid-template-columns:66px 1fr 38px}
+  .tab{padding:8px 10px;font-size:12px}
+  #main{padding:10px 10px 32px}
+  .card{padding:12px}
+
+  /* 390px: the header was eating 162px of an 844px screen - a fifth of the
+     phone, pinned there permanently. Compressing it was measured and saved
+     seven pixels while costing two live numbers, so instead the stats scroll
+     away with the content and only the two nav strips stay pinned. 72px of
+     chrome instead of 162. */
+  /* display:contents, not position:static - a sticky child is trapped inside
+     its parent's box, so a merely-static #top would drag the nav off-screen
+     with it. Dissolving the box makes the page itself the containing block. */
+  #top{position:static;display:contents;background:none;border-bottom:0;backdrop-filter:none}
+  #tabwrap{position:sticky;top:0;z-index:50;
+    background:linear-gradient(180deg,#0a0e14,#0a0e14f2);
+    border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+
+  /* Tap targets. .btn.xs measured 25px tall and .btn.sm 27x30 - both under
+     any comfortable thumb. Nothing was removed to make room; the buttons
+     simply got the padding they should have had on a phone. */
+  .btn.xs{padding:7px 10px;font-size:11.5px}
+  .btn.sm{padding:8px 12px;font-size:12.5px}
+  .sub{padding:6px 12px}
+  /* Native selects (20px) and text inputs (28px) were the controls the
+     stylesheet had never touched on a phone. Range inputs are left alone:
+     they are styled as sliders and their height is load-bearing. */
+  select,input:not([type=range]){padding:7px 8px;min-height:33px}
+  /* A slider is dragged, not tapped, so it must not be padded like a button -
+     but its box is its hit area, and 28px is thin. Transparent vertical
+     padding grows the target without touching the painted track. */
+  input[type=range]{height:36px;padding:4px 0}   /* border-box: pad alone will not grow it */
+}
+.chev{margin-left:auto;font-size:10px;color:var(--dim2);line-height:1}
+.card>h3[data-disc]{cursor:pointer;user-select:none;-webkit-user-select:none}
+.card>h3[data-disc]:hover{color:var(--txt)}
+.disctools{display:flex;justify-content:flex-end;gap:6px;margin:0 0 8px}
+.avbar{height:4px;border-radius:4px;background:#182231;overflow:hidden;margin:10px 0 14px}
+.avbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+.avrow{display:grid;grid-template-columns:1fr 88px 16px 100px;gap:8px;align-items:center;
+  padding:6px 0;border-bottom:1px solid #16202c;font-size:12.5px}
+.avrow:last-of-type{border-bottom:0}
+.avlbl{color:var(--dim)}
+.avfrom{text-align:right;color:var(--dim2);font-size:11.5px}
+.avarrow{text-align:center;color:var(--dim2)}
+.avto{text-align:right;font-weight:650}
+.avline{margin-top:12px;font-size:13.5px;line-height:1.6;min-height:46px}
+.avline .caret{display:inline-block;width:7px;height:14px;background:var(--acc);
+  vertical-align:-2px;margin-left:2px;animation:caret .9s steps(1) infinite}
+.negoacts{padding:2px 18px 16px}
+.negoacts .opt:last-child{margin-bottom:0}
+@keyframes caret{0%,50%{opacity:1}51%,100%{opacity:0}}
+@media(max-width:640px){
+  .avrow{grid-template-columns:1fr 68px 12px 82px;font-size:11.5px}
+}
+@media(prefers-reduced-motion:reduce){ .avline .caret{animation:none} }
