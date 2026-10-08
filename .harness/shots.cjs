@@ -37,7 +37,7 @@ const SHOTS = [
 ];
 
 (async () => {
-  const b = await chromium.launch();
+  const b = await chromium.launch(process.env.LEDGER_CHROMIUM ? { executablePath: process.env.LEDGER_CHROMIUM } : undefined);
   const p = await b.newPage({ viewport: { width: 390, height: 1400 } });
   await p.goto('http://127.0.0.1:3007/', { waitUntil: 'networkidle' });
   await p.waitForTimeout(2500);

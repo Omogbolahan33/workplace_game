@@ -272,6 +272,10 @@ Nothing generated is in the download: `dist/`, `.harness/check.js` and
 and the rebuild is byte-identical, so a fresh checkout produces the same
 `ledger/index.html` we last verified.
 
+On macOS 13 the current Playwright no longer downloads chromium. Point the
+browser gates, the e2e tests and the tools at any chromium you have with
+`LEDGER_CHROMIUM=/path/to/Chromium`; unset, they launch Playwright's own.
+
 On a slim Linux container chromium also needs its shared libraries
 (`libnspr4 libnss3 libasound2t64 libatk1.0-0t64 libatk-bridge2.0-0t64 libcups2t64
 libdrm2 libgbm1 libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2`);

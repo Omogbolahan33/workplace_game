@@ -225,7 +225,7 @@ const get = (pathname) => new Promise((resolve, reject) => {
 
   /* ---- 5-7. in a browser: register, activate, go offline ---------------- */
 
-  const b = await chromium.launch();
+  const b = await chromium.launch(process.env.LEDGER_CHROMIUM ? { executablePath: process.env.LEDGER_CHROMIUM } : undefined);
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 } });
   const p = await ctx.newPage();
   const errs = [];

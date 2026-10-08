@@ -284,7 +284,7 @@ async function clickE2E() {
   });
   await new Promise(r => srv.listen(0, '127.0.0.1', r));
   const port = srv.address().port;
-  const b = await chromium.launch();
+  const b = await chromium.launch(process.env.LEDGER_CHROMIUM ? { executablePath: process.env.LEDGER_CHROMIUM } : undefined);
   const page = await b.newPage({ viewport: { width: 1280, height: 900 } });
   const errs = [];
   page.on('console', m => { if (m.type() === 'error') errs.push('console: ' + m.text()); });

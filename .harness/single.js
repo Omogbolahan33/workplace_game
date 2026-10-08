@@ -57,7 +57,7 @@ const txt = (s) => String(s).replace(/\s+/g, ' ').trim();
 (async () => {
   const srv = await serve();
   const url = 'http://127.0.0.1:' + srv.address().port + '/';
-  const b = await chromium.launch();
+  const b = await chromium.launch(process.env.LEDGER_CHROMIUM ? { executablePath: process.env.LEDGER_CHROMIUM } : undefined);
   const p = await b.newPage({ viewport: { width: 390, height: 844 } });
   /* the one helper the page side needs: whitespace flattened, so a length is a
      length and a heading is comparable. Installed before any page script runs,

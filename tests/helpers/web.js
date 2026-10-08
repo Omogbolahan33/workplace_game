@@ -45,7 +45,7 @@ function browserLibraries() {
 async function launch() {
   const { chromium } = require(path.join(ROOT, '.harness', 'node_modules', 'playwright'));
   try {
-    return await chromium.launch();
+    return await chromium.launch(process.env.LEDGER_CHROMIUM ? { executablePath: process.env.LEDGER_CHROMIUM } : undefined);
   } catch (e) {
     const libs = browserLibraries();
     const hint = libs.length

@@ -72,7 +72,7 @@ const canvas = async () => {
      check, so this skips loudly and lets the build finish. */
   let browser;
   try {
-    browser = await chromium.launch();
+    browser = await chromium.launch(process.env.LEDGER_CHROMIUM ? { executablePath: process.env.LEDGER_CHROMIUM } : undefined);
   } catch (e) {
     /* A missing shared library is reported by playwright as "Target page, context
        or browser has been closed", which reads like a concurrency bug. Find the

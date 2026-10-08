@@ -123,7 +123,7 @@ const visit = async (page, wanted, tabText) => {
 };
 
 (async () => {
-  const browser = await chromium.launch();
+  const browser = await chromium.launch(process.env.LEDGER_CHROMIUM ? { executablePath: process.env.LEDGER_CHROMIUM } : undefined);
   const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
   t0 = Date.now();
   await page.goto(URL, { waitUntil: 'load' });

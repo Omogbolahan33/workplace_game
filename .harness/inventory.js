@@ -128,7 +128,7 @@ async function stampE2E() {
     });
   });
   await new Promise(r => srv.listen(0, '127.0.0.1', r));
-  const b = await chromium.launch();
+  const b = await chromium.launch(process.env.LEDGER_CHROMIUM ? { executablePath: process.env.LEDGER_CHROMIUM } : undefined);
   const page = await b.newPage();
   await page.goto('http://127.0.0.1:' + srv.address().port + '/index.html', { waitUntil: 'load' });
   const r = await page.evaluate(() => {

@@ -85,8 +85,10 @@ test('the zip is ten files, fresh, and contains the shipped payload', () => {
   const zip = at('ledger-app.zip');
   assert.ok(fs.existsSync(zip), 'there is no zip — run `npm run build`');
   const listing = execFileSync('unzip', ['-l', zip], { encoding: 'utf8' });
-  /* `unzip -l` prints size, date, name — one line per file, plus headers */
-  const entries = listing.split('\n').filter((l) => /^\s*\d+\s+\d{4}-\d{2}-\d{2}/.test(l));
+  /* `unzip -l` prints size, date, name — one line per file, plus headers. The
+     date is YYYY-MM-DD from Info-ZIP on Linux and MM-DD-YYYY from the one macOS
+     ships, and a listing that matched neither counted zero files on a Mac */
+  const entries = listing.split('\n').filter((l) => /^\s*\d+\s+(\d{4}-\d{2}-\d{2}|\d{2}-\d{2}-\d{4})/.test(l));
   assert.equal(entries.length, 10, 'the zip holds ' + entries.length + ' files, not ten');
   /* and it is not older than what it was built from */
   assert.ok(fs.statSync(zip).mtimeMs >= fs.statSync(path.join(ledger, 'index.html')).mtimeMs,
