@@ -379,6 +379,7 @@ input[type=text]:focus,input[type=email]:focus,input[type=password]:focus,select
 @keyframes flash{0%{background:rgba(245,179,1,.22)}100%{background:transparent}}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:300;background:#16202c;border:1px solid #2c3e54;
   padding:10px 16px;border-radius:30px;font-size:13px;box-shadow:0 10px 30px #000a;max-width:92vw;text-align:center}
+.toast.fx{bottom:74px;max-width:min(92vw,520px);padding:8px 10px}
 .tutorial{background:linear-gradient(135deg,rgba(90,169,255,.09),rgba(90,169,255,.02));border:1px solid rgba(90,169,255,.28);
   border-radius:9px;padding:9px 11px;font-size:12px;color:#b9d4f5;margin-top:9px;line-height:1.5}
 .principle{background:rgba(167,139,250,.07);border:1px solid rgba(167,139,250,.25);border-radius:9px;padding:9px 11px;font-size:12px;color:#cfc0f7;margin-top:9px}
@@ -4858,8 +4859,87 @@ function optLabel(o){ return typeof o.label==='function' ? o.label() : o.label; 
 function optHint(o){ return typeof o.hint==='function' ? o.hint() : o.hint; }
 function evText(ev){ return typeof ev.title==='function' ? ev.title() : ev.title; }
 function evBody(ev){ return typeof ev.text==='function' ? ev.text() : ev.text; }
+/* ── Repercussions you can see ────────────────────────────────────────────
+   A choice in this game moves numbers now and schedules more for later, and
+   neither was visible: the result card said a sentence, and 91 delayed
+   consequences in the decks arrived quarters later with nothing to say where
+   they came from. vitals() is the handful of numbers a player feels, deltaOf()
+   is what one move did to them, and comingBack() is everything already set in
+   motion, with the choice that set it. All three read state and draw nothing
+   from the seeded stream. */
+function vitals(){
+  return { cash:S.fin.cash, usd:S.fin.usdCash, debt:debtTotal(), biz:S.biz ? S.biz.cash : 0,
+           health:S.p.health, stress:S.p.stress, happy:S.p.happy, family:S.p.family, rep:S.p.rep,
+           credit:S.fin.credit, hours:hoursLeft(), perf:S.p.job ? S.p.jobPerf : 0 };
+}
+/* label, whether the number is money, and which way is good (0: neither) */
+/** @type {Array<[string, string, number, number]>} */
+const VITAL_KEYS = [
+  ['cash','cash',1,1], ['usd','USD',2,1], ['debt','debt',1,-1], ['biz','company cash',1,1],
+  ['hours','hours',0,0], ['health','health',0,1], ['stress','stress',0,-1], ['happy','happiness',0,1],
+  ['family','family',0,1], ['rep','reputation',0,1], ['credit','credit',0,1], ['perf','performance',0,1],
+];
+function deltaOf(a, b){
+  const out = [];
+  VITAL_KEYS.forEach(function(k){
+    const d = (b[k[0]]||0) - (a[k[0]]||0);
+    if(Math.abs(d) < 1 || (k[2] === 0 && Math.round(Math.abs(d)) < 1)) return;
+    out.push({k:k[0], label:k[1], d:d, money:k[2], tone:k[3] === 0 ? 0 : (d*k[3] > 0 ? 1 : -1)});
+  });
+  return out;
+}
+function fxChipsHTML(list){
+  return list.map(function(x){
+    const sign = x.d > 0 ? '+' : '−', n = Math.abs(x.d);
+    const v = x.money === 1 ? fmt(Math.round(n)) : x.money === 2 ? '$'+Math.round(n).toLocaleString() : String(Math.round(n));
+    return '<span class="chip '+(x.tone > 0 ? 'g' : x.tone < 0 ? 'r' : '')+'">'+esc(x.label)+' '+sign+v+'</span>';
+  }).join('');
+}
+/* what a decision did, and what it set in motion: drawn under the result in
+   both renderers, so the two cannot disagree about it */
+function resultFxHTML(r){
+  const fx = (r && r.fx) || [], echo = (r && r.echo) || [];
+  if(!fx.length && !echo.length) return '';
+  return '<div class="tiny muted" style="margin-top:12px">What that did</div>'+
+    (fx.length ? '<div class="row wrap" style="gap:4px;margin-top:5px">'+fxChipsHTML(fx)+'</div>' : '')+
+    echo.map(function(e){
+      return '<div class="logline" style="margin-top:8px;border-left-color:'+
+        (e.kind === 'good' ? 'var(--good)' : e.kind === 'bad' ? 'var(--bad)' : 'var(--acc)')+'">'+
+        '<div class="t">Comes back '+dateLabel(e.turn)+'</div>'+esc(e.title)+'</div>';
+    }).join('');
+}
+/* everything already set in motion: delayed consequences and committed deals,
+   soonest first */
+function comingBack(){
+  const out = [];
+  (S.pending||[]).forEach(function(p){
+    if(p.turn >= S.turn) out.push({turn:p.turn, title:p.title, kind:p.kind||'neutral', from:p.from||''});
+  });
+  (S.active||[]).forEach(function(a){
+    out.push({turn:a.due, title:a.name+' resolves', kind:'neutral', from:fmt(a.capital)+' committed'});
+  });
+  return out.sort(function(x, y){ return x.turn - y.turn; });
+}
+function comingBackHTML(){
+  const items = comingBack();
+  if(!items.length) return '';
+  return '<div class="card" style="margin-bottom:12px"><h3>Coming back to you</h3>'+
+    items.slice(0, 6).map(function(i){
+      const q = i.turn - S.turn;
+      return '<div class="logline" style="border-left-color:'+
+        (i.kind === 'good' ? 'var(--good)' : i.kind === 'bad' ? 'var(--bad)' : 'var(--acc)')+'">'+
+        '<div class="t">'+dateLabel(i.turn)+' · '+(q <= 0 ? 'this quarter' : 'in '+q+' quarter'+(q === 1 ? '' : 's'))+'</div>'+
+        esc(i.title)+(i.from ? '<div class="tiny muted">from: '+esc(i.from)+'</div>' : '')+'</div>';
+    }).join('')+
+    (items.length > 6 ? '<div class="tiny muted" style="margin-top:6px">and '+(items.length - 6)+' more after that</div>' : '')+
+    '</div>';
+}
 function resolveOption(ev, opt){
+  /** @type {any} */
   let res = {text:'', kind:'neutral'};
+  /* what the choice moves now, and what it schedules for later - measured, so
+     the result card can say it rather than leave it to be discovered */
+  const before = vitals(), pendAt = (S.pending||[]).length;
   const odds = (typeof opt.odds==='function') ? clamp(opt.odds(S),0,1) : opt.odds;
   if(odds!==undefined && odds!==null){
     const ok = R.chance(odds);
@@ -4876,6 +4956,10 @@ function resolveOption(ev, opt){
     res.text = opt.text || e.text || 'Decision made.';
     res.kind = 'neutral';
   }
+  const made = (S.pending||[]).slice(pendAt);
+  made.forEach(function(p){ p.from = evText(ev)+' \u2014 '+optLabel(opt); });
+  res.fx = deltaOf(before, vitals());
+  res.echo = made.map(function(p){ return {turn:p.turn, title:p.title, kind:p.kind}; });
   if(!S.decisions) S.decisions = [];
   S.decisions.push({turn:S.turn, date:dateLabel(S.turn), title:evText(ev), choice:optLabel(opt), outcome:res.text, kind:res.kind, cat:ev.cat});
   log(ev.cat==='biz'?'biz':'life', evText(ev)+' — '+optLabel(opt)+'. '+res.text, res.kind);
@@ -12607,6 +12691,18 @@ function toast(msg, ms){
   h.innerHTML = '<div class="toast">'+msg+'</div>';
   clearTimeout(_toastT); _toastT = setTimeout(()=>{h.innerHTML='';}, ms||2600);
 }
+/* What a move just did, as chips: its own node in the toast host with its own
+   timer, so an action's own message and its effect can be on screen together.
+   The newest effect replaces the last one. */
+let _fxT = null;
+function fxToast(html, ms){
+  const h = Q('toastHost'); if(!h || !html) return;
+  const old = h.querySelector('.toast.fx'); if(old) old.remove();
+  const n = document.createElement('div');
+  n.className = 'toast fx'; n.setAttribute('role', 'status'); n.innerHTML = html;
+  h.appendChild(n);
+  clearTimeout(_fxT); _fxT = setTimeout(()=>{ if(n.parentNode) n.remove(); }, ms||3600);
+}
 /**
  * What is in an input, or '' when the element is not there yet.
  * @param {string} id
@@ -12867,6 +12963,8 @@ function viewOverview(){
 
   /* ---- what needs a decision ---- */
   h += threadStrip();
+  /* what you have already set in motion, with the choice that set it */
+  h += comingBackHTML();
   h += viewAgenda();
 
   /* ---- the quarter that just closed, and the person living it ---- */
@@ -15008,6 +15106,7 @@ function renderModal(){
       '<span class="chip '+(r.kind==='good'?'g':r.kind==='bad'?'r':'')+'">'+(r.kind==='good'?'Worked out':r.kind==='bad'?'Cost you':'Noted')+'</span>'+
       '<h2 style="margin-top:8px;font-size:18px">'+esc(optLabel(M.opt))+'</h2>',
       '<div style="font-size:14.5px;line-height:1.6">'+esc(r.text)+'</div>'+
+      resultFxHTML(r)+
       (r.principle?'<div class="principle"><b>The principle.</b> '+esc(r.principle)+'</div>':
         (D().coaching?'':'<div class="tutorial">Turn on Apprentice difficulty in Settings to see the underlying principle behind every decision.</div>')),
       '<button class="btn primary" data-a="close">Continue</button>');
@@ -17330,7 +17429,17 @@ document.addEventListener('click', function(e){
   const el = /** @type {HTMLElement} */ (tgt.closest('[data-a]'));
   if(!el) return;
   const a = el.dataset.a;
-  if(ACT[a]){ e.preventDefault(); ACT[a](el); autosaveSoon(); }
+  if(!ACT[a]) return;
+  /* every move is measured at the one funnel every move goes through: what it
+     did to the numbers a player feels is said where they pressed it. A choice
+     on an event says it on its result card instead, and a move that opens a
+     modal, starts a run or closes a quarter is not a move with an effect yet */
+  const run0 = S, before = (S && !UI.modal) ? vitals() : null;
+  e.preventDefault(); ACT[a](el); autosaveSoon();
+  if(before && S === run0 && !UI.modal && a !== 'advance'){
+    const fx = deltaOf(before, vitals());
+    if(fx.length) fxToast('<div class="row wrap" style="gap:4px;justify-content:center">'+fxChipsHTML(fx)+'</div>');
+  }
 });
 document.addEventListener('keydown', function(e){
   if(e.key==='Escape' && UI.modal){

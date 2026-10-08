@@ -15,6 +15,18 @@ export function toast(msg, ms){
   h.innerHTML = '<div class="toast">'+msg+'</div>';
   clearTimeout(_toastT); _toastT = setTimeout(()=>{h.innerHTML='';}, ms||2600);
 }
+/* What a move just did, as chips: its own node in the toast host with its own
+   timer, so an action's own message and its effect can be on screen together.
+   The newest effect replaces the last one. */
+export let _fxT = null;
+export function fxToast(html, ms){
+  const h = Q('toastHost'); if(!h || !html) return;
+  const old = h.querySelector('.toast.fx'); if(old) old.remove();
+  const n = document.createElement('div');
+  n.className = 'toast fx'; n.setAttribute('role', 'status'); n.innerHTML = html;
+  h.appendChild(n);
+  clearTimeout(_fxT); _fxT = setTimeout(()=>{ if(n.parentNode) n.remove(); }, ms||3600);
+}
 /**
  * What is in an input, or '' when the element is not there yet.
  * @param {string} id

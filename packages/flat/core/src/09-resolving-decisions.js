@@ -13,8 +13,87 @@ function optLabel(o){ return typeof o.label==='function' ? o.label() : o.label; 
 function optHint(o){ return typeof o.hint==='function' ? o.hint() : o.hint; }
 function evText(ev){ return typeof ev.title==='function' ? ev.title() : ev.title; }
 function evBody(ev){ return typeof ev.text==='function' ? ev.text() : ev.text; }
+/* ── Repercussions you can see ────────────────────────────────────────────
+   A choice in this game moves numbers now and schedules more for later, and
+   neither was visible: the result card said a sentence, and 91 delayed
+   consequences in the decks arrived quarters later with nothing to say where
+   they came from. vitals() is the handful of numbers a player feels, deltaOf()
+   is what one move did to them, and comingBack() is everything already set in
+   motion, with the choice that set it. All three read state and draw nothing
+   from the seeded stream. */
+function vitals(){
+  return { cash:S.fin.cash, usd:S.fin.usdCash, debt:debtTotal(), biz:S.biz ? S.biz.cash : 0,
+           health:S.p.health, stress:S.p.stress, happy:S.p.happy, family:S.p.family, rep:S.p.rep,
+           credit:S.fin.credit, hours:hoursLeft(), perf:S.p.job ? S.p.jobPerf : 0 };
+}
+/* label, whether the number is money, and which way is good (0: neither) */
+/** @type {Array<[string, string, number, number]>} */
+const VITAL_KEYS = [
+  ['cash','cash',1,1], ['usd','USD',2,1], ['debt','debt',1,-1], ['biz','company cash',1,1],
+  ['hours','hours',0,0], ['health','health',0,1], ['stress','stress',0,-1], ['happy','happiness',0,1],
+  ['family','family',0,1], ['rep','reputation',0,1], ['credit','credit',0,1], ['perf','performance',0,1],
+];
+function deltaOf(a, b){
+  const out = [];
+  VITAL_KEYS.forEach(function(k){
+    const d = (b[k[0]]||0) - (a[k[0]]||0);
+    if(Math.abs(d) < 1 || (k[2] === 0 && Math.round(Math.abs(d)) < 1)) return;
+    out.push({k:k[0], label:k[1], d:d, money:k[2], tone:k[3] === 0 ? 0 : (d*k[3] > 0 ? 1 : -1)});
+  });
+  return out;
+}
+function fxChipsHTML(list){
+  return list.map(function(x){
+    const sign = x.d > 0 ? '+' : '−', n = Math.abs(x.d);
+    const v = x.money === 1 ? fmt(Math.round(n)) : x.money === 2 ? '$'+Math.round(n).toLocaleString() : String(Math.round(n));
+    return '<span class="chip '+(x.tone > 0 ? 'g' : x.tone < 0 ? 'r' : '')+'">'+esc(x.label)+' '+sign+v+'</span>';
+  }).join('');
+}
+/* what a decision did, and what it set in motion: drawn under the result in
+   both renderers, so the two cannot disagree about it */
+function resultFxHTML(r){
+  const fx = (r && r.fx) || [], echo = (r && r.echo) || [];
+  if(!fx.length && !echo.length) return '';
+  return '<div class="tiny muted" style="margin-top:12px">What that did</div>'+
+    (fx.length ? '<div class="row wrap" style="gap:4px;margin-top:5px">'+fxChipsHTML(fx)+'</div>' : '')+
+    echo.map(function(e){
+      return '<div class="logline" style="margin-top:8px;border-left-color:'+
+        (e.kind === 'good' ? 'var(--good)' : e.kind === 'bad' ? 'var(--bad)' : 'var(--acc)')+'">'+
+        '<div class="t">Comes back '+dateLabel(e.turn)+'</div>'+esc(e.title)+'</div>';
+    }).join('');
+}
+/* everything already set in motion: delayed consequences and committed deals,
+   soonest first */
+function comingBack(){
+  const out = [];
+  (S.pending||[]).forEach(function(p){
+    if(p.turn >= S.turn) out.push({turn:p.turn, title:p.title, kind:p.kind||'neutral', from:p.from||''});
+  });
+  (S.active||[]).forEach(function(a){
+    out.push({turn:a.due, title:a.name+' resolves', kind:'neutral', from:fmt(a.capital)+' committed'});
+  });
+  return out.sort(function(x, y){ return x.turn - y.turn; });
+}
+function comingBackHTML(){
+  const items = comingBack();
+  if(!items.length) return '';
+  return '<div class="card" style="margin-bottom:12px"><h3>Coming back to you</h3>'+
+    items.slice(0, 6).map(function(i){
+      const q = i.turn - S.turn;
+      return '<div class="logline" style="border-left-color:'+
+        (i.kind === 'good' ? 'var(--good)' : i.kind === 'bad' ? 'var(--bad)' : 'var(--acc)')+'">'+
+        '<div class="t">'+dateLabel(i.turn)+' · '+(q <= 0 ? 'this quarter' : 'in '+q+' quarter'+(q === 1 ? '' : 's'))+'</div>'+
+        esc(i.title)+(i.from ? '<div class="tiny muted">from: '+esc(i.from)+'</div>' : '')+'</div>';
+    }).join('')+
+    (items.length > 6 ? '<div class="tiny muted" style="margin-top:6px">and '+(items.length - 6)+' more after that</div>' : '')+
+    '</div>';
+}
 function resolveOption(ev, opt){
+  /** @type {any} */
   let res = {text:'', kind:'neutral'};
+  /* what the choice moves now, and what it schedules for later - measured, so
+     the result card can say it rather than leave it to be discovered */
+  const before = vitals(), pendAt = (S.pending||[]).length;
   const odds = (typeof opt.odds==='function') ? clamp(opt.odds(S),0,1) : opt.odds;
   if(odds!==undefined && odds!==null){
     const ok = R.chance(odds);
@@ -31,6 +110,10 @@ function resolveOption(ev, opt){
     res.text = opt.text || e.text || 'Decision made.';
     res.kind = 'neutral';
   }
+  const made = (S.pending||[]).slice(pendAt);
+  made.forEach(function(p){ p.from = evText(ev)+' \u2014 '+optLabel(opt); });
+  res.fx = deltaOf(before, vitals());
+  res.echo = made.map(function(p){ return {turn:p.turn, title:p.title, kind:p.kind}; });
   if(!S.decisions) S.decisions = [];
   S.decisions.push({turn:S.turn, date:dateLabel(S.turn), title:evText(ev), choice:optLabel(opt), outcome:res.text, kind:res.kind, cat:ev.cat});
   log(ev.cat==='biz'?'biz':'life', evText(ev)+' — '+optLabel(opt)+'. '+res.text, res.kind);

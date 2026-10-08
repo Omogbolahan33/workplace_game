@@ -42,6 +42,8 @@ function viewOverview(){
 
   /* ---- what needs a decision ---- */
   h += threadStrip();
+  /* what you have already set in motion, with the choice that set it */
+  h += comingBackHTML();
   h += viewAgenda();
 
   /* ---- the quarter that just closed, and the person living it ---- */

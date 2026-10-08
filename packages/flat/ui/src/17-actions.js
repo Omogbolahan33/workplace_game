@@ -1448,7 +1448,17 @@ document.addEventListener('click', function(e){
   const el = /** @type {HTMLElement} */ (tgt.closest('[data-a]'));
   if(!el) return;
   const a = el.dataset.a;
-  if(ACT[a]){ e.preventDefault(); ACT[a](el); autosaveSoon(); }
+  if(!ACT[a]) return;
+  /* every move is measured at the one funnel every move goes through: what it
+     did to the numbers a player feels is said where they pressed it. A choice
+     on an event says it on its result card instead, and a move that opens a
+     modal, starts a run or closes a quarter is not a move with an effect yet */
+  const run0 = S, before = (S && !UI.modal) ? vitals() : null;
+  e.preventDefault(); ACT[a](el); autosaveSoon();
+  if(before && S === run0 && !UI.modal && a !== 'advance'){
+    const fx = deltaOf(before, vitals());
+    if(fx.length) fxToast('<div class="row wrap" style="gap:4px;justify-content:center">'+fxChipsHTML(fx)+'</div>');
+  }
 });
 document.addEventListener('keydown', function(e){
   if(e.key==='Escape' && UI.modal){

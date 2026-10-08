@@ -1,5 +1,5 @@
 
-import { D, PRINCIPLES, S, UI, advanceModal, anotherBizModal, archOf, bizAccounts, bizById, clamp, dateLabel, deedOf, endModal, esc, evBody, evText, fmt, govVoteModal, helpModal, modalHTML, negFmt, negoModal, negoTacticButtons, optHint, optLabel, pct, profileModal, runInfoModal, seasonModal, settingsModal, startModal, yearModal } from '@ledger/core';
+import { D, PRINCIPLES, S, UI, advanceModal, anotherBizModal, archOf, bizAccounts, bizById, clamp, dateLabel, deedOf, endModal, esc, evBody, evText, fmt, govVoteModal, helpModal, modalHTML, negFmt, negoModal, negoTacticButtons, optHint, optLabel, pct, profileModal, resultFxHTML, runInfoModal, seasonModal, settingsModal, startModal, yearModal } from '@ledger/core';
 import { Q } from './00-q.js';
 import { render, shellDraw } from './03-render.js';
 
@@ -54,6 +54,7 @@ export function renderModal(){
       '<span class="chip '+(r.kind==='good'?'g':r.kind==='bad'?'r':'')+'">'+(r.kind==='good'?'Worked out':r.kind==='bad'?'Cost you':'Noted')+'</span>'+
       '<h2 style="margin-top:8px;font-size:18px">'+esc(optLabel(M.opt))+'</h2>',
       '<div style="font-size:14.5px;line-height:1.6">'+esc(r.text)+'</div>'+
+      resultFxHTML(r)+
       (r.principle?'<div class="principle"><b>The principle.</b> '+esc(r.principle)+'</div>':
         (D().coaching?'':'<div class="tutorial">Turn on Apprentice difficulty in Settings to see the underlying principle behind every decision.</div>')),
       '<button class="btn primary" data-a="close">Continue</button>');

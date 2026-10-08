@@ -2,7 +2,7 @@
 /* The overview answers three questions in this order: where do I stand, what
    needs me, and what just happened. Everything else in the game is a drill-down
    from one of those. */
-import { BIZ, CITY, S, TX, UI, ambitionOf, ambitionPct, bar, bigStat, dateLabel, esc, firstMovesHTML, fmt, foldHTML, freedomIndex, hoursBudget, hoursLeft, netWorth, pct, routeKey, sleepDebt, sparkline, statRow, threadStrip, whyHTML } from '@ledger/core';
+import { BIZ, CITY, S, TX, UI, ambitionOf, ambitionPct, bar, bigStat, comingBackHTML, dateLabel, esc, firstMovesHTML, fmt, foldHTML, freedomIndex, hoursBudget, hoursLeft, netWorth, pct, routeKey, sleepDebt, sparkline, statRow, threadStrip, whyHTML } from '@ledger/core';
 import { Q } from './00-q.js';
 import { shellDraw } from './03-render.js';
 import { viewAgenda } from './08-view-people.js';
@@ -48,6 +48,8 @@ export function viewOverview(){
 
   /* ---- what needs a decision ---- */
   h += threadStrip();
+  /* what you have already set in motion, with the choice that set it */
+  h += comingBackHTML();
   h += viewAgenda();
 
   /* ---- the quarter that just closed, and the person living it ---- */

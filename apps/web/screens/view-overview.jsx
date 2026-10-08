@@ -32,7 +32,7 @@
   and its own padding, because it is the one control a player presses every
   quarter and it should not move.
 */
-import { S, fmt, pct, esc, bar, bigStat, sparkline, threadStrip, dateLabel, CITY,
+import { S, fmt, pct, esc, bar, bigStat, sparkline, threadStrip, comingBackHTML, dateLabel, CITY,
   netWorth, freedomIndex, ambitionOf, ambitionPct, firstMovesHTML } from '@ledger/core';
 import ViewAgenda, { hasAgenda } from './view-agenda.jsx';
 import ViewPulse from './view-pulse.jsx';
@@ -106,6 +106,9 @@ export default function ViewOverview() {
       </Group>
 
       <div dangerouslySetInnerHTML={{ __html: threadStrip() }} />
+
+      {/* what you have already set in motion - core's card, as threadStrip is */}
+      <div dangerouslySetInnerHTML={{ __html: comingBackHTML() }} />
 
       {/* a section with nothing in it is not a section: the agenda renders
           nothing when nothing is waiting, so its group is not composed at all */}

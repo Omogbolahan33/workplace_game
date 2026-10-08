@@ -2,6 +2,8 @@
  "Q": "src/00-q.js",
  "_toastT": "src/00-q.js",
  "toast": "src/00-q.js",
+ "_fxT": "src/00-q.js",
+ "fxToast": "src/00-q.js",
  "inputValue": "src/00-q.js",
  "viewWorkingCapital": "src/01-view-working-capital.js",
  "viewCommitments": "src/01-view-working-capital.js",
