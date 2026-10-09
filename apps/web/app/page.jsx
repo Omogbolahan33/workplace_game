@@ -1,13 +1,11 @@
 import Game from './game.jsx';
+import THREE_SRC from '../../../packages/ui/vendor/three-world.text.mjs';
 
-/*
-  The shell. Eight elements, exactly the ones the game's renderers expect, and
-  the only markup React is responsible for at this point in the migration.
+/* The 3D world's renderer: the same committed slice of three.js the single
+   file carries (tools/vendor-three.mjs), inlined the same way - as inert text
+   the world evaluates the first time it is shown. This is a server component,
+   so the string lands in the HTML and is not shipped again as client code. */
 
-  Kept as JSX rather than an injected HTML string on purpose: this is the part
-  that becomes React, screen by screen, and it should be readable as structure
-  from the first commit.
-*/
 export default function Page() {
   return (
     <>
@@ -24,6 +22,7 @@ export default function Page() {
       <div id="main" />
       <div id="modalHost" />
       <div id="toastHost" />
+      <script type="text/plain" id="three-src" dangerouslySetInnerHTML={{ __html: THREE_SRC }} />
       <Game />
     </>
   );

@@ -349,7 +349,7 @@ Six sub-tabs (`GOV_SUBS`): pack, register, board, votes, deed, bids.
 
 ---
 
-## 15. Complete action index — all 172 entries in `ACT`
+## 15. Complete action index — all 173 entries in `ACT`
 
 Every one of these must still be reachable after the rebuild, or explicitly
 marked for removal here.
@@ -528,6 +528,7 @@ marked for removal here.
 | 15.170 | `fmdone` | [x] added with §22.61 — dismiss the first-quarter coach, for good, on this save |
 | 15.171 | `dealtoday` | [x] added with F4 — deal today's life: the profile, birth circumstance, seed, city and tier from the date in Lagos, the same for everyone that day |
 | 15.172 | `undeal` | [x] added with F4 — put today's life back and choose who you are instead |
+| 15.173 | `worldfocus` | [x] added with the 3D world — open a district of the city, or go back to the whole city; the buildings' labels are plain `goto` |
 ---
 
 ## 16. Game state shape (the spine)

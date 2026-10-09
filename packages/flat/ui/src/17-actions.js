@@ -327,6 +327,9 @@ const ACT = {
     _cfg.step = Math.min(3, (_cfg.step||1) + 1); UI.modal = {type:'start'}; render();
   },
   stepback:  e=>{ _cfg.step = Math.max(1, (_cfg.step||1) - 1); UI.modal = {type:'start'}; render(); },
+  /* the world: open a district, or go back to the whole city. Only the camera
+     moves; the screens are the buildings' labels, which are plain goto */
+  worldfocus: e=>{ UI.worldFocus = e.dataset.d || ''; render(); },
   /* the deal is the date's, so pressing it twice deals the same life twice */
   dealtoday: e=>{ _cfg.dealt = todaysLife(); UI.modal = {type:'start'}; render(); },
   undeal:    e=>{ _cfg.dealt = null; UI.modal = {type:'start'}; render(); },

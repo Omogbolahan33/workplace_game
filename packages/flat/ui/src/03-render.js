@@ -65,6 +65,9 @@ function render(){
     }catch(e){}
     UI.focus = '';
   }
+  /* the world is drawn last, over whatever filled the page, by either renderer;
+     a world that cannot be drawn is a list of places, never a broken page */
+  try{ worldSync(); }catch(e){ worldFlat(); }
 }
 /* The two names the markup path goes by.
 

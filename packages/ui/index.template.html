@@ -37,6 +37,10 @@
 <div id="main"></div>
 <div id="modalHost"></div>
 <div id="toastHost"></div>
+<!-- The 3D world's renderer: a slice of three.js, inert until the world is first
+     shown (it is text/plain, so the browser does not parse it on load). It sits
+     before the game script so every tool that reads "the script" reads the game. -->
+<script type="text/plain" id="three-src"><!--VENDOR--></script>
 <script><!--SCRIPT--></script>
 </body>
 </html>

@@ -54,6 +54,10 @@ export function composeBundle() {
   const tpl = read('packages/ui/index.template.html');
   /* function replacers: String.replace() gives meaning to $& and $' inside a
      replacement string, and a 16,000-line script contains some */
-  const html = tpl.replace('<!--STYLES-->', () => css).replace('<!--SCRIPT-->', () => js);
-  return { sections, js, css, html };
+  /* the one third-party library: built by tools/vendor-three.mjs, committed,
+     and spliced in as text the world evaluates on first use */
+  const vendor = exists('packages/ui/vendor/three-world.js') ? read('packages/ui/vendor/three-world.js') : '';
+  const html = tpl.replace('<!--STYLES-->', () => css).replace('<!--VENDOR-->', () => vendor)
+    .replace('<!--SCRIPT-->', () => js);
+  return { sections, js, css, html, vendor };
 }

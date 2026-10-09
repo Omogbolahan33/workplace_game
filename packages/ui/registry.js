@@ -3,7 +3,7 @@
 
   Every export of every module in this package, merged into one object, so a
   name can be looked up without a list somewhere falling out of step with the
-  code. 18 modules.
+  code. 19 modules.
 */
 import * as m0 from './modules/00-q.js';
 import * as m1 from './modules/01-view-working-capital.js';
@@ -23,6 +23,7 @@ import * as m14 from './modules/14-view-register.js';
 import * as m15 from './modules/15-view-pack.js';
 import * as m16 from './modules/16-view-group.js';
 import * as m17 from './modules/17-actions.js';
+import * as m18 from './modules/18-world.js';
 
 export const exported = {
   ...m0,
@@ -42,7 +43,8 @@ export const exported = {
   ...m14,
   ...m15,
   ...m16,
-  ...m17
+  ...m17,
+  ...m18
 };
 
 export function screenNames() {

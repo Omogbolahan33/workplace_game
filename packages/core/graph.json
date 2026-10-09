@@ -348,5 +348,17 @@
    "host-shims.js: toast"
   ],
   "externals": []
+ },
+ "32-the-world.js": {
+  "needs": [
+   "01-game-state.js: S, UI",
+   "03-startbizcost-one-price-for-every-picker.js: bizList",
+   "02-derived-state-personal-finance-career.js: CITY, budgetMonthly, netWorth",
+   "00-cities.js: dateLabel, esc, fmt",
+   "31-afterthreadchoice.js: ambitionOf, ambitionPct",
+   "30-eras-you-live-through.js: eraById",
+   "11-profilesummary-and-strings.js: subsFor"
+  ],
+  "externals": []
  }
 }

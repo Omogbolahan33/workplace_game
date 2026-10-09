@@ -5,6 +5,7 @@ import { Q } from './00-q.js';
 import { applyDisclosure, releaseDisclosure, renderTabs } from './04-render-tabs-and-rail.js';
 import { renderModal } from './13-render-modal.js';
 import { bindInputs, renderStart } from './17-actions.js';
+import { worldFlat, worldSync } from './18-world.js';
 
 /* Generated from src/03-render.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export function render(){
@@ -72,6 +73,9 @@ export function render(){
     }catch(e){}
     UI.focus = '';
   }
+  /* the world is drawn last, over whatever filled the page, by either renderer;
+     a world that cannot be drawn is a list of places, never a broken page */
+  try{ worldSync(); }catch(e){ worldFlat(); }
 }
 /* The two names the markup path goes by.
 

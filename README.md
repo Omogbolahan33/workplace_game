@@ -182,6 +182,35 @@ player's, entered in Settings.
 
 ---
 
+## The world — the game as a 3D place
+
+The Overview opens on a city. Every screen in the game is a building in it: the
+plaza is the Overview, the four districts are Work, Money, Governance and
+Legacy, and each district's buildings are that tab's six screens. Tap a
+district and the camera flies there; tap a building and its screen opens — the
+same screen, through the same `goto` the tabs use. Nothing was removed and no
+rule changed; what the world adds is that each screen's state is also its shape
+(the career tower grows with the salary, the company with its outlets, the
+ambition monument with its progress, the plaza's column with net worth).
+
+| piece | where | what it does |
+|---|---|---|
+| what the city contains | `packages/core/src/32-the-world.js` | `worldModel()` reads the state each screen draws and returns buildings, districts and people as data; `worldHTML()` writes the stage and the labels. No DOM, no random draw |
+| how it is drawn | `packages/ui/src/18-world.js` | `worldSync()` runs after every render in both renderers, moves the one canvas into the new container, rebuilds the city only when the model changed, and floats each label over its building |
+| the renderer | `packages/ui/vendor/three-world.js` | a slice of three.js 0.169.0 (≈ 484 KB, 122 KB gzipped), committed, carried as inert `text/plain` and evaluated the first time a world is shown |
+
+The labels are the controls — ordinary buttons with `worldfocus` and `goto` —
+so with no WebGL, a screen reader or a test the world is a working list of
+places. A tap on a building clicks its label, so every move still goes through
+the one dispatcher. The file is still one file with zero requests; it is now
+about 1.6 MB, of which the renderer is the 484 KB the payload test bounds
+separately.
+
+```bash
+node tools/vendor-three.mjs           # rebuild the renderer slice (after adding a three.js class)
+node tools/vendor-three.mjs --check   # fail if the committed slice is stale
+```
+
 ## What is in here
 
 The download (`ledger-workspace.zip`) is this whole repository — source, tests,

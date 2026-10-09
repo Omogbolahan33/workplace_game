@@ -32,7 +32,7 @@
   and its own padding, because it is the one control a player presses every
   quarter and it should not move.
 */
-import { S, fmt, pct, esc, bar, bigStat, sparkline, threadStrip, comingBackHTML, dateLabel, CITY,
+import { S, fmt, pct, esc, bar, bigStat, sparkline, threadStrip, comingBackHTML, worldHTML, dateLabel, CITY,
   netWorth, freedomIndex, ambitionOf, ambitionPct, firstMovesHTML } from '@ledger/core';
 import ViewAgenda, { hasAgenda } from './view-agenda.jsx';
 import ViewPulse from './view-pulse.jsx';
@@ -67,6 +67,10 @@ export default function ViewOverview() {
 
   return (
     <>
+      {/* the game as a place - core's markup; the ui's worldSync() puts the
+          canvas in it after every render, the same as on the string path */}
+      <div dangerouslySetInnerHTML={{ __html: worldHTML() }} />
+
       {firstMoves ? <div dangerouslySetInnerHTML={{ __html: firstMoves }} /> : null}
 
       {alerts.length

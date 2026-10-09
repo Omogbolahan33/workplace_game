@@ -9,7 +9,7 @@ let S = null;          // live game state
    module boundary makes that an error, which is the boundary doing its job. */
 function setS(v){ S = v; return S; }
           // live game state
-let UI = { tab:'overview', sub:'', bizSub:'ops', modal:null, lastGain:0 };
+let UI = { tab:'overview', sub:'', bizSub:'ops', modal:null, lastGain:0, worldFocus:'' };
 let TX = [];           // this-turn transaction ledger lines
 
 function blankState(){
