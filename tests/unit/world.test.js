@@ -125,3 +125,44 @@ test('the buildings answer to the state they stand for', async () => {
   assert.equal(h('work/business').muted, true, 'a run with no company shows a business');
   assert.match(h('work/business').note, /no company/);
 });
+
+test('the people in your life live where their role belongs, and show what the game knows', async () => {
+  const C = await world();
+  const routes = new Set(C.worldModel().buildings.map((b) => b.id));
+  const alive = C.S.cast.filter((c) => c.alive);
+  let m = C.worldModel();
+  assert.equal(m.people.length, Math.min(10, alive.length), 'not everyone alive is in the city');
+  for (const p of m.people) {
+    assert.ok(routes.has(p.home), p.name + ' lives at ' + p.home + ', which is not a building in the city');
+    assert.equal(p.home, C.worldHome(p.role), p.name + ' is not at the building their role belongs to');
+  }
+  /* someone who died, or emigrated, is not in the city */
+  const gone = alive[0], away = alive[1];
+  gone.alive = false; away.tags = Object.assign({}, away.tags, { emigrated: true });
+  m = C.worldModel();
+  assert.ok(!m.people.some((p) => p.id === gone.id), 'someone who died is still walking about');
+  assert.ok(!m.people.some((p) => p.id === away.id), 'someone who emigrated is still walking about');
+  gone.alive = true; away.tags.emigrated = false;
+  /* a story open with someone marks them; what you just did to them shows */
+  const c = alive[2];
+  C.S.threads = (C.S.threads || []).concat([{ castId: c.id, arc: 'test', stage: 0 }]);
+  C.relate(c, 8, 'a test kindness');
+  m = C.worldModel();
+  const p = m.people.find((x) => x.id === c.id);
+  assert.equal(p.story, true, 'an open story with ' + p.name + ' does not show on them');
+  assert.equal(p.felt, 'up', 'a kindness this quarter does not show on ' + p.name);
+  C.S.threads = C.S.threads.filter((t) => t.arc !== 'test');
+});
+
+test('you are in the city as you are: tired, ill or happy, and dressed for work when you have it', async () => {
+  const C = await world();
+  const me = () => C.worldModel().me;
+  C.S.p.health = 20; assert.equal(me().mood, 'ill');
+  C.S.p.health = 80; C.S.p.stress = 90; assert.equal(me().mood, 'tired');
+  C.S.p.stress = 20; C.S.p.happy = 90; assert.equal(me().mood, 'happy');
+  C.S.p.job = { title: 'Analyst', monthly: 500000, industry: 'Corporate' };
+  assert.equal(me().suit, true, 'a job does not dress you for work');
+  C.S.p.job = null;
+  assert.equal(me().suit, false);
+});
+

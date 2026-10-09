@@ -12476,6 +12476,15 @@ function worldBuilding(tab, sub){
   return {shape:'kiosk', h:1.4, tone:'', muted:true, note:''};
 }
 
+/* Where each kind of person in your life is found: family at home, the banker
+   at the bank, the supplier at the business, the contact where the forms are
+   filed, the rival at the rival's tower. A friend is wherever your own life is. */
+function worldHome(role){
+  return ({sibling:'work/household', cousin:'work/household', elder:'work/household', love:'work/household',
+           friend:'work/life', mentor:'work/career', banker:'money/position', supplier:'work/business',
+           contact:'governance/register', rival:'work/rival'})[role] || 'work/life';
+}
+
 function worldModel(){
   const era = S.era ? eraById(S.era.id) : null;
   const buildings = [];
@@ -12490,13 +12499,28 @@ function worldModel(){
         colour: D.colour});
     });
   });
-  /* the people in your life live around the plaza; where each one stands is
-     a function of who they are, not of a random draw */
-  const people = (S.cast||[]).filter(function(c){ return c.alive; }).slice(0, 10).map(function(c, i){
+  /* The people in your life, as characters. Each lives at the building their
+     role belongs to, and what the game knows about them is what they show: how
+     they feel about you, whether a story with them is open, what you last did
+     to them, how life has treated them. Someone who has died or emigrated is
+     not in the city. Nothing here is drawn at random. */
+  const people = (S.cast||[]).filter(function(c){
+    return c.alive && !(c.tags && (c.tags.emigrated || c.tags.abroad));
+  }).slice(0, 10).map(function(c){
     let h = 0; for(let j = 0; j < c.id.length; j++) h = (h * 31 + c.id.charCodeAt(j)) >>> 0;
-    return {id: c.id, name: String(c.name||'').split(' ')[0], role: c.role,
-      ring: 2.4 + (i % 3) * 0.7, phase: (h % 628) / 100, hue: h % 360};
+    const last = (c.memory && c.memory[0] && S.turn - c.memory[0].turn <= 1) ? c.memory[0] : null;
+    return {id: c.id, name: String(c.name||'').split(' ')[0], role: c.role, home: worldHome(c.role),
+      hue: h % 360, age: c.age,
+      mood: c.relation >= 65 ? 'warm' : c.relation >= 25 ? 'cordial' : c.relation >= -20 ? 'cool' : 'hostile',
+      story: (S.threads||[]).some(function(t){ return t.castId === c.id; }),
+      felt: last ? (last.delta > 0 ? 'up' : last.delta < 0 ? 'down' : '') : '',
+      fortune: c.tags && c.tags.madeIt ? 'rich' : c.tags && c.tags.broke ? 'broke' : ''};
   });
+  /* and you: how you are, read from the same five numbers the header shows */
+  const p = S.p;
+  const me = {name: String(S.name||'You').split(' ')[0], age: p.age,
+    mood: p.health < 35 ? 'ill' : p.stress > 72 ? 'tired' : p.happy >= 72 ? 'happy' : '',
+    suit: !!p.job, rich: netWorth() > 50000000 * (S.cumInfl || 1)};
   const districts = WORLD_DISTRICTS.map(function(D){
     const t = TABS.find(function(x){ return x.id === D.tab; });
     const at = worldAt(D.sx, D.sy);
@@ -12505,7 +12529,7 @@ function worldModel(){
   });
   return {city: CITY().label, date: dateLabel(S.turn), era: era ? era.name : '', tone: era ? era.tone : 'neutral',
     plaza: {h: worldHeight(Math.max(0, netWorth()), 5, 9.5), tone: netWorth() > 0 ? 'good' : 'bad'},
-    districts: districts, buildings: buildings, people: people};
+    districts: districts, buildings: buildings, people: people, me: me};
 }
 
 /* Which building the page is showing: the current route, or '' on the
@@ -12552,7 +12576,7 @@ function worldHTML(){
 }
 
 /* -------------------------------------------------------------------------
-   Everything above, exported. 653 names: the simulation's whole surface.
+   Everything above, exported. 654 names: the simulation's whole surface.
    ------------------------------------------------------------------------- */
 export {
   ALL_EVENTS,
@@ -13202,6 +13226,7 @@ export {
   worldHTML,
   worldHeight,
   worldHere,
+  worldHome,
   worldModel,
   worldNote,
   yearClosing,

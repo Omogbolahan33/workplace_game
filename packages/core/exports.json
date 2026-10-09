@@ -646,6 +646,7 @@
  "worldHTML": "core.js",
  "worldHeight": "core.js",
  "worldHere": "core.js",
+ "worldHome": "core.js",
  "worldModel": "core.js",
  "worldNote": "core.js",
  "yearClosing": "core.js",

@@ -96,12 +96,16 @@ function worldInit(){
   sc.left = -44; sc.right = 44; sc.top = 44; sc.bottom = -44; sc.near = 1; sc.far = 160;
   scene.add(hemi, sun);
   const root = new T.Group();
-  scene.add(root);
+  /* the characters and the coins live outside the city, so a rebuild - which
+     follows almost every move - never interrupts what somebody is doing */
+  const cast = new T.Group(), fxg = new T.Group();
+  scene.add(root, cast, fxg);
   gl.canvas.className = 'world-canvas';
   gl.canvas.addEventListener('click', worldTap);
   gl.canvas.addEventListener('webglcontextlost', function(ev){ ev.preventDefault(); worldFlat(); });
-  return {T:T, renderer:renderer, scene:scene, camera:camera, root:root, canvas:gl.canvas,
-          mats:{}, picks:[], walkers:[], cars:[], grows:[], coins:[], lots:{}, heights:{}, ring:null,
+  return {T:T, renderer:renderer, scene:scene, camera:camera, root:root, castg:cast, fxg:fxg, canvas:gl.canvas,
+          mats:{}, picks:[], cars:[], grows:[], coins:[], lots:{}, heights:{}, ring:null,
+          people:{}, me:null, lastHere:null,
           sig:'', here:null, focus:null,
           view:{x:0, y:0, z:0, size:30}, goal:{x:0, y:0, z:0, size:30},
           raf:0, last:0, drawn:0, idleAt:0, host:null, stage:null, w:0, h:0,
@@ -250,7 +254,7 @@ function worldBuild(m){
     c.traverse(function(o){ if(o.geometry) o.geometry.dispose(); });
     root.remove(c);
   }
-  W.picks = []; W.walkers = []; W.cars = []; W.coins = []; W.lots = {};
+  W.picks = []; W.cars = []; W.lots = {};
   const now = performance.now();
   const sky = worldSky(m.tone);
   W.scene.background = new T.Color(sky);
@@ -314,17 +318,7 @@ function worldBuild(m){
   W.ring = new T.Mesh(new T.CylinderGeometry(2.7, 2.7, 0.06, 48), worldGlow('#f5b301', 0.42));
   W.ring.visible = false;
   root.add(W.ring);
-  /* the people in your life, walking the plaza */
-  m.people.forEach(function(p){
-    const g = new T.Group();
-    const bodyC = new T.Color().setHSL(p.hue/360, 0.5, 0.58);
-    const body = new T.Mesh(new T.CylinderGeometry(0.2, 0.26, 0.75, 8), new T.MeshLambertMaterial({color:bodyC}));
-    body.position.y = 0.38 + 0.3; body.castShadow = true;
-    const head = new T.Mesh(new T.SphereGeometry(0.19, 10, 8), worldMat('#6b4a32'));
-    head.position.y = 1.0 + 0.3; head.castShadow = true;
-    g.add(body, head); root.add(g);
-    W.walkers.push({g:g, ring:p.ring, phase:p.phase, speed:0.00012 * (1 + (p.hue % 3) * 0.25)});
-  });
+  worldPeople(m);
   for(let i = 0; i < 8; i++) worldCar(root, i);
 }
 
@@ -387,41 +381,326 @@ function worldLabels(){
     el.classList.add('placed');
   });
 }
-/* coins in flight: from a building home to the plaza when money comes in, from
-   the plaza out to the building when it goes */
-function worldPulse(fx){
+/* ── characters ─────────────────────────────────────────────────────────────
+   You and the people in your life, as bodies in the city. Each has legs, arms,
+   a torso and a head on pivots, so they can walk, work, rest, talk, cheer,
+   slump and hand money over. What they do comes from the game: you act out the
+   move you just made at the building of the screen you made it on; the people
+   in your life keep to the building their role belongs to and show what the
+   game knows about them. None of this is a rule and none of it is saved - it is
+   the state, acted. */
+
+/* a body: pivots at the hips and shoulders so the limbs can swing */
+function worldBody(shirt, trousers, scale, tie){
+  const W = WORLD, T = W.T, g = new T.Group();
+  const top = new T.MeshLambertMaterial({color: new T.Color(shirt)});
+  const bottom = worldMat(trousers), skin = worldMat('#6b4a32');
+  const part = function(geo, mat, x, y, z){ const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; return m; };
+  const hip = 0.55;
+  const limb = function(x, y, w, h, mat){ const p = new T.Group(); p.position.set(x, y, 0); p.add(part(new T.BoxGeometry(w, h, w + 0.02), mat, 0, -h/2, 0)); g.add(p); return p; };
+  const legL = limb(-0.1, hip, 0.14, 0.52, bottom), legR = limb(0.1, hip, 0.14, 0.52, bottom);
+  const torso = part(new T.BoxGeometry(0.42, 0.5, 0.24), top, 0, hip + 0.25, 0); g.add(torso);
+  if(tie) torso.add(part(new T.BoxGeometry(0.07, 0.3, 0.02), worldMat('#f5b301'), 0, 0.02, 0.125));
+  const armL = limb(-0.27, hip + 0.46, 0.11, 0.46, top), armR = limb(0.27, hip + 0.46, 0.11, 0.46, top);
+  const head = part(new T.SphereGeometry(0.17, 12, 10), skin, 0, hip + 0.68, 0); g.add(head);
+  g.scale.setScalar((scale || 1) * 1.2);
+  return {g:g, legL:legL, legR:legR, armL:armL, armR:armR, torso:torso, head:head, top:top};
+}
+/* a building's door, on the side that faces the camera, in ground coordinates */
+function worldDoor(id){
+  const b = WORLD.lots[id];
+  if(!b) return {x:0.9, z:0.9};
+  const r = Math.SQRT1_2, sx = (b.x - b.z) * r, sy = (b.x + b.z) * r;
+  return worldGround(sx + 0.6, sy + 2.3);
+}
+/* A walk that keeps to the streets: out along the gap beside the building you
+   are at, along the avenue, and up the gap beside the one you are going to -
+   never through a wall. Positions are turned to the screen's axes, where the
+   districts' rows and gaps are straight lines. */
+function worldPath(from, to){
+  const r = Math.SQRT1_2;
+  const f = {sx:(from.x - from.z) * r, sy:(from.x + from.z) * r};
+  const t = {sx:(to.x - to.z) * r, sy:(to.x + to.z) * r};
+  if(Math.hypot(f.sx - t.sx, f.sy - t.sy) < 0.3) return [];
+  const pts = [];
+  const sameBlock = Math.sign(f.sx) === Math.sign(t.sx) && Math.sign(f.sy) === Math.sign(t.sy) && Math.abs(f.sy) > 2 && Math.abs(t.sy) > 2;
+  const gf = f.sx + 2.8, gt = t.sx + 2.8;
+  if(Math.abs(f.sy) > 2) pts.push({sx:gf, sy:f.sy});
+  if(sameBlock){
+    pts.push({sx:gf, sy:t.sy});
+  } else {
+    if(Math.abs(f.sy) > 2) pts.push({sx:gf, sy:0});
+    pts.push({sx:gt, sy:0});
+    pts.push({sx:gt, sy:t.sy});
+  }
+  pts.push(t);
+  return pts.map(function(p){ return worldGround(p.sx, p.sy); });
+}
+/* one character: a body, where it is, where it is going, and what it is doing */
+function worldCharacter(id, kind, look, at){
+  const W = WORLD;
+  const b = worldBody(look.shirt, look.trousers, look.scale, look.tie);
+  b.g.position.set(at.x, 0.25, at.z);
+  b.g.traverse(function(o){ if(o.isMesh) o.userData.person = id; });
+  W.castg.add(b.g);
+  const bub = document.createElement('div');
+  bub.className = 'wbub'; bub.setAttribute('aria-hidden', 'true');
+  return {id:id, kind:kind, body:b, x:at.x, z:at.z, face:0, path:[], speed:2.2, step:0,
+          act:'', actUntil:0, actAt:null, then:null, partner:null, wanderAt:0, home:at,
+          bub:bub, say:'', sayUntil:0, status:'', look:look};
+}
+function worldLook(p){
+  const shirt = new WORLD.T.Color().setHSL(p.hue / 360, 0.5, p.fortune === 'broke' ? 0.42 : 0.58);
+  return {shirt:'#' + shirt.getHexString(), trousers: p.fortune === 'rich' ? '#1b2230' : '#3a4250',
+          scale: p.age >= 60 ? 0.9 : 1, tie: p.fortune === 'rich' || p.role === 'banker'};
+}
+/* Keep the characters in step with the model: newcomers arrive at their door,
+   people who have left go, and everyone's state is brought up to date. Called
+   on every rebuild; nobody is recreated, so nothing a character is doing is
+   cut short. */
+function worldPeople(m){
+  const W = WORLD, seen = {};
+  if(!W.me){
+    W.me = worldCharacter('me', 'me', {shirt: m.me.suit ? '#e9e4d8' : '#3f7fd0', trousers:'#1f2632', scale:1, tie: m.me.suit},
+                          W.here ? worldDoor(W.here) : {x:0.9, z:0.9});
+    W.me.speed = 3.2;
+  }
+  W.me.status = m.me.mood === 'ill' ? '\u{1F912}' : m.me.mood === 'tired' ? '\u{1F62E}‍\u{1F4A8}' : '';
+  W.me.body.top.color.set(m.me.suit ? '#e9e4d8' : '#3f7fd0');
+  m.people.forEach(function(p){
+    seen[p.id] = true;
+    let c = W.people[p.id];
+    const home = worldDoor(p.home);
+    if(!c){ c = W.people[p.id] = worldCharacter(p.id, 'cast', worldLook(p), {x:home.x + 0.8, z:home.z + 0.5}); }
+    c.home = home; c.name = p.name; c.mood = p.mood;
+    c.status = p.story ? '! ' + p.name : '';
+    if(p.felt && c.felt !== p.felt + ':' + m.date){
+      c.felt = p.felt + ':' + m.date;
+      c.say = p.felt === 'up' ? '❤️' : '\u{1F4A2}'; c.sayUntil = performance.now() + 6000;
+    }
+  });
+  Object.keys(W.people).forEach(function(id){
+    if(seen[id]) return;
+    const c = W.people[id];
+    W.castg.remove(c.body.g);
+    c.body.g.traverse(function(o){ if(o.geometry) o.geometry.dispose(); });
+    if(c.bub.parentNode) c.bub.remove();
+    delete W.people[id];
+  });
+  W.castg.traverse(function(o){ if(o.isMesh) W.picks.push(o); });
+}
+function worldEveryone(){
+  const W = WORLD, all = W.me ? [W.me] : [];
+  Object.keys(W.people).forEach(function(id){ all.push(W.people[id]); });
+  return all;
+}
+function worldPeopleBusy(t){
+  return worldEveryone().some(function(c){ return c.path.length > 0 || t < c.actUntil; });
+}
+function worldWalkTo(c, to){
+  c.path = worldPath({x:c.x, z:c.z}, to);
+  const len = c.path.reduce(function(s, p, i){ const q = i ? c.path[i-1] : {x:c.x, z:c.z}; return s + Math.hypot(p.x - q.x, p.z - q.z); }, 0);
+  /* a long walk is a brisk one: nobody crosses the city for ten seconds */
+  c.pace = Math.max(c.speed, len / 3.2);
+}
+/* What you do, and how it looks. `kind` comes from what the move did. */
+function worldActSpec(kind){
+  return ({work:['\u{1F4BC}', 2800], rest:['\u{1F634}', 3200], family:['\u{1F46A}', 3000], talk:['\u{1F4AC}', 2800],
+           spend:['\u{1F6CD}️', 2400], earn:['\u{1F4B0}', 2400], deal:['\u{1F91D}', 2800], cheer:['\u{1F389}', 2400],
+           slump:['\u{1F623}', 2600], think:['\u{1F4AD}', 2200], home:['\u{1F319}', 3200]})[kind] || ['✨', 2000];
+}
+function worldDo(c, kind, at){
+  const spec = worldActSpec(kind);
+  c.then = {kind:kind, ms:spec[1], at:at || null};
+  c.say = spec[0]; c.sayUntil = performance.now() + spec[1] + (c.path.length ? 2600 : 0);
+  if(!c.path.length) worldBegin(c, performance.now());
+  if(c === WORLD.me) worldWatch(c.sayUntil);
+  worldKick();
+}
+/* The button you press is usually well down the page, with the city scrolled
+   out of sight - so you would never see yourself do it. When that is the case
+   a small window opens in the corner with the camera on you, for as long as you
+   are doing it, and then gives the canvas back to the city. It is the same
+   canvas, moved, so there is still one world and one GL context; the window is
+   not a control and is not pinned chrome - it comes and goes with the move. */
+function worldWatch(until){
   const W = WORLD;
   if(!W || W.flat || !W.host || W.still) return;
+  if(W.pip){ W.pip.until = Math.max(W.pip.until, until + 700); return; }
+  const r = W.host.getBoundingClientRect();
+  const tw = document.getElementById('tabwrap');
+  const topEdge = tw ? tw.getBoundingClientRect().bottom : 0;
+  if(r.bottom > topEdge + 60 && r.top < window.innerHeight - 60) return;
+  let box = document.getElementById('worldpip');
+  if(!box){
+    box = document.createElement('div');
+    box.id = 'worldpip'; box.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(box);
+  }
+  box.innerHTML = '';
+  /* under the nav strip, clear of the toasts at the bottom of the screen */
+  box.style.top = Math.round(topEdge + 10) + 'px';
+  box.appendChild(W.canvas);
+  const layer = document.createElement('div');
+  layer.className = 'world-bubbles';
+  box.appendChild(layer);
+  box.classList.add('on');
+  W.pip = {box:box, until: until + 700, goal:W.goal, view:Object.assign({}, W.view), stage:W.stage, bubbles:W.bubbles};
+  W.stage = box; W.bubbles = layer;
+  W.view = {x:W.me.x, y:1, z:W.me.z, size:2.7};
+  worldResize();
+}
+function worldUnwatch(){
+  const W = WORLD, pip = W.pip;
+  if(!pip) return;
+  W.pip = null;
+  pip.box.classList.remove('on');
+  W.goal = pip.goal; W.view = pip.view; W.bubbles = pip.bubbles;
+  W.stage = pip.stage;
+  if(W.stage && W.stage.isConnected) W.stage.appendChild(W.canvas);
+  worldResize();
+}
+function worldBegin(c, t){
+  if(!c.then) return;
+  c.act = c.then.kind; c.actUntil = t + c.then.ms; c.actAt = c.then.at; c.then = null;
+}
+/* Read a move by what it did, the same measurement the toast shows. */
+function worldMove(a, fx){
+  const W = WORLD;
+  if(!W || W.flat || !W.me) return;
+  const k = {};
+  (fx || []).forEach(function(x){ k[x.k] = x; });
+  let kind = 'think';
+  if(/deal|contract|partner|bid|sign|offer/i.test(a)) kind = 'deal';
+  else if(k.hours && k.perf && k.perf.d > 0) kind = 'work';
+  else if((k.stress && k.stress.d < 0) || (k.health && k.health.d > 0)) kind = 'rest';
+  else if(k.family && k.family.d > 0) kind = 'family';
+  else if(k.rep && k.rep.d > 0) kind = 'talk';
+  else if(k.hours) kind = 'work';
+  else if(k.cash && k.cash.d < 0) kind = 'spend';
+  else if((k.cash && k.cash.d > 0) || (k.biz && k.biz.d > 0)) kind = 'earn';
+  const here = W.here || 'money/position';
+  worldDo(W.me, kind, W.lots[here] || null);
+  worldPulse(fx);
+}
+/* the quarter closes: you go home, and so does everyone else */
+function worldAdvance(){
+  const W = WORLD;
+  if(!W || W.flat || !W.me) return;
+  worldWalkTo(W.me, worldDoor('work/household'));
+  worldDo(W.me, 'home', W.lots['work/household']);
+  Object.keys(W.people).forEach(function(id){ worldWalkTo(W.people[id], W.people[id].home); });
+}
+/* an event answered: you react to how it went, and if the story is somebody's,
+   they come over first and the two of you talk it through */
+function worldReact(res, castId){
+  const W = WORLD;
+  if(!W || W.flat || !W.me) return;
+  const kind = res && res.kind === 'good' ? 'cheer' : res && res.kind === 'bad' ? 'slump' : 'think';
+  const c = castId ? W.people[castId] : null;
+  if(c){
+    worldWalkTo(c, {x:W.me.x + 0.9, z:W.me.z + 0.3});
+    c.partner = W.me; W.me.partner = c;
+    worldDo(c, 'talk'); worldDo(W.me, 'talk');
+    W.me.after = kind;
+  } else worldDo(W.me, kind);
+  worldPulse(res && res.fx);
+}
+/* Coins with the money: out of your hand into the building when you spend,
+   from the building into your hand when you are paid. */
+function worldPulse(fx){
+  const W = WORLD;
+  if(!W || W.flat || !W.host || W.still || !W.me) return;
   const money = (fx || []).filter(function(x){ return x.money === 1 && (x.k === 'cash' || x.k === 'biz'); });
   if(!money.length) return;
   const d = money.reduce(function(s, x){ return s + x.d; }, 0);
   const lot = W.lots[worldHere()] || W.lots['money/position'];
   if(!lot || !d) return;
   const T = W.T, n = Math.max(4, Math.min(12, Math.round(Math.log10(Math.abs(d) + 1) * 1.6)));
-  /* on the overview the plaza is in frame and the coins travel between it and
-     the building; on a screen it is not, so the money drops into the building
-     from above when it comes in and rises out of it when it goes */
-  const house = new T.Vector3(lot.x, lot.h + 0.9, lot.z);
-  const away = W.here ? new T.Vector3(lot.x - 1.2, lot.h + 7.5, lot.z - 1.2) : new T.Vector3(0, W.plazaTop + 0.3, 0);
-  const from = d > 0 ? (W.here ? away : house) : (W.here ? house : away);
-  const to = d > 0 ? (W.here ? house : away) : (W.here ? away : house);
-  const arc = W.here ? 1.2 : 4.5;
-  const now = performance.now();
+  const me = W.me.path.length ? W.me.path[W.me.path.length - 1] : {x:W.me.x, z:W.me.z};
+  const hand = new T.Vector3(me.x, 1.2, me.z), house = new T.Vector3(lot.x, Math.min(lot.h, 3) + 0.6, lot.z);
+  const from = d > 0 ? house : hand, to = d > 0 ? hand : house;
+  const now = performance.now() + (W.me.path.length ? 1800 : 300);
   for(let i = 0; i < n; i++){
-    const c = new T.Mesh(new T.CylinderGeometry(0.22, 0.22, 0.06, 14), worldGlow(d > 0 ? '#f5c542' : '#ffb067'));
+    const c = new T.Mesh(new T.CylinderGeometry(0.16, 0.16, 0.05, 14), worldGlow(d > 0 ? '#f5c542' : '#ffb067'));
     c.rotation.x = Math.PI / 2;
-    W.root.add(c);
-    W.coins.push({m:c, from:from, to:to, arc:arc, start: now + i * 70, dur: 950});
+    c.visible = false;
+    W.fxg.add(c);
+    W.coins.push({m:c, from:from, to:to, arc:1.4, start: now + i * 70, dur: 800});
   }
   worldKick();
 }
+/* Everyone, one frame: walking along their path, doing what they are doing,
+   or - for the people in your life - wandering near their door. */
+function worldStepPeople(t){
+  const W = WORLD, dt = Math.min(0.1, (t - (W.peopleT || t)) / 1000);
+  W.peopleT = t;
+  worldEveryone().forEach(function(c){
+    const b = c.body;
+    let walking = false;
+    if(c.path.length && !W.still){
+      const p = c.path[0], dx = p.x - c.x, dz = p.z - c.z, dist = Math.hypot(dx, dz);
+      const v = (c.pace || c.speed) * (c === W.me && W.me.status ? 0.7 : 1) * dt;
+      if(dist <= v){ c.x = p.x; c.z = p.z; c.path.shift(); if(!c.path.length) worldBegin(c, t); }
+      else { c.x += dx / dist * v; c.z += dz / dist * v; c.face = Math.atan2(dx, dz); walking = true; }
+    } else if(c.path.length){
+      const p = c.path[c.path.length - 1]; c.x = p.x; c.z = p.z; c.path = []; worldBegin(c, t);
+    }
+    if(!walking && c.kind === 'cast' && !c.act && t > c.wanderAt && !W.still){
+      /* a few steps about their door, then a pause */
+      const a = Math.random() * Math.PI * 2, r = 0.6 + Math.random() * 1.4;
+      c.path = [{x:c.home.x + Math.cos(a) * r, z:c.home.z + Math.sin(a) * r}];
+      c.pace = 0; c.speed = 1.1 + (c.mood === 'warm' ? 0.4 : 0);
+      c.wanderAt = t + 3500 + Math.random() * 5000;
+    }
+    const doing = t < c.actUntil ? c.act : '';
+    if(!doing && c.act){
+      c.act = ''; if(c.partner){ c.partner = null; }
+      if(c.after){ const k = c.after; c.after = null; worldDo(c, k); }
+    }
+    /* face what you are doing it to */
+    if(doing && c.partner) c.face = Math.atan2(c.partner.x - c.x, c.partner.z - c.z);
+    else if(doing && c.actAt) c.face = Math.atan2(c.actAt.x - c.x, c.actAt.z - c.z);
+    b.g.position.set(c.x, 0.25, c.z);
+    b.g.rotation.y += (c.face - b.g.rotation.y) * 0.25;
+    const s = Math.sin(t / 95);
+    let lL = 0, lR = 0, aL = 0, aR = 0, lift = 0, lean = 0;
+    if(walking){ c.step += dt * 9; lL = Math.sin(c.step) * 0.6; lR = -lL; aL = -lL * 0.8; aR = lL * 0.8; lift = Math.abs(Math.sin(c.step)) * 0.05; }
+    else if(doing === 'work'){ aL = -1.15 + s * 0.15; aR = -1.15 - s * 0.15; }
+    else if(doing === 'rest' || doing === 'home'){ lL = lR = -1.45; lift = -0.3; aL = aR = -0.3; }
+    else if(doing === 'talk' || doing === 'family'){ aR = -0.7 + Math.sin(t / 160) * 0.45; aL = -0.2; }
+    else if(doing === 'deal'){ aR = -1.4 + Math.sin(t / 120) * 0.15; }
+    else if(doing === 'cheer'){ aL = aR = -2.8; lift = Math.abs(Math.sin(t / 130)) * 0.35; }
+    else if(doing === 'slump'){ lean = 0.32; aL = aR = 0.1; }
+    else if(doing === 'spend' || doing === 'earn'){ aR = -1.35; }
+    else if(doing === 'think'){ aR = -2.1; lean = 0.05; }
+    else { aL = Math.sin(t / 900) * 0.04; aR = -aL; }
+    const ease = function(o, v){ o.rotation.x += (v - o.rotation.x) * 0.3; };
+    ease(b.legL, lL); ease(b.legR, lR); ease(b.armL, aL); ease(b.armR, aR); ease(b.torso, lean);
+    b.head.position.y = (0.55 + 0.68) - lean * 0.4;
+    b.g.position.y = 0.25 + lift;
+  });
+}
+/* the bubbles over their heads: what they are doing, or what they need */
+function worldBubbles(t){
+  const W = WORLD, layer = W.bubbles;
+  if(!layer) return;
+  const v = new W.T.Vector3();
+  worldEveryone().forEach(function(c){
+    const text = t < c.sayUntil ? c.say : c.status;
+    if(!text){ c.bub.style.display = 'none'; return; }
+    if(c.bub.parentNode !== layer) layer.appendChild(c.bub);
+    if(c.bub.textContent !== text) c.bub.textContent = text;
+    c.bub.classList.toggle('story', !(t < c.sayUntil) && text.charAt(0) === '!');
+    v.set(c.x, 1.72 * c.body.g.scale.y + (c.body.g.position.y - 0.25), c.z).project(W.camera);
+    const x = (v.x + 1) / 2 * W.w, y = (1 - v.y) / 2 * W.h;
+    if(x < 8 || x > W.w - 8 || y < 12 || y > W.h - 8 || v.z > 1){ c.bub.style.display = 'none'; return; }
+    c.bub.style.display = '';
+    c.bub.style.left = Math.round(x) + 'px'; c.bub.style.top = Math.round(y) + 'px';
+  });
+}
 function worldDraw(t){
   const W = WORLD;
-  W.walkers.forEach(function(p){
-    const a = p.phase + (W.still ? 0 : t * p.speed);
-    p.g.position.set(Math.cos(a) * p.ring, 0, Math.sin(a) * p.ring);
-    p.g.rotation.y = -a;
-  });
   W.cars.forEach(function(c){
     const u = ((c.phase + (W.still ? 0 : t * c.speed)) % 1);
     const s = (u * 2 - 1) * c.span * c.dir;
@@ -438,13 +717,14 @@ function worldDraw(t){
   W.coins = W.coins.filter(function(c){
     const k = (t - c.start) / c.dur;
     if(k < 0){ c.m.visible = false; return true; }
-    if(k >= 1){ W.root.remove(c.m); c.m.geometry.dispose(); return false; }
+    if(k >= 1){ W.fxg.remove(c.m); c.m.geometry.dispose(); return false; }
     c.m.visible = true;
     c.m.position.lerpVectors(c.from, c.to, k);
     c.m.position.y += Math.sin(k * Math.PI) * c.arc;
     c.m.rotation.z = k * 9;
     return true;
   });
+  worldStepPeople(t);
   const here = W.here ? W.lots[W.here] : null;
   if(W.ring){
     W.ring.visible = !!here;
@@ -456,7 +736,8 @@ function worldDraw(t){
   }
   worldCamera();
   W.renderer.render(W.scene, W.camera);
-  worldLabels();
+  if(!W.pip) worldLabels();
+  worldBubbles(t);
   W.drawn = t;
 }
 function worldFrame(t){
@@ -467,10 +748,14 @@ function worldFrame(t){
   const dt = Math.min(0.1, (t - (W.last || t)) / 1000);
   W.last = t;
   worldResize();
+  if(W.pip){
+    if(t > W.pip.until) worldUnwatch();
+    else W.goal = {x:W.me.x, y:1, z:W.me.z, size:2.7};
+  }
   const k = W.still ? 1 : 1 - Math.exp(-dt * 4.5);
   ['x', 'y', 'z', 'size'].forEach(function(a){ W.view[a] += (W.goal[a] - W.view[a]) * k; });
   const flying = ['x', 'y', 'z', 'size'].some(function(a){ return Math.abs(W.goal[a] - W.view[a]) > 0.02; });
-  const busy = flying || W.coins.length > 0 || W.grows.length > 0;
+  const busy = flying || !!W.pip || W.coins.length > 0 || W.grows.length > 0 || worldPeopleBusy(t);
   /* about 30 frames a second while the city moves; flights, coins and growth
      at full rate */
   if(busy || t - W.drawn > 32) worldDraw(t);
@@ -498,7 +783,9 @@ function worldTap(ev){
   const hit = ray.intersectObjects(W.picks, false)[0];
   if(!hit) return;
   const u = hit.object.userData, here = worldHere(), focus = here ? here.split('/')[0] : (UI.worldFocus || '');
-  if(!here && (!focus || u.district !== focus)){
+  /* a person opens the screen about people; you open your own record */
+  if(u.person) u.lot = u.person === 'me' ? 'legacy/record' : 'legacy/people';
+  if(!u.person && !here && (!focus || u.district !== focus)){
     const d = /** @type {HTMLElement} */ (W.host.querySelector('.wl[data-a="worldfocus"][data-d="' + u.district + '"]'));
     if(d) d.click();
     return;
@@ -537,17 +824,35 @@ function worldSync(off){
   if(!WORLD) WORLD = worldInit();
   if(WORLD.flat){ host.classList.add('flat'); return; }
   const stage = /** @type {HTMLElement} */ (host.querySelector('.world-stage'));
-  stage.appendChild(WORLD.canvas);
   host.classList.add('live');
-  WORLD.host = host; WORLD.stage = stage;
+  WORLD.host = host;
+  /* while the corner window is open the canvas stays in it; the city gets it
+     back when the move is done */
+  if(WORLD.pip) WORLD.pip.stage = stage;
+  else { stage.appendChild(WORLD.canvas); WORLD.stage = stage; }
   worldResize();
   const m = worldModel();
   const sig = JSON.stringify([m.buildings, m.people, m.plaza, m.tone]);
   if(sig !== WORLD.sig){ worldBuild(m); WORLD.sig = sig; }
   const here = worldHere(), focus = here ? here.split('/')[0] : (UI.worldFocus || '');
   WORLD.goal = worldGoal(m, focus, here);
-  if(WORLD.focus === null) WORLD.view = Object.assign({}, WORLD.goal);
+  const first = WORLD.focus === null;
+  if(first) WORLD.view = Object.assign({}, WORLD.goal);
   WORLD.focus = focus; WORLD.here = here;
+  /* you go where the page goes: to the door of the screen's building, or back
+     to the plaza from the overview - placed there on the first draw, walked
+     there after that */
+  if(WORLD.lastHere !== here){
+    const to = here ? worldDoor(here) : {x:0.9, z:0.9};
+    if(first){ WORLD.me.x = to.x; WORLD.me.z = to.z; }
+    else worldWalkTo(WORLD.me, to);
+    WORLD.lastHere = here;
+  }
+  /* the bubbles' layer is part of the container a render replaces */
+  const layer = document.createElement('div');
+  layer.className = 'world-bubbles'; layer.setAttribute('aria-hidden', 'true');
+  host.appendChild(layer);
+  if(WORLD.pip) WORLD.pip.bubbles = layer; else WORLD.bubbles = layer;
   worldDraw(performance.now());
   worldKick();
 }

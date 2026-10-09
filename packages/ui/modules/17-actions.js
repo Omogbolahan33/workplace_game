@@ -6,7 +6,7 @@ import { renderWhy } from './02-view-overview.js';
 import { releaseAppRoute, releaseShell, render, renderTop, startAdvanceAnim } from './03-render.js';
 import { shellClear, toggleDisclosure } from './04-render-tabs-and-rail.js';
 import { copyText, renderModal, seasonCanScan } from './13-render-modal.js';
-import { worldPulse, worldSync } from './18-world.js';
+import { worldAdvance, worldMove, worldReact, worldSync } from './18-world.js';
 
 /* Generated from src/17-actions.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export const ACT = {
@@ -1312,6 +1312,9 @@ export const ACT = {
     if(th && (S.threads||[]).indexOf(th)>=0) afterThreadChoice(th, opt);
     UI.modal = {type:'result', ev:ev, opt:opt, res:res};
     render();
+    /* in the world you react to how it went; a story that is somebody's
+       brings them over to talk it through first */
+    worldReact(res, th && th.castId);
     const mb = document.querySelector('.modalbox'); if(mb) mb.scrollTop = 0;
   },
   okamount: ()=>{
@@ -1476,13 +1479,16 @@ document.addEventListener('click', function(e){
      modal, starts a run or closes a quarter is not a move with an effect yet */
   const run0 = S, before = (S && !UI.modal) ? vitals() : null;
   e.preventDefault(); ACT[a](el); autosaveSoon();
+  /* the quarter closes: in the world, everyone goes home */
+  if(a === 'advance' && S === run0) worldAdvance();
   if(before && S === run0 && !UI.modal && a !== 'advance'){
     const fx = deltaOf(before, vitals());
     if(fx.length){
       fxToast('<div class="row wrap" style="gap:4px;justify-content:center">'+fxChipsHTML(fx)+'</div>');
-      /* and the money moves in the world: coins between the plaza and the
-         building of the screen the move was made on */
-      worldPulse(fx);
+      /* and you act it out in the world, at the building of the screen the
+         move was made on - working, resting, paying, shaking hands - with the
+         money moving between your hand and the building */
+      worldMove(a, fx);
     }
   }
 });

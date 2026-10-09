@@ -459,3 +459,16 @@ input[type=text]:focus,input[type=email]:focus,input[type=password]:focus,select
 .world.compact{height:clamp(190px,30vh,280px)}
 .world .wl.here{border-color:var(--acc);box-shadow:0 0 0 2px rgba(245,179,1,.35)}
 @media (max-width:640px){ #scene{padding:10px 10px 0} }
+/* the bubbles over people's heads: what they are doing, or what they need */
+.world-bubbles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.wbub{position:absolute;transform:translate(-50%,-100%);padding:3px 8px;border-radius:12px;
+  background:rgba(9,14,21,.86);border:1px solid rgba(255,255,255,.18);color:#eef2f6;font-size:12px;font-weight:650;
+  white-space:nowrap;line-height:1.25}
+.wbub.story{border-color:var(--acc);color:var(--acc)}
+/* the corner window: you, doing the move you just made, while the city is
+   scrolled out of sight. Not a control; it comes and goes with the move. */
+#worldpip{position:fixed;right:12px;top:170px;width:150px;height:150px;border-radius:16px;overflow:hidden;
+  border:1px solid rgba(245,179,1,.55);box-shadow:0 12px 30px #000b;background:#0e1620;z-index:290;
+  pointer-events:none;opacity:0;transform:translateY(-12px) scale(.96);transition:opacity .25s,transform .25s;visibility:hidden}
+#worldpip.on{opacity:1;transform:none;visibility:visible}
+#worldpip canvas{position:absolute;inset:0;width:100%;height:100%;display:block}

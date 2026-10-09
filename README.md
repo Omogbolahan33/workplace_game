@@ -193,6 +193,21 @@ under it, with its district around it and **City** to go back. Tap a building
 and its screen opens - the same screen, through the same `goto` the tabs use.
 Nothing was removed and no rule changed.
 
+**You and the people in your life live in it.** You walk to the building of
+whatever screen you open, and when you make a move you act it out there:
+working at the career tower, resting, paying or being paid (the money passes
+between your hand and the building), shaking on a deal, time with your family.
+When the quarter closes you walk home. An answered event plays out too: you
+cheer, slump or ponder, and if the story is somebody's they come over and the
+two of you talk it through. The people in your life keep to the building their
+role belongs to - family at home, the banker at the bank, the rival at the
+rival's tower - and show what the game knows: a gold **!** and their name when a
+story with them is open, a heart or a flare when your last move with them
+landed, a tie when they have made it. Someone who has died or emigrated is not
+in the city. Tap a person for People, yourself for Your record. If you make a
+move with the city scrolled out of sight, a small window opens under the nav
+with the camera on you for as long as you are doing it.
+
 What the world adds is that state has a shape and money has a direction. The
 career tower grows with the salary, the company with its outlets, the ambition
 monument with its progress, the plaza's column with net worth - and when a
