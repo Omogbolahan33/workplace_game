@@ -9,8 +9,6 @@ function viewOverview(){
   const yearsLeft = Math.max(0, 65 - p.age);
   const amb = ambitionOf(), ap = ambitionPct();
   let h = '';
-  /* the game as a place: every screen a building, tap one to open it */
-  h += worldHTML();
   /* the first quarter only, once per player: the loop and three places to start */
   h += firstMovesHTML();
 

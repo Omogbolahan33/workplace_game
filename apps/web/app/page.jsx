@@ -19,6 +19,8 @@ export default function Page() {
           </div>
         </div>
       </div>
+      {/* the world, above every screen: written by the ui's worldSync(), never by React */}
+      <div id="scene" />
       <div id="main" />
       <div id="modalHost" />
       <div id="toastHost" />

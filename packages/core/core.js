@@ -12508,37 +12508,51 @@ function worldModel(){
     districts: districts, buildings: buildings, people: people};
 }
 
+/* Which building the page is showing: the current route, or '' on the
+   overview. The world stands above every screen, and on a screen it is that
+   screen's building the camera looks at. */
+function worldHere(){
+  const k = routeKey();
+  return k.indexOf('/') > 0 ? k : '';
+}
 /* The world's markup: a stage the ui fills with a canvas, and the labels -
    which are the controls. They are ordinary buttons with ordinary actions, so a
    player with no WebGL, a screen reader or a test sees a list of places that
    works exactly like the 3D city; the renderer only moves them over their
-   buildings. In the city view the labels are the four districts; with a
-   district open they are its buildings and a way back. */
+   buildings. Three views, one city:
+   - the overview, whole: the labels are the four districts;
+   - the overview, a district open: its six buildings and a way back;
+   - any other screen: the camera on that screen's building, the district's
+     buildings around it (the one you are in marked), and a way to the city. */
 function worldHTML(){
   const m = worldModel();
-  const focus = UI.worldFocus || '';
+  const here = worldHere();
+  const focus = here ? here.split('/')[0] : (UI.worldFocus || '');
   const pin = function(x, y, z){ return ' data-wx="'+x+'" data-wy="'+y+'" data-wz="'+z+'"'; };
+  const lot = function(b){
+    return '<button class="wl wb'+(b.muted?' muted':'')+(b.tone?' t-'+b.tone:'')+(b.id === here ? ' here' : '')+'" data-a="goto" data-t="'+b.tab+'" data-s="'+b.sub+'"'+
+      (b.id === here ? ' aria-current="page"' : '')+pin(b.x, b.h + 0.4, b.z)+'><b>'+esc(b.label)+'</b>'+(b.note ? '<span>'+esc(b.note)+'</span>' : '')+'</button>';
+  };
   let labels = '';
   if(!focus){
     labels = m.districts.map(function(d){
       return '<button class="wl wd" data-a="worldfocus" data-d="'+d.tab+'"'+pin(d.x, 9, d.z)+'>'+esc(d.label)+'</button>';
     }).join('');
   } else {
-    labels = '<button class="wl wback" data-a="worldfocus" data-d="">‹ City</button>' +
-      m.buildings.filter(function(b){ return b.tab === focus; }).map(function(b){
-        return '<button class="wl wb'+(b.muted?' muted':'')+(b.tone?' t-'+b.tone:'')+'" data-a="goto" data-t="'+b.tab+'" data-s="'+b.sub+'"'+
-          pin(b.x, b.h + 0.4, b.z)+'><b>'+esc(b.label)+'</b>'+(b.note ? '<span>'+esc(b.note)+'</span>' : '')+'</button>';
-      }).join('');
+    /* from a screen, "City" is the overview with the whole city; from a district
+       on the overview, it is the whole city again */
+    labels = '<button class="wl wback" data-a="worldfocus" data-d=""'+(here ? ' data-t="overview"' : '')+'>\u2039 City</button>' +
+      m.buildings.filter(function(b){ return b.tab === focus; }).map(lot).join('');
   }
-  return '<div class="world" id="world" data-focus="'+esc(focus)+'">'+
+  return '<div class="world'+(here ? ' compact' : '')+'" id="world" data-focus="'+esc(focus)+'" data-here="'+esc(here)+'">'+
     '<div class="world-stage" aria-hidden="true"></div>'+
     '<div class="world-labels">'+labels+'</div>'+
-    '<div class="world-cap">'+esc(m.city)+' · '+esc(m.date)+(m.era ? ' · '+esc(m.era) : '')+'</div>'+
+    '<div class="world-cap">'+esc(m.city)+' \u00b7 '+esc(m.date)+(m.era ? ' \u00b7 '+esc(m.era) : '')+'</div>'+
     '</div>';
 }
 
 /* -------------------------------------------------------------------------
-   Everything above, exported. 652 names: the simulation's whole surface.
+   Everything above, exported. 653 names: the simulation's whole surface.
    ------------------------------------------------------------------------- */
 export {
   ALL_EVENTS,
@@ -13187,6 +13201,7 @@ export {
   worldBuilding,
   worldHTML,
   worldHeight,
+  worldHere,
   worldModel,
   worldNote,
   yearClosing,

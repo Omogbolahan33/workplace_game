@@ -184,19 +184,27 @@ player's, entered in Settings.
 
 ## The world — the game as a 3D place
 
-The Overview opens on a city. Every screen in the game is a building in it: the
-plaza is the Overview, the four districts are Work, Money, Governance and
-Legacy, and each district's buildings are that tab's six screens. Tap a
-district and the camera flies there; tap a building and its screen opens — the
-same screen, through the same `goto` the tabs use. Nothing was removed and no
-rule changed; what the world adds is that each screen's state is also its shape
-(the career tower grows with the salary, the company with its outlets, the
-ambition monument with its progress, the plaza's column with net worth).
+The game stands in a city, above every screen. Every screen is a building in
+it: the plaza is the Overview, the four districts are Work, Money, Governance
+and Legacy, and each district's buildings are that tab's six screens. On the
+Overview you see the whole city - tap a district and the camera flies there. On
+any other screen the camera stands close on that screen's building, a gold ring
+under it, with its district around it and **City** to go back. Tap a building
+and its screen opens - the same screen, through the same `goto` the tabs use.
+Nothing was removed and no rule changed.
+
+What the world adds is that state has a shape and money has a direction. The
+career tower grows with the salary, the company with its outlets, the ambition
+monument with its progress, the plaza's column with net worth - and when a
+quarter changes a building, it grows or shrinks into its new size. When a move
+changes your cash, coins fly between the plaza and the building it was made on
+(on a screen, into or out of that building). The city is drawn through a long
+lens with lit windows, trees, lamps and traffic; none of it is a control.
 
 | piece | where | what it does |
 |---|---|---|
 | what the city contains | `packages/core/src/32-the-world.js` | `worldModel()` reads the state each screen draws and returns buildings, districts and people as data; `worldHTML()` writes the stage and the labels. No DOM, no random draw |
-| how it is drawn | `packages/ui/src/18-world.js` | `worldSync()` runs after every render in both renderers, moves the one canvas into the new container, rebuilds the city only when the model changed, and floats each label over its building |
+| how it is drawn | `packages/ui/src/18-world.js` | `worldSync()` runs after every render in both renderers and on the start screen, writes `#scene` (its own container between the header and the page - no renderer touches it), moves the one canvas in, rebuilds the city only when the model changed, aims the camera at the screen's building, and floats each label over its building |
 | the renderer | `packages/ui/vendor/three-world.js` | a slice of three.js 0.169.0 (≈ 484 KB, 122 KB gzipped), committed, carried as inert `text/plain` and evaluated the first time a world is shown |
 
 The labels are the controls — ordinary buttons with `worldfocus` and `goto` —

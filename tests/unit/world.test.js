@@ -76,6 +76,32 @@ test('the labels are the controls: districts in the city, screens in a district'
   C.UI.worldFocus = '';
 });
 
+test('on any screen the world stands on that screen\'s building, with a way back to the city', async () => {
+  const C = await world();
+  const buttons = (html) => [...html.matchAll(/<button class="([^"]*)" data-a="(\w+)"([^>]*)>(.*?)<\/button>/g)]
+    .map((m) => ({ cls: m[1], a: m[2], attrs: m[3],
+      d: (m[3].match(/data-d="([^"]*)"/) || [])[1], t: (m[3].match(/data-t="([^"]*)"/) || [])[1],
+      s: (m[3].match(/data-s="([^"]*)"/) || [])[1] }));
+  for (const tab of ['work', 'money', 'governance', 'legacy']) {
+    for (const sub of C.subsFor(tab)) {
+      C.UI.tab = tab; C.UI.sub = sub.id;
+      const html = C.worldHTML();
+      assert.match(html, new RegExp('data-here="' + tab + '/' + sub.id + '"'), tab + '/' + sub.id + ': the world does not say which building the page is');
+      const bs = buttons(html);
+      const here = bs.filter((b) => / here\b/.test(b.cls));
+      assert.equal(here.length, 1, tab + '/' + sub.id + ': ' + here.length + ' buildings are marked as the one you are on');
+      assert.equal(here[0].t + '/' + here[0].s, tab + '/' + sub.id);
+      assert.match(here[0].attrs, /aria-current="page"/, 'the building you are on does not say so to a screen reader');
+      assert.deepEqual(bs.filter((b) => b.a === 'goto').map((b) => b.t + '/' + b.s), C.subsFor(tab).map((x) => tab + '/' + x.id),
+        tab + '/' + sub.id + ': the district around it is not its own six screens');
+      const back = bs.find((b) => b.a === 'worldfocus');
+      assert.ok(back && back.d === '' && back.t === 'overview', tab + '/' + sub.id + ': City does not lead back to the whole city');
+    }
+  }
+  C.UI.tab = 'overview'; C.UI.sub = '';
+  assert.match(C.worldHTML(), /data-here=""/, 'the overview claims to be a building');
+});
+
 test('looking at the world changes nothing about the run', async () => {
   const C = await world();
   for (let q = 0; q < 6; q++) playQuarter(C);

@@ -357,7 +357,8 @@
    "00-cities.js: dateLabel, esc, fmt",
    "31-afterthreadchoice.js: ambitionOf, ambitionPct",
    "30-eras-you-live-through.js: eraById",
-   "11-profilesummary-and-strings.js: subsFor"
+   "11-profilesummary-and-strings.js: subsFor",
+   "12-main.js: routeKey"
   ],
   "externals": []
  }

@@ -29,7 +29,7 @@ const OUT_MODULE = path.join(ROOT, 'packages/ui/vendor/three-world.text.mjs');
 const PKG = JSON.parse(fs.readFileSync(path.join(import.meta.dirname, 'node_modules/three/package.json'), 'utf8'));
 
 const NAMES = [
-  'Scene', 'Color', 'Fog', 'OrthographicCamera', 'WebGLRenderer', 'Group', 'Mesh',
+  'Scene', 'Color', 'Fog', 'PerspectiveCamera', 'WebGLRenderer', 'Group', 'Mesh',
   'BoxGeometry', 'CylinderGeometry', 'ConeGeometry', 'PlaneGeometry', 'SphereGeometry',
   'MeshLambertMaterial', 'MeshBasicMaterial', 'HemisphereLight', 'DirectionalLight',
   'Raycaster', 'Vector2', 'Vector3', 'SRGBColorSpace', 'PCFSoftShadowMap',

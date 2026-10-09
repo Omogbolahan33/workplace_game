@@ -451,3 +451,11 @@ input[type=text]:focus,input[type=email]:focus,input[type=password]:focus,select
 .world.live .wl.wback{left:10px;top:10px;transform:none}
 .world.live .wl:not(.placed):not(.wback){visibility:hidden}
 .world-cap{position:absolute;left:12px;bottom:10px;font-size:11px;color:var(--dim);pointer-events:none}
+/* the world's own row, above every screen; on a screen it is compact and the
+   building you are on carries a gold edge */
+#scene{max-width:1180px;margin:0 auto;padding:14px 12px 0}
+#scene:empty{display:none}
+#scene .world{margin:0}
+.world.compact{height:clamp(190px,30vh,280px)}
+.world .wl.here{border-color:var(--acc);box-shadow:0 0 0 2px rgba(245,179,1,.35)}
+@media (max-width:640px){ #scene{padding:10px 10px 0} }

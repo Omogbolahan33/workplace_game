@@ -6,6 +6,7 @@ import { renderWhy } from './02-view-overview.js';
 import { releaseAppRoute, releaseShell, render, renderTop, startAdvanceAnim } from './03-render.js';
 import { shellClear, toggleDisclosure } from './04-render-tabs-and-rail.js';
 import { copyText, renderModal, seasonCanScan } from './13-render-modal.js';
+import { worldPulse, worldSync } from './18-world.js';
 
 /* Generated from src/17-actions.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export const ACT = {
@@ -338,7 +339,12 @@ export const ACT = {
   stepback:  e=>{ _cfg.step = Math.max(1, (_cfg.step||1) - 1); UI.modal = {type:'start'}; render(); },
   /* the world: open a district, or go back to the whole city. Only the camera
      moves; the screens are the buildings' labels, which are plain goto */
-  worldfocus: e=>{ UI.worldFocus = e.dataset.d || ''; render(); },
+  worldfocus: e=>{
+    UI.worldFocus = e.dataset.d || '';
+    /* from a screen, "City" is the overview with the whole city in view */
+    if(e.dataset.t){ UI.bellOpen = false; UI.tab = e.dataset.t; UI.sub = ''; UI.modal = null; UI.scrollTop = true; }
+    render();
+  },
   /* the deal is the date's, so pressing it twice deals the same life twice */
   dealtoday: e=>{ _cfg.dealt = todaysLife(); UI.modal = {type:'start'}; render(); },
   undeal:    e=>{ _cfg.dealt = null; UI.modal = {type:'start'}; render(); },
@@ -1361,6 +1367,9 @@ export function renderStart(){
      noticed while `startgame` read the field straight out of the DOM; the moment
      a step asked `_cfg` the question instead, it did. */
   bindInputs();
+  /* the start screen is no place for a city: the world takes itself off the
+     page, whether or not a run still exists behind this screen */
+  worldSync(true);
   /* the app may be holding a React root on #main; it lets go before this
      writes over it */
   releaseAppRoute();
@@ -1469,7 +1478,12 @@ document.addEventListener('click', function(e){
   e.preventDefault(); ACT[a](el); autosaveSoon();
   if(before && S === run0 && !UI.modal && a !== 'advance'){
     const fx = deltaOf(before, vitals());
-    if(fx.length) fxToast('<div class="row wrap" style="gap:4px;justify-content:center">'+fxChipsHTML(fx)+'</div>');
+    if(fx.length){
+      fxToast('<div class="row wrap" style="gap:4px;justify-content:center">'+fxChipsHTML(fx)+'</div>');
+      /* and the money moves in the world: coins between the plaza and the
+         building of the screen the move was made on */
+      worldPulse(fx);
+    }
   }
 });
 document.addEventListener('keydown', function(e){
