@@ -225,3 +225,17 @@ no iOS project exists (no macOS), and nothing has been pushed to Vercel or a sto
 from here. Each of those is one command on a machine that has the tool — and the
 `deploy:check` above is the part of each that can go wrong from the repository
 side.
+
+## GitHub Pages — the live address
+
+The game is served from the `gh-pages` branch at
+**https://omogbolahan33.github.io/workplace_game/**, which holds exactly the
+committed `ledger/` folder (the page, manifest, worker and icons).
+
+```bash
+npm run build            # and commit ledger/ - Pages serves what is committed
+npm run deploy:pages     # ledger/ -> gh-pages, force-pushed; live in about a minute
+```
+
+Pages serves over https, so the worker registers and the game installs to a
+home screen and plays offline from there.
