@@ -14,7 +14,7 @@ mechanically by `tools/playtest.mjs`.
 ## 1. The rule this protocol exists to obey
 
 **Copy nothing that the log does not show working.** For each mechanic from
-`FINDINGS.md` §5 the sitting has to produce one of three verdicts:
+`FINDINGS.md` §8 the sitting has to produce one of three verdicts:
 
 | verdict | when |
 |---|---|
@@ -148,8 +148,8 @@ baseline a competitor has to beat:
 
 ## 5. Cost sheet — what a copy would actually cost us
 
-Fill this before deciding. The items are `FINDINGS.md` §5: flow defects (5a),
-surface changes (5b) and growth moves (5c). Three of them are cheap; the rest are
+Fill this before deciding. The items are `FINDINGS.md` §8: flow defects (8a),
+what playing them showed (8b), surface changes (8c) and growth moves (8d). Three of them are cheap; the rest are
 not.
 
 | what | would cost us | still worth it? |
@@ -173,7 +173,7 @@ not.
    column is where the sitting lives).
 2. `node tools/playtest.mjs --compare playtest/seat-lagos-life.csv`
    → the two columns side by side, field names matched, no arithmetic by hand.
-3. Bring the log to the decision: each `FINDINGS.md` §3 mechanic gets **copy**,
+3. Bring the log to the decision: each `FINDINGS.md` §5 and §8b mechanic gets **copy**,
    **decline** or **unmeasurable**, and the reason is a line from the log.
 
 **Ethics, non-negotiable:** 18+ and a real sign-up are theirs to set — respect

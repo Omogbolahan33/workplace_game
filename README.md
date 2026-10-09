@@ -288,8 +288,10 @@ without them the browser gates exit 127 and read like broken tests.
 - **`MIGRATION.md`** — how the single file became a project: the phases, what is
   done, and what is left (React Native is the last thing on the list).
 - **`FINDINGS.md`** — the whole competitive and UX read in one file: Lagos Life
-  (a browser life sim that launched in the same city), what works in its screens
-  and its journey, our journey measured, the ranked fix list, and what not to take.
+  (a browser life sim that launched in the same city) and PH Lifestyle, both played
+  logged in, what works in their screens and journeys, our journey measured, what
+  has shipped, the ranked fix list, and what not to take. Captures are in
+  `evidence/session-2026-10-08/`.
 - **`playtest/PROTOCOL.md`** — the yardstick for measuring their game the way ours
   is measured: five groups of fields with units, three fixed sittings, an event log.
   `node tools/playtest.mjs --compare playtest/seat-lagos-life.csv` prints both columns.
