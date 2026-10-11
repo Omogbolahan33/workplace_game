@@ -900,6 +900,12 @@ const EDITS = [
   { marker: 'function goodTileHTML(g)', addition: true,
     name: 'goodTileHTML — a thing you can buy, as a picture on a shelf',
     why: 'its drawing with how many you own, name and price, its effects as marks, and when you cannot afford it a bar of how far your cash gets you toward it; the Buy button, its refusal and reason are unchanged. Both renderers draw the shop from this one tile' },
+  { marker: 'function flowBarsHTML(rows, net)', addition: true,
+    name: 'flowBarsHTML — money as bars against each other',
+    why: 'each row as long as its share of the biggest, with its picture, figure and name, and the net under them rising or falling; the quarter on the Overview and income against burn on Position both use it' },
+  { marker: 'function positionStrip()',
+    name: 'positionStrip — where you stand, drawn',
+    why: 'net worth as the one big number and runway as a ring beside it (full when you live inside your means, emptying toward a month), income against burn as bars with the month\'s surplus or bleed under them; the reading sentence and the all-clear are prose, shown with the explanations, and every exposure chip is unchanged. Four stacked boxes took a phone screen' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

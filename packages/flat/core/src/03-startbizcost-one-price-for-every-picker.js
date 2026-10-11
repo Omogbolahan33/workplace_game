@@ -84,7 +84,10 @@ function bizTypeTileHTML(t){
     '</div>'+
     foldHTML('What it is', t.desc+' Margin '+pct(t.margin, 0)+' · growth '+pct(t.growth, 0)+'/q · labour '+
       t.laborPer+' · regulatory risk '+pct(t.regRisk, 0)+'.')+
-    (afford ? '' : '<div class="row wrap" style="gap:5px"><span class="chip y">short '+fmt(cost - S.fin.cash)+'</span></div>')+
+    /* how far your cash gets you toward it, as the shop draws it; the
+       shortfall is the bar's name */
+    (afford ? '' : '<span class="gfx bmb gsave" role="img" aria-label="short '+fmt(cost - S.fin.cash)+'" title="short '+fmt(cost - S.fin.cash)+
+      ' \u00b7 you have '+fmt(S.fin.cash)+' of '+fmt(cost)+'"><i style="width:'+Math.max(3, Math.round(Math.max(0, S.fin.cash) / cost * 100))+'%;background:var(--acc)"></i></span>')+
     '<div class="row" style="gap:6px">'+
       '<button class="btn sm '+(afford ? 'primary' : '')+'" style="flex:1" data-a="startbiz" data-t="'+t.id+'"'+
         (afford ? '' : ' disabled aria-disabled="true" title="Needs '+fmt(cost)+' · you have '+

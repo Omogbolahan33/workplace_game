@@ -85,7 +85,7 @@ const pos = M.routeView();
 ['Net worth','Income','Burn','Runway','Where you stand'].forEach(function (k) {
   ck(pos.indexOf(k) >= 0, 'Position is missing the ' + k + ' figure');
 });
-ck(/Runway<\/div><div style="font-size:21px[^>]*>(Indefinite|12\+ qtrs|\d+ qtrs|\d+ months?)</.test(pos),
+ck(/>Runway (Indefinite|12\+ qtrs|\d+ qtrs|\d+ months?)</.test(pos),
    'Position runway did not render a value');
 
 /* runway must be finite and correctly scaled when genuinely bleeding */
@@ -100,7 +100,7 @@ M.UI.tab='money'; M.UI.sub='position'; S.grp={}; expand('money/position');
 const broke = M.routeView();
 ck(broke.indexOf('Indefinite') < 0, 'a broke run still reports indefinite runway');
 ck(broke.indexOf('Informal lender') >= 0, 'shark debt not flagged as an exposure');
-ck(/\d+ months?<\/div>/.test(broke), 'broke run did not report runway in months');
+ck(/>Runway \d+ months?</.test(broke), 'broke run did not report runway in months');
 console.log('position strip  : net worth / income / burn / runway / exposures ok');
 
 if (bad.length) { console.log('\nDEDUPE FAIL'); bad.forEach(function (b) { console.log('  FAIL:', b); }); process.exit(1); }

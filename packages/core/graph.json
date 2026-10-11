@@ -168,7 +168,7 @@
    "00-cities.js: esc, fmt, pct",
    "28-votes-and-decisions.js: covenantBreaches, lastQ",
    "26-governance-register-board.js: openResolutions",
-   "11-profilesummary-and-strings.js: bigStat"
+   "32-the-world.js: flowBarsHTML, ringsHTML, worldIco"
   ],
   "externals": []
  },

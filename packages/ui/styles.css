@@ -607,10 +607,10 @@ body.terse .prose{display:none}
 .gtile .bico{position:relative}
 .gtile .gown{position:absolute;right:0;top:0;font-size:11px;font-weight:700;color:#1a1405;background:var(--acc);border-radius:10px;padding:1px 6px;line-height:1.4}
 .gtile .emarks{display:flex;flex-wrap:wrap;gap:4px}
-.gtile .gsave{display:block;flex:none;height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}
-.gtile .gsave i{display:block;height:100%;border-radius:3px}
+.btile .gsave{display:block;flex:none;height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}
+.btile .gsave i{display:block;height:100%;border-radius:3px}
 /* where you stand: the one big number, and two rings */
-.stand{display:grid;grid-template-columns:1.25fr 1fr;gap:10px;align-items:center}
+.stand{display:grid;grid-template-columns:1.25fr 1fr;gap:10px;align-items:center;margin-bottom:10px}
 .stand .lrings{grid-template-columns:1fr 1fr;margin:0}
 .snw{display:flex;flex-direction:column;gap:2px}
 .snw .gfx{font-size:24px;line-height:1;color:var(--acc)}
@@ -641,6 +641,8 @@ body.terse .prose{display:none}
 /* the quarter's money as bars against each other */
 .qflow{display:grid;gap:8px}
 .qrow{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:8px}
+.qrow .qv{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.stand .lrings.n1{grid-template-columns:1fr}
 .qrow .qi{font-size:17px;line-height:1;color:var(--acc)}
 .qrow .qb{height:12px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden;display:block}
 .qrow .qb i{display:block;height:100%;border-radius:6px}

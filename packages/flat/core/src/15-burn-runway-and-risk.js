@@ -36,14 +36,24 @@ function positionStrip(){
   if(S.fin.credit < 45) risks.push('Credit score '+Math.round(S.fin.credit)+' — banks will not look at you');
   if(S.mkt.infl > 0.25) risks.push('Inflation '+pct(S.mkt.infl,0)+' — cash is melting');
 
+  /* drawn: net worth as the one big number and runway as a ring beside it
+     (full when you live inside your means, emptying toward a month), then
+     income against burn as bars, and the month's surplus or bleed under them.
+     The sentence that reads it to you is shown with the explanations. */
+  const runPc = rq === null ? 100 : Math.max(2, Math.min(100, rq / 12 * 100));
   let h = '<div class="card"><h3>Where you stand <span class="tag">Q'+S.turn+'</span></h3>';
-  h += '<div class="grid g4" style="margin-bottom:9px">'+
-       bigStat('Net worth', fmt(nw), debtTotal()>0 ? 'after '+fmt(debtTotal())+' of debt' : 'no debt', nw>=0?'':'bad')+
-       bigStat('Income', fmt(inc)+'/mo', 'salary, side income, yields', 'good')+
-       bigStat('Burn', fmt(burn)+'/mo', 'budget, upkeep, debt service', burn>inc?'bad':'')+
-       bigStat('Runway', runTxt, runNote, tone)+
-       '</div>';
-  h += '<div class="tiny muted" style="margin-top:2px">'+
+  h += '<div class="stand">'+
+    '<div class="snw"><span class="gfx" aria-hidden="true">'+worldIco('trend')+'</span>'+
+      '<span class="tiny muted">Net worth</span><b class="mono'+(nw >= 0 ? '' : ' bad')+'">'+fmt(nw)+'</b>'+
+      '<span class="tiny muted prose">'+(debtTotal() > 0 ? 'after '+fmt(debtTotal())+' of debt' : 'no debt')+'</span></div>'+
+    ringsHTML([{ico:'glass', label:'Runway', v:runPc, text:runTxt, note:runNote,
+      tone: tone === 'good' ? 'var(--good)' : tone === 'warn' ? 'var(--warn)' : tone === 'bad' ? 'var(--bad)' : 'var(--info)'}])+
+  '</div>';
+  h += flowBarsHTML([
+    {ico:'note', label:'Income', v:inc, c:'var(--good)', t:fmt(inc)+'/mo'},
+    {ico:'cart', label:'Burn', v:burn, c:'var(--bad)', t:fmt(burn)+'/mo'}],
+    {label: net >= 0 ? 'Banking' : 'Bleeding', v:net, text:fmt(Math.abs(net))+'/mo'});
+  h += '<div class="tiny muted prose" style="margin-top:6px">'+
        (net>=0
          ? 'You are banking <b>'+fmt(net)+'</b> a month. That surplus is the only thing in this game that compounds.'
          : (rq>=8
@@ -54,7 +64,7 @@ function positionStrip(){
     h += '<hr class="sep"><div class="tiny muted" style="margin-bottom:5px">Exposures</div><div class="row wrap" style="gap:5px">'+
          risks.map(function(r){ return '<span class="chip r">'+r+'</span>'; }).join('')+'</div>';
   } else {
-    h += '<hr class="sep"><div class="tiny muted">No live exposures. Nothing here is quietly killing the run.</div>';
+    h += '<hr class="sep prose"><div class="tiny muted prose">No live exposures. Nothing here is quietly killing the run.</div>';
   }
   h += '</div>';
   return h;

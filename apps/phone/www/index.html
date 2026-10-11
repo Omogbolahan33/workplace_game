@@ -630,10 +630,10 @@ body.terse .prose{display:none}
 .gtile .bico{position:relative}
 .gtile .gown{position:absolute;right:0;top:0;font-size:11px;font-weight:700;color:#1a1405;background:var(--acc);border-radius:10px;padding:1px 6px;line-height:1.4}
 .gtile .emarks{display:flex;flex-wrap:wrap;gap:4px}
-.gtile .gsave{display:block;flex:none;height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}
-.gtile .gsave i{display:block;height:100%;border-radius:3px}
+.btile .gsave{display:block;flex:none;height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}
+.btile .gsave i{display:block;height:100%;border-radius:3px}
 /* where you stand: the one big number, and two rings */
-.stand{display:grid;grid-template-columns:1.25fr 1fr;gap:10px;align-items:center}
+.stand{display:grid;grid-template-columns:1.25fr 1fr;gap:10px;align-items:center;margin-bottom:10px}
 .stand .lrings{grid-template-columns:1fr 1fr;margin:0}
 .snw{display:flex;flex-direction:column;gap:2px}
 .snw .gfx{font-size:24px;line-height:1;color:var(--acc)}
@@ -664,6 +664,8 @@ body.terse .prose{display:none}
 /* the quarter's money as bars against each other */
 .qflow{display:grid;gap:8px}
 .qrow{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:8px}
+.qrow .qv{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15}
+.stand .lrings.n1{grid-template-columns:1fr}
 .qrow .qi{font-size:17px;line-height:1;color:var(--acc)}
 .qrow .qb{height:12px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden;display:block}
 .qrow .qb i{display:block;height:100%;border-radius:6px}
@@ -5572,7 +5574,10 @@ function bizTypeTileHTML(t){
     '</div>'+
     foldHTML('What it is', t.desc+' Margin '+pct(t.margin, 0)+' · growth '+pct(t.growth, 0)+'/q · labour '+
       t.laborPer+' · regulatory risk '+pct(t.regRisk, 0)+'.')+
-    (afford ? '' : '<div class="row wrap" style="gap:5px"><span class="chip y">short '+fmt(cost - S.fin.cash)+'</span></div>')+
+    /* how far your cash gets you toward it, as the shop draws it; the
+       shortfall is the bar's name */
+    (afford ? '' : '<span class="gfx bmb gsave" role="img" aria-label="short '+fmt(cost - S.fin.cash)+'" title="short '+fmt(cost - S.fin.cash)+
+      ' \u00b7 you have '+fmt(S.fin.cash)+' of '+fmt(cost)+'"><i style="width:'+Math.max(3, Math.round(Math.max(0, S.fin.cash) / cost * 100))+'%;background:var(--acc)"></i></span>')+
     '<div class="row" style="gap:6px">'+
       '<button class="btn sm '+(afford ? 'primary' : '')+'" style="flex:1" data-a="startbiz" data-t="'+t.id+'"'+
         (afford ? '' : ' disabled aria-disabled="true" title="Needs '+fmt(cost)+' · you have '+
@@ -10625,14 +10630,24 @@ function positionStrip(){
   if(S.fin.credit < 45) risks.push('Credit score '+Math.round(S.fin.credit)+' — banks will not look at you');
   if(S.mkt.infl > 0.25) risks.push('Inflation '+pct(S.mkt.infl,0)+' — cash is melting');
 
+  /* drawn: net worth as the one big number and runway as a ring beside it
+     (full when you live inside your means, emptying toward a month), then
+     income against burn as bars, and the month's surplus or bleed under them.
+     The sentence that reads it to you is shown with the explanations. */
+  const runPc = rq === null ? 100 : Math.max(2, Math.min(100, rq / 12 * 100));
   let h = '<div class="card"><h3>Where you stand <span class="tag">Q'+S.turn+'</span></h3>';
-  h += '<div class="grid g4" style="margin-bottom:9px">'+
-       bigStat('Net worth', fmt(nw), debtTotal()>0 ? 'after '+fmt(debtTotal())+' of debt' : 'no debt', nw>=0?'':'bad')+
-       bigStat('Income', fmt(inc)+'/mo', 'salary, side income, yields', 'good')+
-       bigStat('Burn', fmt(burn)+'/mo', 'budget, upkeep, debt service', burn>inc?'bad':'')+
-       bigStat('Runway', runTxt, runNote, tone)+
-       '</div>';
-  h += '<div class="tiny muted" style="margin-top:2px">'+
+  h += '<div class="stand">'+
+    '<div class="snw"><span class="gfx" aria-hidden="true">'+worldIco('trend')+'</span>'+
+      '<span class="tiny muted">Net worth</span><b class="mono'+(nw >= 0 ? '' : ' bad')+'">'+fmt(nw)+'</b>'+
+      '<span class="tiny muted prose">'+(debtTotal() > 0 ? 'after '+fmt(debtTotal())+' of debt' : 'no debt')+'</span></div>'+
+    ringsHTML([{ico:'glass', label:'Runway', v:runPc, text:runTxt, note:runNote,
+      tone: tone === 'good' ? 'var(--good)' : tone === 'warn' ? 'var(--warn)' : tone === 'bad' ? 'var(--bad)' : 'var(--info)'}])+
+  '</div>';
+  h += flowBarsHTML([
+    {ico:'note', label:'Income', v:inc, c:'var(--good)', t:fmt(inc)+'/mo'},
+    {ico:'cart', label:'Burn', v:burn, c:'var(--bad)', t:fmt(burn)+'/mo'}],
+    {label: net >= 0 ? 'Banking' : 'Bleeding', v:net, text:fmt(Math.abs(net))+'/mo'});
+  h += '<div class="tiny muted prose" style="margin-top:6px">'+
        (net>=0
          ? 'You are banking <b>'+fmt(net)+'</b> a month. That surplus is the only thing in this game that compounds.'
          : (rq>=8
@@ -10643,7 +10658,7 @@ function positionStrip(){
     h += '<hr class="sep"><div class="tiny muted" style="margin-bottom:5px">Exposures</div><div class="row wrap" style="gap:5px">'+
          risks.map(function(r){ return '<span class="chip r">'+r+'</span>'; }).join('')+'</div>';
   } else {
-    h += '<hr class="sep"><div class="tiny muted">No live exposures. Nothing here is quietly killing the run.</div>';
+    h += '<hr class="sep prose"><div class="tiny muted prose">No live exposures. Nothing here is quietly killing the run.</div>';
   }
   h += '</div>';
   return h;
@@ -17409,23 +17424,28 @@ function skillsRadarHTML(){
     }).join('')+
   '</div>';
 }
-/* The quarter's money as bars against each other - what came in, what the
-   business made or lost, what living and debt took - each as long as its share
-   of the biggest, and the net under them, rising or falling. */
+/* Money as bars against each other: each row as long as its share of the
+   biggest, with its picture, figure and name, and the net under them rising
+   or falling. `net` is {label, v, text}. */
+function flowBarsHTML(rows, net){
+  const top = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.v); }).concat([1]));
+  return '<div class="qflow">'+rows.map(function(r){
+    return '<div class="qrow" title="'+esc(r.label+' '+r.t)+'"><span class="gfx qi" aria-hidden="true">'+worldIco(r.ico)+'</span>'+
+      '<span class="gfx qb" role="img" aria-label="'+esc(r.label+' '+r.t)+'"><i style="width:'+Math.max(2, Math.round(Math.abs(r.v) / top * 100))+'%;background:'+r.c+'"></i></span>'+
+      '<span class="qv"><span class="mono '+(r.c === 'var(--good)' ? 'good' : 'bad')+'">'+r.t+'</span><span class="tiny muted">'+esc(r.label)+'</span></span></div>';
+  }).join('')+
+  '<div class="qnet '+(net.v >= 0 ? 'good' : 'bad')+'"><span class="gfx" aria-hidden="true">'+worldIco(net.v >= 0 ? 'up' : 'down')+'</span>'+
+    '<span class="tiny muted">'+esc(net.label)+'</span><b class="mono">'+net.text+'</b></div></div>';
+}
+/* The quarter's money: what came in, what the business made or lost, what
+   living and debt took, and the net. */
 function quarterFlowHTML(){
   const q = S.quarter || {}, inc = Math.round(q.income || 0), exp = Math.round(q.expense || 0);
   const profit = S.biz ? (S.biz.profit || 0) : 0, net = inc - exp + profit;
   const rows = [{ico:'note', label:'Income', v:inc, c:'var(--good)', t:fmt(inc)}];
   if(S.biz) rows.push({ico:'case', label:'Business P&L', v:profit, c: profit >= 0 ? 'var(--good)' : 'var(--bad)', t:fmt(profit)});
   rows.push({ico:'cart', label:'Living + debt', v:exp, c:'var(--bad)', t:'−'+fmt(exp)});
-  const top = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.v); }).concat([1]));
-  return '<div class="qflow">'+rows.map(function(r){
-    return '<div class="qrow" title="'+esc(r.label+' '+r.t)+'"><span class="gfx qi" aria-hidden="true">'+worldIco(r.ico)+'</span>'+
-      '<span class="gfx qb" role="img" aria-label="'+esc(r.label+' '+r.t)+'"><i style="width:'+Math.max(2, Math.round(Math.abs(r.v) / top * 100))+'%;background:'+r.c+'"></i></span>'+
-      '<span class="mono '+(r.c === 'var(--good)' ? 'good' : 'bad')+'">'+r.t+'</span></div>';
-  }).join('')+
-  '<div class="qnet '+(net >= 0 ? 'good' : 'bad')+'"><span class="gfx" aria-hidden="true">'+worldIco(net >= 0 ? 'up' : 'down')+'</span>'+
-    '<span class="tiny muted">Net</span><b class="mono">'+fmt(net)+'</b></div></div>';
+  return flowBarsHTML(rows, {label:'Net', v:net, text:fmt(net)});
 }
 /* Which building the page is showing: the current route, or '' on the
    overview. The world stands above every screen, and on a screen it is that

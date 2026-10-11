@@ -476,23 +476,28 @@ function skillsRadarHTML(){
     }).join('')+
   '</div>';
 }
-/* The quarter's money as bars against each other - what came in, what the
-   business made or lost, what living and debt took - each as long as its share
-   of the biggest, and the net under them, rising or falling. */
+/* Money as bars against each other: each row as long as its share of the
+   biggest, with its picture, figure and name, and the net under them rising
+   or falling. `net` is {label, v, text}. */
+function flowBarsHTML(rows, net){
+  const top = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.v); }).concat([1]));
+  return '<div class="qflow">'+rows.map(function(r){
+    return '<div class="qrow" title="'+esc(r.label+' '+r.t)+'"><span class="gfx qi" aria-hidden="true">'+worldIco(r.ico)+'</span>'+
+      '<span class="gfx qb" role="img" aria-label="'+esc(r.label+' '+r.t)+'"><i style="width:'+Math.max(2, Math.round(Math.abs(r.v) / top * 100))+'%;background:'+r.c+'"></i></span>'+
+      '<span class="qv"><span class="mono '+(r.c === 'var(--good)' ? 'good' : 'bad')+'">'+r.t+'</span><span class="tiny muted">'+esc(r.label)+'</span></span></div>';
+  }).join('')+
+  '<div class="qnet '+(net.v >= 0 ? 'good' : 'bad')+'"><span class="gfx" aria-hidden="true">'+worldIco(net.v >= 0 ? 'up' : 'down')+'</span>'+
+    '<span class="tiny muted">'+esc(net.label)+'</span><b class="mono">'+net.text+'</b></div></div>';
+}
+/* The quarter's money: what came in, what the business made or lost, what
+   living and debt took, and the net. */
 function quarterFlowHTML(){
   const q = S.quarter || {}, inc = Math.round(q.income || 0), exp = Math.round(q.expense || 0);
   const profit = S.biz ? (S.biz.profit || 0) : 0, net = inc - exp + profit;
   const rows = [{ico:'note', label:'Income', v:inc, c:'var(--good)', t:fmt(inc)}];
   if(S.biz) rows.push({ico:'case', label:'Business P&L', v:profit, c: profit >= 0 ? 'var(--good)' : 'var(--bad)', t:fmt(profit)});
   rows.push({ico:'cart', label:'Living + debt', v:exp, c:'var(--bad)', t:'−'+fmt(exp)});
-  const top = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.v); }).concat([1]));
-  return '<div class="qflow">'+rows.map(function(r){
-    return '<div class="qrow" title="'+esc(r.label+' '+r.t)+'"><span class="gfx qi" aria-hidden="true">'+worldIco(r.ico)+'</span>'+
-      '<span class="gfx qb" role="img" aria-label="'+esc(r.label+' '+r.t)+'"><i style="width:'+Math.max(2, Math.round(Math.abs(r.v) / top * 100))+'%;background:'+r.c+'"></i></span>'+
-      '<span class="mono '+(r.c === 'var(--good)' ? 'good' : 'bad')+'">'+r.t+'</span></div>';
-  }).join('')+
-  '<div class="qnet '+(net >= 0 ? 'good' : 'bad')+'"><span class="gfx" aria-hidden="true">'+worldIco(net >= 0 ? 'up' : 'down')+'</span>'+
-    '<span class="tiny muted">Net</span><b class="mono">'+fmt(net)+'</b></div></div>';
+  return flowBarsHTML(rows, {label:'Net', v:net, text:fmt(net)});
 }
 /* Which building the page is showing: the current route, or '' on the
    overview. The world stands above every screen, and on a screen it is that
