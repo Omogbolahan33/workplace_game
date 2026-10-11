@@ -9,74 +9,15 @@
      copies had drifted, the gate's text comparison would have said so when this
      screen was converted, which is a better way to find out than by reading.
 
-  2. `ensureGov()`'s sibling problem does not arise here, but `bar()` and
-     `statRow()` do: both are core widgets used by several screens. They are
-     embedded, per the rule — one converted screen does not get to have its own
-     opinion about what a bar looks like.
-
-  `relationWord()` stays in core because the rival screen and this one both use
-  the same three-word scale, and one scale in two places is one place too many.
+  2. Each person is a face: `castTileHTML()` is core's, and both renderers draw
+     the cast from it - the portrait, its relation ring, the means and standing
+     meters, the traits, the memory and the three actions - as the household's
+     health is `lifeRingsHTML()`. One converted screen does not get to have its
+     own opinion about what a person looks like.
 */
-import { S, fmt, ROLES, FAVOURS, bar, statRow, relationWord } from '@ledger/core';
+import { S, fmt, castTileHTML, lifeRingsHTML } from '@ledger/core';
 import { RivalCard } from './view-rival.jsx';
 import Group from './group.jsx';
-
-/* the relation colour ramp: good, accent, warning, bad */
-function relationColour(relation) {
-  if (relation >= 70) return 'var(--good)';
-  if (relation >= 40) return 'var(--acc)';
-  if (relation >= 15) return 'var(--warn)';
-  return 'var(--bad)';
-}
-
-/* `key` is React's, not the component's: React takes it out of props before the
-   component ever runs, and this declaration exists so the JSX attribute is legal
-   on a props type that came from a JSDoc - React's own types do the same thing
-   with `Attributes`. Nothing in the body reads it. */
-/**
- * @param {{ c: any, key?: any }} props
- */
-function Person({ c }) {
-  const role = ROLES[c.role] || { label: c.role, blurb: '' };
-  const rel = relationWord(c.relation);
-  const colour = relationColour(c.relation);
-  const last = c.memory && c.memory.length ? c.memory[0] : null;
-  const dead = !c.alive;
-
-  return (
-    <div className="mrow" style={dead ? { opacity: '.62' } : undefined}>
-      <div className="between">
-        <div>
-          <b>{c.name}</b>{' '}
-          <span className="tiny muted">· {role.label} · {c.age}{dead ? ' · deceased' : ''}</span>
-        </div>
-        <span className="chip" style={{ background: colour + '22', color: colour }}>
-          {rel} {Math.round(c.relation)}
-        </span>
-      </div>
-      <div style={{ margin: '5px 0 4px' }} dangerouslySetInnerHTML={{ __html: bar(c.relation + 100, 200, colour) }} />
-      <div className="row wrap" style={{ gap: '4px' }}>
-        {c.traits.map((t) => <span className="chip" key={t}>{t}</span>)}
-        <span className="chip">means {Math.round(c.wealth)}</span>
-        <span className="chip">standing {Math.round(c.status)}</span>
-      </div>
-      {last && (
-        <div className="tiny muted" style={{ marginTop: '5px', fontStyle: 'italic' }}>
-          Remembers: {last.note} <span className="muted">({last.d})</span>
-        </div>
-      )}
-      {!dead && (
-        <div className="row wrap" style={{ marginTop: '8px' }}>
-          {FAVOURS[c.role] ? (
-            <button className="btn xs" data-a="favour" data-c={c.id}>{FAVOURS[c.role].ask}</button>
-          ) : null}
-          <button className="btn xs" data-a="give" data-c={c.id}>Send money</button>
-          <button className="btn xs" data-a="cutoff" data-c={c.id}>Let it lapse</button>
-        </div>
-      )}
-    </div>
-  );
-}
 
 /* The grid is core's arrangement and this screen keeps it. Two sections sit in
    it: `The people in your life` around the cast, and `The rival` around the
@@ -111,9 +52,9 @@ export default function ViewPeople() {
       <div>
         <Group route="legacy/people" i={0}>
           <div className="card">
-            {/* the scale, once, instead of on all thirty-odd numbers below it */}
-            <h3>The cast <span className="tag">means &amp; standing 0–100</span></h3>
-            {cast.map((c) => <Person c={c} key={c.id} />)}
+            <h3>The cast</h3>
+            {/* each person is a face - castTileHTML(), the same tile the string renderer draws */}
+            <div className="ctiles" dangerouslySetInnerHTML={{ __html: cast.map((c) => castTileHTML(c)).join('') }} />
             {/* the sentence that opened this card, at the foot of it, one tap away */}
             <details className="fold">
               <summary>Why they remember</summary>
@@ -127,10 +68,7 @@ export default function ViewPeople() {
 
         <div className="card" style={{ marginTop: '12px' }}>
           <h3>Household &amp; family</h3>
-          <div dangerouslySetInnerHTML={{ __html: statRow('Family harmony', p.family) }} />
-          <div dangerouslySetInnerHTML={{ __html: statRow('Happiness', p.happy) }} />
-          <div dangerouslySetInnerHTML={{ __html: statRow('Health', p.health) }} />
-          <div dangerouslySetInnerHTML={{ __html: statRow('Stress (lower is better)', 100 - p.stress) }} />
+          <div dangerouslySetInnerHTML={{ __html: lifeRingsHTML() }} />
           <hr className="sep" />
           <div className="tiny muted">
             {household}{p.kids > 0 ? ' · ' + p.kids + ' child' + (p.kids === 1 ? '' : 'ren') : ''}

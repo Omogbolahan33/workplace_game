@@ -405,10 +405,10 @@ function worldLabels(){
    the state, acted. */
 
 /* a body: pivots at the hips and shoulders so the limbs can swing */
-function worldBody(shirt, trousers, scale, tie){
+function worldBody(shirt, trousers, scale, tie, skinTone){
   const W = WORLD, T = W.T, g = new T.Group();
   const top = new T.MeshLambertMaterial({color: new T.Color(shirt)});
-  const bottom = worldMat(trousers), skin = worldMat('#6b4a32');
+  const bottom = worldMat(trousers), skin = worldMat(skinTone || '#6b4a32');
   const part = function(geo, mat, x, y, z){ const m = new T.Mesh(geo, mat); m.position.set(x, y, z); m.castShadow = true; return m; };
   const hip = 0.55;
   const limb = function(x, y, w, h, mat){ const p = new T.Group(); p.position.set(x, y, 0); p.add(part(new T.BoxGeometry(w, h, w + 0.02), mat, 0, -h/2, 0)); g.add(p); return p; };
@@ -453,7 +453,7 @@ function worldPath(from, to){
 /* one character: a body, where it is, where it is going, and what it is doing */
 function worldCharacter(id, kind, look, at){
   const W = WORLD;
-  const b = worldBody(look.shirt, look.trousers, look.scale, look.tie);
+  const b = worldBody(look.shirt, look.trousers, look.scale, look.tie, look.skin);
   b.g.position.set(at.x, 0.25, at.z);
   b.g.traverse(function(o){ if(o.isMesh) o.userData.person = id; });
   W.castg.add(b.g);
@@ -465,7 +465,7 @@ function worldCharacter(id, kind, look, at){
 }
 function worldLook(p){
   const shirt = new WORLD.T.Color().setHSL(p.hue / 360, 0.5, p.fortune === 'broke' ? 0.42 : 0.58);
-  return {shirt:'#' + shirt.getHexString(), trousers: p.fortune === 'rich' ? '#1b2230' : '#3a4250',
+  return {shirt:'#' + shirt.getHexString(), skin: p.skin, trousers: p.fortune === 'rich' ? '#1b2230' : '#3a4250',
           scale: p.age >= 60 ? 0.9 : 1, tie: p.fortune === 'rich' || p.role === 'banker'};
 }
 /* Keep the characters in step with the model: newcomers arrive at their door,

@@ -168,10 +168,10 @@ function worldModel(){
   const people = (S.cast||[]).filter(function(c){
     return c.alive && !(c.tags && (c.tags.emigrated || c.tags.abroad));
   }).slice(0, 10).map(function(c){
-    let h = 0; for(let j = 0; j < c.id.length; j++) h = (h * 31 + c.id.charCodeAt(j)) >>> 0;
+    const look = castLook(c);
     const last = (c.memory && c.memory[0] && S.turn - c.memory[0].turn <= 1) ? c.memory[0] : null;
     return {id: c.id, name: String(c.name||'').split(' ')[0], role: c.role, home: worldHome(c.role),
-      hue: h % 360, age: c.age,
+      hue: look.hue, skin: look.skin, age: c.age,
       mood: c.relation >= 65 ? 'warm' : c.relation >= 25 ? 'cordial' : c.relation >= -20 ? 'cool' : 'hostile',
       story: (S.threads||[]).some(function(t){ return t.castId === c.id; }),
       felt: last ? (last.delta > 0 ? 'up' : last.delta < 0 ? 'down' : '') : '',

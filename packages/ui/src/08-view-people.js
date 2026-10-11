@@ -21,41 +21,18 @@ function viewPeople(){
      Nothing was removed: the relation chip and its bar, the traits, the memory
      line, and every action stay, and `textaudit --check` fails if one loses its
      button. */
-  h += '<div class="card"><h3>The cast <span class="tag">means &amp; standing 0\u2013100</span></h3>';
-  h += cast.map(function(c){
-    const R_ = ROLES[c.role] || {label:c.role, blurb:''};
-    const rel = relationWord(c.relation);
-    const relCol = c.relation>=70?'var(--good)':c.relation>=40?'var(--acc)':c.relation>=15?'var(--warn)':'var(--bad)';
-    const last = c.memory && c.memory.length ? c.memory[0] : null;
-    const dead = !c.alive;
-    return '<div class="mrow"'+(dead?';opacity:.62':'')+'>'+
-      '<div class="between"><div><b>'+esc(c.name)+'</b> <span class="tiny muted">· '+esc(R_.label)+' · '+c.age+(dead?' · deceased':'')+'</span></div>'+
-      '<span class="chip" style="background:'+relCol+'22;color:'+relCol+'">'+esc(rel)+' '+Math.round(c.relation)+'</span></div>'+
-      '<div style="margin:5px 0 4px">'+bar(c.relation+100, 200, relCol)+'</div>'+
-      '<div class="row wrap" style="gap:4px">'+
-        c.traits.map(function(t){ return '<span class="chip">'+esc(t)+'</span>'; }).join('')+
-        '<span class="chip">means '+Math.round(c.wealth)+'</span>'+
-        '<span class="chip">standing '+Math.round(c.status)+'</span>'+
-      '</div>'+
-      (last? '<div class="tiny muted" style="margin-top:5px;font-style:italic">Remembers: '+esc(last.note)+' <span class="muted">('+esc(last.d)+')</span></div>':'')+
-      (dead? '' :
-        '<div class="row wrap" style="margin-top:8px">'+
-        (FAVOURS[c.role]? '<button class="btn xs" data-a="favour" data-c="'+c.id+'">'+esc(FAVOURS[c.role].ask)+'</button>':'')+
-        '<button class="btn xs" data-a="give" data-c="'+c.id+'">Send money</button>'+
-        '<button class="btn xs" data-a="cutoff" data-c="'+c.id+'">Let it lapse</button>'+
-        '</div>')+
-      '</div>';
-  }).join('');
+  h += '<div class="card"><h3>The cast</h3>';
+  /* each person is a face now - castTileHTML(), the tile the app draws too:
+     the relation ring around them, their mood on their face, means and standing
+     as meters, and the same traits, memory and actions as before */
+  h += '<div class="ctiles">'+cast.map(function(c){ return castTileHTML(c); }).join('')+'</div>';
   /* the sentence that opened this card, at the foot of it, one tap away */
   h += '<details class="fold"><summary>Why they remember</summary><div>'+
     'These people get older, richer, poorer and dead whether you are paying attention or not. '+
     'What they remember is what you did.</div></details>';
   h += '</div></div><div>';
   h += '<div class="card"><h3>Household &amp; family</h3>'+
-    statRow('Family harmony', S.p.family)+
-    statRow('Happiness', S.p.happy)+
-    statRow('Health', S.p.health)+
-    statRow('Stress (lower is better)', 100-S.p.stress)+
+    lifeRingsHTML()+
     '<hr class="sep">'+
     '<div class="tiny muted">'+esc((S.p.married?'Married to '+(S.p.spouseName||'your spouse'):(S.p.kids>0?'Not married, with children':'Not married'))+
     (S.p.kids>0? ' · '+S.p.kids+' child'+(S.p.kids===1?'':'ren'):''))+'</div>'+

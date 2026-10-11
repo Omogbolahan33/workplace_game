@@ -567,6 +567,45 @@ body.terse .prose{display:none}
   .btile .bname b{font-size:13px;line-height:1.2}
   .btile .row{flex-direction:column;align-items:stretch}
 }
+/* the cast as faces: a shelf of people, each ringed by how they feel about you */
+.ctiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ctile{border:1px solid var(--line2);border-radius:16px;padding:10px;background:var(--panel2);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+.ctile.gone{opacity:.62}
+.ctile .cname{display:flex;flex-direction:column;gap:1px}
+.ctile .cname b{font-size:13px;line-height:1.2}
+.ctile .bmeters{display:grid;gap:5px;width:100%}
+.ctile .bmeter{display:flex;align-items:center;gap:7px}
+.ctile .bmi{font-size:14px;line-height:1;color:var(--acc)}
+.ctile .bmb{flex:1;height:7px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
+.ctile .bmb i{display:block;height:100%;border-radius:4px}
+.ctile .row{justify-content:center}
+.ctile .cacts{display:flex;flex-direction:column;align-items:stretch;width:100%;gap:5px}
+.ctile .cacts .btn{display:flex;align-items:center;justify-content:center;gap:5px}
+.ctile .cacts .btn .gfx{font-size:15px;line-height:1;color:var(--acc);flex:none}
+.ctile .cask{font-size:11px;line-height:1.25;text-align:left;justify-content:flex-start!important}
+.ctile .cpair{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.ctile .cmem{display:flex;gap:5px;align-items:flex-start;text-align:left;color:var(--dim)}
+.ctile .cmi{font-size:14px;line-height:1;color:var(--acc);flex:none}
+.ctile .cmi.up{color:var(--good)} .ctile .cmi.down{color:var(--bad)}
+.cface{position:relative;width:76px;height:76px;flex:none}
+.cface svg{width:100%;height:100%;display:block}
+.cface.gone svg{filter:grayscale(1)}
+.cface .cbadge,.cface .cfelt,.cface .cstory{position:absolute;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(9,14,21,.94);box-shadow:0 0 0 1px rgba(255,255,255,.16);font-size:14px;color:var(--acc)}
+.cface .cbadge{right:-2px;bottom:-2px}
+.cface .cfelt{right:-2px;top:-2px}
+.cface .cfelt.up{color:var(--good)} .cface .cfelt.down{color:var(--bad)}
+.cface .cstory{left:-2px;top:-2px;box-shadow:0 0 0 1px var(--acc)}
+/* the household's health as rings, the HUD's own pictures */
+.lrings{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 2px}
+.lring{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center}
+.lring .hring{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--c) calc(var(--p) * 1%),rgba(255,255,255,.13) 0);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
+.lring .hring em{font-style:normal;width:42px;height:42px;border-radius:50%;background:var(--panel2);display:grid;place-items:center;font-size:20px;color:var(--acc)}
+@media (max-width:640px){
+  .ctiles{grid-template-columns:1fr 1fr;gap:8px}
+  .ctile{padding:9px 8px}
+}
 /* ── LEDGER's ink: one hand of thin gold strokes for every picture ─────────── */
 .ico{width:1em;height:1em;display:inline-block;vertical-align:-.14em;fill:none;stroke:currentColor;stroke-width:1.7;
   stroke-linecap:round;stroke-linejoin:round;overflow:visible}

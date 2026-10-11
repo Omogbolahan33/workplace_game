@@ -328,6 +328,7 @@
   "needs": [
    "01-game-state.js: S",
    "00-cities.js: clamp, dateLabel, esc",
+   "32-the-world.js: worldIco",
    "02-derived-state-personal-finance-career.js: log"
   ],
   "externals": []
@@ -360,6 +361,7 @@
    "31-afterthreadchoice.js: ambitionOf, ambitionPct",
    "30-eras-you-live-through.js: eraById",
    "11-profilesummary-and-strings.js: subsFor",
+   "29-the-cast-who-remembers.js: castLook",
    "12-main.js: routeKey"
   ],
   "externals": []
