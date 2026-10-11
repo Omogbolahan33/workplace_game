@@ -65,9 +65,10 @@ function render(){
     }catch(e){}
     UI.focus = '';
   }
-  /* the world is drawn last, over whatever filled the page, by either renderer;
-     a world that cannot be drawn is a list of places, never a broken page */
-  try{ worldSync(); }catch(e){ worldFlat(); }
+  /* the scene is drawn last, behind whatever filled the page, by either
+     renderer; a scene that cannot be drawn is reported and cleared, and the
+     page it sits behind still works */
+  try{ worldSync(); }catch(e){ console.error('the scene could not be drawn', e); worldSync(true); }
 }
 /* The two names the markup path goes by.
 

@@ -1,5 +1,4 @@
-/* The world: your home behind every screen (VISUAL.md, M1), and the city
-   model the 3D renderer still draws from until M2 retires it.
+/* The world: your home behind every screen (VISUAL.md, M1).
 
    The claims: the house, the things and the people in the picture are readings
    of the run - housing spend against the city's need, the goods you bought,
@@ -19,35 +18,6 @@ async function world() {
   C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
   return C;
 }
-
-test('every screen in the navigation is exactly one building, and nothing else is', async () => {
-  const C = await world();
-  const m = C.worldModel();
-  const routes = C.TABS.filter((t) => t.id !== 'overview')
-    .flatMap((t) => (C.subsFor(t.id) || []).map((s) => t.id + '/' + s.id));
-  const ids = m.buildings.map((b) => b.id);
-  assert.deepEqual([...ids].sort(), [...routes].sort(),
-    'the world and the navigation disagree: missing ' +
-    JSON.stringify(routes.filter((r) => !ids.includes(r))) + ', extra ' + JSON.stringify(ids.filter((i) => !routes.includes(i))));
-  assert.equal(new Set(ids).size, ids.length, 'two buildings stand for the same screen');
-  assert.deepEqual(m.districts.map((d) => d.tab).sort(), C.TABS.filter((t) => t.id !== 'overview').map((t) => t.id).sort());
-  for (const b of m.buildings) {
-    assert.ok(b.h > 0 && b.h <= 9.5, b.id + ' has a height the camera cannot frame: ' + b.h);
-    assert.ok(Number.isFinite(b.x) && Number.isFinite(b.z), b.id + ' stands nowhere');
-    assert.ok(b.note.length <= 18, b.id + "'s note is a sentence, not a fact: " + JSON.stringify(b.note));
-  }
-});
-
-test('no two buildings share a lot', async () => {
-  const C = await world();
-  const lots = C.worldModel().buildings;
-  for (let i = 0; i < lots.length; i++) {
-    for (let j = i + 1; j < lots.length; j++) {
-      const d = Math.hypot(lots[i].x - lots[j].x, lots[i].z - lots[j].z);
-      assert.ok(d > 4, lots[i].id + ' and ' + lots[j].id + ' stand ' + d.toFixed(2) + ' apart, inside each other');
-    }
-  }
-});
 
 test('the scene behind every screen is your home, and the house is what you spend on housing', async () => {
   const C = await world();
@@ -94,67 +64,17 @@ test('the air is the quarter\'s: harmattan in Q1, the rains in Q2 and Q3, dry in
   assert.deepEqual([0, 1, 2, 3, 4, 41].map(at), ['harmattan', 'rain', 'rain', 'dry', 'harmattan', 'rain']);
 });
 
-test('looking at the world changes nothing about the run', async () => {
+test('looking at your home changes nothing about the run', async () => {
   const C = await world();
   for (let q = 0; q < 6; q++) playQuarter(C);
   const before = JSON.stringify(C.S), rs = C.R.s;
-  const a = JSON.stringify(C.worldModel());
-  C.UI.worldFocus = 'money';
-  C.worldHTML();
-  C.UI.worldFocus = '';
-  C.worldHTML();
-  assert.equal(C.R.s, rs, 'drawing the world moved the random stream');
-  assert.equal(JSON.stringify(C.S), before, 'drawing the world changed the run');
-  assert.equal(JSON.stringify(C.worldModel()), a, 'the same state drew two different cities');
+  const look = JSON.stringify(C.homeLook());
+  const a = C.homeSceneSVG(C.homeLook(), 500);
+  C.worldHTML(); C.worldHTML();
+  assert.equal(C.R.s, rs, 'drawing your home moved the random stream');
+  assert.equal(JSON.stringify(C.S), before, 'drawing your home changed the run');
+  assert.equal(JSON.stringify(C.homeLook()), look, 'the same state read as two different homes');
+  /* the same look draws the same picture, apart from each drawing's own ids */
+  const strip = (svg) => svg.replace(/hs\d+-/g, 'hs-');
+  assert.equal(strip(C.homeSceneSVG(C.homeLook(), 500)), strip(a), 'the same home drew two different pictures');
 });
-
-test('the buildings answer to the state they stand for', async () => {
-  const C = await world();
-  const h = (id) => C.worldModel().buildings.find((b) => b.id === id);
-  const before = h('money/position').h;
-  C.S.fin.cash += 500000000;
-  assert.ok(h('money/position').h > before, 'net worth rose by ₦500m and the position tower did not grow');
-  assert.equal(h('work/business').muted, true, 'a run with no company shows a business');
-  assert.match(h('work/business').note, /no company/);
-});
-
-test('the people in your life live where their role belongs, and show what the game knows', async () => {
-  const C = await world();
-  const routes = new Set(C.worldModel().buildings.map((b) => b.id));
-  const alive = C.S.cast.filter((c) => c.alive);
-  let m = C.worldModel();
-  assert.equal(m.people.length, Math.min(10, alive.length), 'not everyone alive is in the city');
-  for (const p of m.people) {
-    assert.ok(routes.has(p.home), p.name + ' lives at ' + p.home + ', which is not a building in the city');
-    assert.equal(p.home, C.worldHome(p.role), p.name + ' is not at the building their role belongs to');
-  }
-  /* someone who died, or emigrated, is not in the city */
-  const gone = alive[0], away = alive[1];
-  gone.alive = false; away.tags = Object.assign({}, away.tags, { emigrated: true });
-  m = C.worldModel();
-  assert.ok(!m.people.some((p) => p.id === gone.id), 'someone who died is still walking about');
-  assert.ok(!m.people.some((p) => p.id === away.id), 'someone who emigrated is still walking about');
-  gone.alive = true; away.tags.emigrated = false;
-  /* a story open with someone marks them; what you just did to them shows */
-  const c = alive[2];
-  C.S.threads = (C.S.threads || []).concat([{ castId: c.id, arc: 'test', stage: 0 }]);
-  C.relate(c, 8, 'a test kindness');
-  m = C.worldModel();
-  const p = m.people.find((x) => x.id === c.id);
-  assert.equal(p.story, true, 'an open story with ' + p.name + ' does not show on them');
-  assert.equal(p.felt, 'up', 'a kindness this quarter does not show on ' + p.name);
-  C.S.threads = C.S.threads.filter((t) => t.arc !== 'test');
-});
-
-test('you are in the city as you are: tired, ill or happy, and dressed for work when you have it', async () => {
-  const C = await world();
-  const me = () => C.worldModel().me;
-  C.S.p.health = 20; assert.equal(me().mood, 'ill');
-  C.S.p.health = 80; C.S.p.stress = 90; assert.equal(me().mood, 'tired');
-  C.S.p.stress = 20; C.S.p.happy = 90; assert.equal(me().mood, 'happy');
-  C.S.p.job = { title: 'Analyst', monthly: 500000, industry: 'Corporate' };
-  assert.equal(me().suit, true, 'a job does not dress you for work');
-  C.S.p.job = null;
-  assert.equal(me().suit, false);
-});
-

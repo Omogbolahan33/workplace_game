@@ -4,7 +4,7 @@
     node tools/visual.mjs            the table, and the mean
     node tools/visual.mjs --json     the same, as JSON
 
-  The target is a game that is mostly picture - the city, icons, gauges, bars -
+  The target is a game that is mostly picture - the scene, icons, gauges, bars -
   and the measurement has to be one a player would agree with, so it is taken
   from what is on top at each point of a 390x844 phone screen, before any
   scrolling:
@@ -14,7 +14,7 @@
              of text is drawn there
     text     anything else that is not the bare page: a line of text, and the
              card, row, chip or button around it - a card full of writing is
-             writing, padding included, and a label over the city is text
+             writing, padding included, and a label over the scene is text
     neither  the page's own background (html, body and the bare containers)
 
   A widget built around a picture - a move tile, a tab with its icon, the HUD's
@@ -30,8 +30,7 @@
   with, and it moves when the screen does.
 
   Reads the shipped single file (ledger/index.html) through a real browser
-  window - headless WebGL draws nothing, and an undrawn canvas is still a
-  canvas, so the number would be right for the wrong reason.
+  window, so the layout measured is the one a player gets.
 */
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -65,7 +64,7 @@ const measure = (scrollY) => p.evaluate((scrollY) => {
   for (let n = walker.nextNode(); n; n = walker.nextNode()) {
     if (!n.textContent.trim()) continue;
     const el = n.parentElement;
-    if (!el || el.closest('#three-src, script, style')) continue;
+    if (!el || el.closest('script, style')) continue;
     const r = document.createRange(); r.selectNodeContents(n);
     for (const q of r.getClientRects()) {
       if (q.bottom < 0 || q.top > H || q.width < 1) continue;
@@ -73,7 +72,7 @@ const measure = (scrollY) => p.evaluate((scrollY) => {
     }
   }
   const BARE = new Set(['main', 'scene', 'top', 'tabwrap', 'subrow', 'toastHost', 'modalHost']);
-  const PICTURE_LED = '.wtile, .tab, .hbars, .hring, #worldpip';
+  const PICTURE_LED = '.wtile, .tab, .hbars, .hring';
   let gfx = 0, text = 0;
   for (let y = STEP / 2; y < H; y += STEP) {
     for (let x = STEP / 2; x < W; x += STEP) {
@@ -84,8 +83,7 @@ const measure = (scrollY) => p.evaluate((scrollY) => {
       if (onText) { text++; continue; }
       if (top.closest('canvas, svg, img, .gfx, ' + PICTURE_LED) || top.tagName === 'CANVAS') { gfx++; continue; }
       if (BARE.has(top.id) || top === document.body || top === document.documentElement ||
-          top.classList.contains('world-stage') || top.classList.contains('world-labels') ||
-          top.classList.contains('world-bubbles')) continue;
+          top.classList.contains('world-stage')) continue;
       text++;
     }
   }
@@ -95,7 +93,7 @@ const pct = (g, t) => g + t ? Math.round(g / (g + t) * 1000) / 10 : 0;
 
 const rows = [];
 for (const [t, s] of routes) {
-  await p.evaluate(([t, s]) => { UI.modal = null; UI.tab = t; UI.sub = s; UI.worldFocus = ''; window.scrollTo(0, 0); render(); window.scrollTo(0, 0); }, [t, s]);
+  await p.evaluate(([t, s]) => { UI.modal = null; UI.tab = t; UI.sub = s; window.scrollTo(0, 0); render(); window.scrollTo(0, 0); }, [t, s]);
   await p.waitForTimeout(450);
   const height = await p.evaluate(() => document.documentElement.scrollHeight);
   let gfx = 0, text = 0, first = null;

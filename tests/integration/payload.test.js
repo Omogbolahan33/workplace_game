@@ -47,19 +47,9 @@ test('the shipped payload is ten files, and the game among them is the composed 
      deliverable did not balloon, and the exact figure is in the build's own log
      and in FEATURES. A number that has to be edited on every CSS change is a
      number that gets edited without being read. */
-  /* Two bounds, because the file carries two things. The game itself - everything
-     but the 3D renderer - keeps the band it has held all year. The renderer is a
-     committed slice of three.js (tools/vendor-three.mjs) and gets its own bound:
-     it must be the committed file, byte for byte, and stay a slice rather than
-     drift toward the whole library. */
-  const vendor = fs.readFileSync(at('packages', 'ui', 'vendor', 'three-world.js'));
-  assert.ok(shipped.includes(vendor), 'the shipped file does not carry the committed three-world.js');
-  const game = shipped.length - vendor.length;
-  assert.ok(game > 900000 && game < 1400000,
-    'the shipped game, without its 3D renderer, is ' + game + ' bytes — out of the band it has held all year (0.9–1.4 MB)');
-  assert.ok(vendor.length < 600000,
-    'the 3D renderer is ' + vendor.length + ' bytes — it is meant to be a slice of three.js, not the library (bound 600 KB)');
-  console.log('  the shipped game is ' + game + ' bytes, plus a ' + vendor.length + '-byte 3D renderer');
+  assert.ok(shipped.length > 900000 && shipped.length < 1400000,
+    'the shipped game is ' + shipped.length + ' bytes — out of the band it has held all year (0.9–1.4 MB)');
+  console.log('  the shipped game is ' + shipped.length + ' bytes');
 });
 
 test('every copy of the game is the same bytes: zip, phone, mobile app, native project', () => {

@@ -10,7 +10,7 @@ another (`packages/ui`), and there are two ways to run the result:
 
 | | what it is | how you ship it |
 |---|---|---|
-| **the single file** | `ledger/index.html` (built from `dist/`) — 1.10 MB, self-contained, **zero external requests**, offline-capable | unzip `ledger-app.zip` anywhere, or `Dockerfile.static` |
+| **the single file** | `ledger/index.html` (built from `dist/`) — 1.2 MB, self-contained, **zero external requests**, offline-capable | unzip `ledger-app.zip` anywhere, or `Dockerfile.static` |
 | **the web app** | `apps/web` — Next.js 15 + React 19; the shell, the modal, the page and all 29 routes drawn as React components | Vercel, or `Dockerfile` |
 
 They are the same game: the app imports the same core module and draws the same
@@ -182,57 +182,29 @@ player's, entered in Settings.
 
 ---
 
-## The world — the game as a 3D place
+## Your home, behind every screen
 
-The game stands in a city, above every screen. Every screen is a building in
-it: the plaza is the Overview, the four districts are Work, Money, Governance
-and Legacy, and each district's buildings are that tab's six screens. On the
-Overview you see the whole city - tap a district and the camera flies there. On
-any other screen the camera stands close on that screen's building, a gold ring
-under it, with its district around it and **City** to go back. Tap a building
-and its screen opens - the same screen, through the same `goto` the tabs use.
-Nothing was removed and no rule changed.
-
-**You and the people in your life live in it.** You walk to the building of
-whatever screen you open, and when you make a move you act it out there:
-working at the career tower, resting, paying or being paid (the money passes
-between your hand and the building), shaking on a deal, time with your family.
-When the quarter closes you walk home. An answered event plays out too: you
-cheer, slump or ponder, and if the story is somebody's they come over and the
-two of you talk it through. The people in your life keep to the building their
-role belongs to - family at home, the banker at the bank, the rival at the
-rival's tower - and show what the game knows: a gold **!** and their name when a
-story with them is open, a heart or a flare when your last move with them
-landed, a tie when they have made it. Someone who has died or emigrated is not
-in the city. Tap a person for People, yourself for Your record. If you make a
-move with the city scrolled out of sight, a small window opens under the nav
-with the camera on you for as long as you are doing it.
-
-What the world adds is that state has a shape and money has a direction. The
-career tower grows with the salary, the company with its outlets, the ambition
-monument with its progress, the plaza's column with net worth - and when a
-quarter changes a building, it grows or shrinks into its new size. When a move
-changes your cash, coins fly between the plaza and the building it was made on
-(on a screen, into or out of that building). The city is drawn through a long
-lens with lit windows, trees, lamps and traffic; none of it is a control.
+The game shows the life you are living. Behind every screen is your home, drawn
+from the run: a room in a face-me-I-face-you, then a flat, a house in an estate,
+a mansion — by what you spend on housing against what housing costs a single
+person in your city. The generator, the solar panels and the cars are the goods
+you bought; your spouse, your children and your household staff stand in the
+compound; the windows are lit by the grid, or by your generator (smoke and
+all), or not at all ("NEPA has taken light"); the air is the quarter's season,
+harmattan in Q1 and the rains in Q2 and Q3; a boom puts cranes on the skyline.
+Nothing in it is random, and nothing in it is a control: the HUD sits over it,
+the moves on the screen run along its foot as tiles, and the page is a sheet
+that slides up over it.
 
 | piece | where | what it does |
 |---|---|---|
-| what the city contains | `packages/core/src/32-the-world.js` | `worldModel()` reads the state each screen draws and returns buildings, districts and people as data; `worldHTML()` writes the stage and the labels. No DOM, no random draw |
-| how it is drawn | `packages/ui/src/18-world.js` | `worldSync()` runs after every render in both renderers and on the start screen, writes `#scene` (its own container between the header and the page - no renderer touches it), moves the one canvas in, rebuilds the city only when the model changed, aims the camera at the screen's building, and floats each label over its building |
-| the renderer | `packages/ui/vendor/three-world.js` | a slice of three.js 0.169.0 (≈ 484 KB, 122 KB gzipped), committed, carried as inert `text/plain` and evaluated the first time a world is shown |
+| what your home looks like | `packages/core/src/33-your-home.js` | `homeLook()` reads the run; `homeSceneSVG(look, vh)` draws it as layered SVG, `vh` tall so a tall phone shows more sky rather than cropping the house. No DOM, no random draw |
+| the scene's markup | `packages/core/src/32-the-world.js` | `worldHTML()` puts the scene under the HUD (`worldHUD()`); the pictures every screen uses — icons, rings, gauges, bars — live here too |
+| where it is placed | `packages/ui/src/18-world.js` | `worldSync()` runs after every render in both renderers and on the start screen, writes `#scene` (its own container — no renderer touches it), measures the view, and places the HUD and the move tiles in the band the player can see |
 
-The labels are the controls — ordinary buttons with `worldfocus` and `goto` —
-so with no WebGL, a screen reader or a test the world is a working list of
-places. A tap on a building clicks its label, so every move still goes through
-the one dispatcher. The file is still one file with zero requests; it is now
-about 1.6 MB, of which the renderer is the 484 KB the payload test bounds
-separately.
-
-```bash
-node tools/vendor-three.mjs           # rebuild the renderer slice (after adding a three.js class)
-node tools/vendor-three.mjs --check   # fail if the committed slice is stale
-```
+What is drawn next, and why, is in **[VISUAL.md](VISUAL.md)**: the brief every
+picture is checked against, and the roadmap — your work, the quarter as
+pictures, every event as a moment, consequences arriving at your gate.
 
 ## What is in here
 
