@@ -528,7 +528,7 @@ marked for removal here.
 | 15.170 | `fmdone` | [x] added with §22.61 — dismiss the first-quarter coach, for good, on this save |
 | 15.171 | `dealtoday` | [x] added with F4 — deal today's life: the profile, birth circumstance, seed, city and tier from the date in Lagos, the same for everyone that day |
 | 15.172 | `undeal` | [x] added with F4 — put today's life back and choose who you are instead |
-| 15.173 | `worldfocus` | [x] added with the 3D world — open a district of the city, or go back to the whole city; from any screen, City returns to the overview with the whole city in view. The buildings' labels are plain `goto` |
+| 15.173 | ~~`worldfocus`~~ | [x] REMOVED with the city's districts (VISUAL.md, M1) — the scene behind every screen is your home, and the tabs are the way between screens |
 | 15.174 | `details` | [x] added with the world-first screen — the HUD's (i): shows or folds away every explanation (folds, coaching notes, the vignette, the screen hint) |
 ---
 

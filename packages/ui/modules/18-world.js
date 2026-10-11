@@ -29,7 +29,7 @@
      been evaluated in the app. So the state is a bare `var` (hoisted, never
      reset by an initialiser) and every table is a function. A `let` here threw
      on every reload of a saved run. */
-import { S, UI, esc, routeViewInner, worldGlyph, worldHTML, worldHere, worldIco, worldModel } from '@ledger/core';
+import { S, UI, esc, homeLook, homeSceneSVG, routeViewInner, worldGlyph, worldHTML, worldHere, worldIco } from '@ledger/core';
 import { toast } from './00-q.js';
 
 /* Generated from src/18-world.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
@@ -838,54 +838,45 @@ export function worldSync(off){
   if(off || !S){
     scene.innerHTML = '';
     document.body.classList.remove('has-world', 'terse');
-    if(WORLD && WORLD.raf){ cancelAnimationFrame(WORLD.raf); WORLD.raf = 0; }
-    if(WORLD && !WORLD.flat) WORLD.host = null;
     return;
   }
+  /* the picture is as tall as the view it fills, measured here because core
+     cannot see the screen */
+  UI.sceneVH = homeVH();
   scene.innerHTML = worldHTML();
   const host = /** @type {HTMLElement} */ (scene.querySelector('#world'));
-  /* a document that does not parse markup (a test's stub) has no world to draw */
+  /* a document that does not parse markup (a test's stub) has no scene to place */
   if(!host) return;
-  /* world-first: the city fills the screen and the page is a sheet over it;
+  /* world-first: your home fills the screen and the page is a sheet over it;
      the explanations are one tap off unless the player asked for them */
   document.body.classList.add('has-world');
   document.body.classList.toggle('terse', !UI.details);
+  /* measured now that the stage is laid out: a different height redraws the
+     picture once, at the size it is shown */
+  const vh = homeVH(), stage = host.querySelector('.world-stage');
+  if(stage && Math.abs(vh - UI.sceneVH) > 8){ UI.sceneVH = vh; stage.innerHTML = homeSceneSVG(homeLook(), vh); }
   worldTiles(host);
-  if(!WORLD) WORLD = worldInit();
-  if(WORLD.flat){ host.classList.add('flat'); return; }
-  const stage = /** @type {HTMLElement} */ (host.querySelector('.world-stage'));
-  host.classList.add('live');
-  WORLD.host = host;
-  /* while the corner window is open the canvas stays in it; the city gets it
-     back when the move is done */
-  if(WORLD.pip) WORLD.pip.stage = stage;
-  else { stage.appendChild(WORLD.canvas); WORLD.stage = stage; }
-  worldResize();
-  worldBand();
-  const m = worldModel();
-  const sig = JSON.stringify([m.buildings, m.people, m.plaza, m.tone]);
-  if(sig !== WORLD.sig){ worldBuild(m); WORLD.sig = sig; }
-  const here = worldHere(), focus = here ? here.split('/')[0] : (UI.worldFocus || '');
-  WORLD.goal = worldGoal(m, focus, here);
-  const first = WORLD.focus === null;
-  if(first) WORLD.view = Object.assign({}, WORLD.goal);
-  WORLD.focus = focus; WORLD.here = here;
-  /* you go where the page goes: to the door of the screen's building, or back
-     to the plaza from the overview - placed there on the first draw, walked
-     there after that */
-  if(WORLD.lastHere !== here){
-    const to = here ? worldDoor(here) : {x:0.9, z:0.9};
-    if(first){ WORLD.me.x = to.x; WORLD.me.z = to.z; }
-    else worldWalkTo(WORLD.me, to);
-    WORLD.lastHere = here;
-  }
-  /* the bubbles' layer is part of the container a render replaces */
-  const layer = document.createElement('div');
-  layer.className = 'world-bubbles'; layer.setAttribute('aria-hidden', 'true');
-  host.appendChild(layer);
-  if(WORLD.pip) WORLD.pip.bubbles = layer; else WORLD.bubbles = layer;
-  worldDraw(performance.now());
-  worldKick();
+  homeBand(host);
+}
+/* How tall the scene's view is, in its own units (it is 390 wide): the
+   stage's own box once it is laid out, and before that the CSS's answer - the
+   band down to just under the top of the sheet. */
+export function homeVH(){
+  const st = /** @type {HTMLElement|null} */ (document.querySelector('#world .world-stage'));
+  const h = st && st.clientHeight ? st.clientHeight : window.innerHeight * 0.66 + 24;
+  const w = st && st.clientWidth ? st.clientWidth : window.innerWidth;
+  return Math.round(390 * h / Math.max(1, w));
+}
+/* The band of the scene the player can see, from under the nav to the top of
+   the sheet: the HUD and the tiles are placed in it, and it shrinks as the
+   sheet scrolls up. */
+export function homeBand(host){
+  const tw = document.getElementById('tabwrap'), main = document.getElementById('main');
+  const top = Math.max(0, tw ? tw.getBoundingClientRect().bottom : 0);
+  const bot = Math.max(top, Math.min(window.innerHeight, main ? main.getBoundingClientRect().top : window.innerHeight));
+  host.style.setProperty('--band-top', Math.round(top) + 'px');
+  host.style.setProperty('--band-bot', Math.round(window.innerHeight - bot) + 'px');
+  host.classList.toggle('narrow', bot - top <= 260);
 }
 /* The band of city the player can see: from under the nav to the top of the
    sheet. Everything the world places - the HUD, the tiles, the labels, the
@@ -929,9 +920,11 @@ export function worldTiles(host){
   const row = document.createElement('div');
   row.className = 'wtiles-r';
   btns.forEach(function(b){
-    const ctx = /** @type {HTMLElement} */ (b.closest('.mrow, .opt, li, tr, .kv, .card'));
+    const ctx = /** @type {HTMLElement} */ (b.closest('.ctile, .btile, .stile, .mrow, .opt, li, tr, .kv, .card'));
     const named = ctx ? ctx.querySelector('b, strong, h4, .ol') : null;
     let title = (named && named.textContent || b.textContent || '').trim().replace(/\s+/g, ' ');
+    /* a tile of several moves - a person, a slot - names the move and whose it is */
+    if(ctx && ctx.matches('.ctile, .stile') && named) title = (b.getAttribute('aria-label') || b.textContent || '').trim() + ' \u00b7 ' + named.textContent.trim().split(' ')[0];
     if(title.length > 30) title = title.slice(0, 29) + '…';
     const costEl = ctx ? Array.prototype.slice.call(ctx.querySelectorAll('.chip')).find(function(c){ return /₦|\d+h\b/.test(c.textContent || ''); }) : null;
     const said = (b.textContent || '').trim();
@@ -961,11 +954,14 @@ export function worldTiles(host){
   host.appendChild(strip);
 }
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) worldKick(); });
-window.addEventListener('resize', function(){ if(WORLD && !WORLD.flat && WORLD.host){ worldResize(); worldBand(); worldKick(); } });
-/* the sheet scrolls over the city: the band shrinks, and the city stops
-   drawing when there is none of it left to see */
+/* a new shape of screen is a new height of view: redraw the scene to fit */
+window.addEventListener('resize', function(){
+  if(!S || !document.body.classList.contains('has-world')) return;
+  if(Math.abs(homeVH() - (UI.sceneVH || 0)) > 8) worldSync();
+  else { const host = document.getElementById('world'); if(host) homeBand(host); }
+});
+/* the sheet scrolls over the scene: the band shrinks, and what sits in it moves */
 window.addEventListener('scroll', function(){
-  if(!WORLD || WORLD.flat || !WORLD.host) return;
-  worldBand();
-  if(WORLD.band && WORLD.band.sheet - WORLD.band.top >= 40){ WORLD.goal = worldGoal(worldModel(), WORLD.focus, WORLD.here); worldKick(); }
+  const host = document.getElementById('world');
+  if(host && document.body.classList.contains('has-world')) homeBand(host);
 }, {passive:true});

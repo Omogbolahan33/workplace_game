@@ -333,14 +333,6 @@ const ACT = {
     _cfg.step = Math.min(3, (_cfg.step||1) + 1); UI.modal = {type:'start'}; render();
   },
   stepback:  e=>{ _cfg.step = Math.max(1, (_cfg.step||1) - 1); UI.modal = {type:'start'}; render(); },
-  /* the world: open a district, or go back to the whole city. Only the camera
-     moves; the screens are the buildings' labels, which are plain goto */
-  worldfocus: e=>{
-    UI.worldFocus = e.dataset.d || '';
-    /* from a screen, "City" is the overview with the whole city in view */
-    if(e.dataset.t){ UI.bellOpen = false; UI.tab = e.dataset.t; UI.sub = ''; UI.modal = null; UI.scrollTop = true; }
-    render();
-  },
   /* every explanation the game has, shown or folded away: the world-first
      screen keeps the prose one tap off, never deleted */
   details:   e=>{ UI.details = !UI.details; render(); },

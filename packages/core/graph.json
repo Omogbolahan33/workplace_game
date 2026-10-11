@@ -363,7 +363,16 @@
    "30-eras-you-live-through.js: eraById",
    "11-profilesummary-and-strings.js: subsFor",
    "29-the-cast-who-remembers.js: castLook",
-   "12-main.js: routeKey"
+   "12-main.js: routeKey",
+   "33-your-home.js: homeLook, homeSceneSVG"
+  ],
+  "externals": []
+ },
+ "33-your-home.js": {
+  "needs": [
+   "01-game-state.js: S",
+   "02-derived-state-personal-finance-career.js: CITY",
+   "00-cities.js: esc"
   ],
   "externals": []
  }

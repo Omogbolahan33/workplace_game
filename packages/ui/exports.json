@@ -161,6 +161,8 @@
  "worldKick": "src/18-world.js",
  "worldTap": "src/18-world.js",
  "worldSync": "src/18-world.js",
+ "homeVH": "src/18-world.js",
+ "homeBand": "src/18-world.js",
  "worldBand": "src/18-world.js",
  "worldTiles": "src/18-world.js"
 }

@@ -1,10 +1,10 @@
-/* The world: every screen in the game, as a place.
+/* The world: your home behind every screen (VISUAL.md, M1), and the city
+   model the 3D renderer still draws from until M2 retires it.
 
-   The claims are the ones that make "everything in LEDGER, in 3D" true rather
-   than a picture: one building per screen and no screen without one, read from
-   the same table the tabs are drawn from; every building's label opens its own
-   screen through the action the tabs already use; and looking at the world
-   changes nothing - no random draw, no state touched - so a run that is looked
+   The claims: the house, the things and the people in the picture are readings
+   of the run - housing spend against the city's need, the goods you bought,
+   your family and staff, the quarter's season - and looking at the world
+   changes nothing: no random draw, no state touched, so a run that is looked
    at is the same run as one that is not. */
 const test = require('node:test');
 const assert = require('node:assert/strict');
@@ -49,57 +49,49 @@ test('no two buildings share a lot', async () => {
   }
 });
 
-test('the labels are the controls: districts in the city, screens in a district', async () => {
+test('the scene behind every screen is your home, and the house is what you spend on housing', async () => {
   const C = await world();
-  /* the markup's own buttons, read without a DOM: the unit layer has none, and
-     these are flat buttons with their attributes in a fixed order */
-  const buttons = (html) => [...html.matchAll(/<button class="([^"]*)" data-a="(\w+)"([^>]*)>(.*?)<\/button>/g)]
-    .map((m) => ({ cls: m[1], a: m[2], attrs: m[3], text: m[4].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
-      d: (m[3].match(/data-d="([^"]*)"/) || [])[1], t: (m[3].match(/data-t="([^"]*)"/) || [])[1],
-      s: (m[3].match(/data-s="([^"]*)"/) || [])[1] }));
-
-  C.UI.worldFocus = '';
-  const city = buttons(C.worldHTML());
-  assert.deepEqual(city.filter((b) => b.a === 'worldfocus').map((b) => b.d).sort(), ['governance', 'legacy', 'money', 'work'],
-    'the city does not offer the four districts');
-  assert.equal(city.filter((b) => b.a === 'goto').length, 0, 'the city view offers screens before a district is open');
-
-  for (const tab of ['work', 'money', 'governance', 'legacy']) {
-    C.UI.worldFocus = tab;
-    const bs = buttons(C.worldHTML());
-    const gos = bs.filter((b) => b.a === 'goto').map((b) => b.t + '/' + b.s);
-    const want = (C.subsFor(tab) || []).map((s) => tab + '/' + s.id);
-    assert.deepEqual(gos, want, tab + ' district does not open its own screens');
-    assert.ok(bs.some((b) => b.a === 'worldfocus' && b.d === ''), tab + ' district has no way back to the city');
-    for (const b of bs) assert.ok(b.text.length <= 42, 'a world label is over 42 characters: ' + b.text);
-  }
-  C.UI.worldFocus = '';
-});
-
-test('on any screen the world stands on that screen\'s building, with a way back to the city', async () => {
-  const C = await world();
-  const buttons = (html) => [...html.matchAll(/<button class="([^"]*)" data-a="(\w+)"([^>]*)>(.*?)<\/button>/g)]
-    .map((m) => ({ cls: m[1], a: m[2], attrs: m[3],
-      d: (m[3].match(/data-d="([^"]*)"/) || [])[1], t: (m[3].match(/data-t="([^"]*)"/) || [])[1],
-      s: (m[3].match(/data-s="([^"]*)"/) || [])[1] }));
-  for (const tab of ['work', 'money', 'governance', 'legacy']) {
-    for (const sub of C.subsFor(tab)) {
-      C.UI.tab = tab; C.UI.sub = sub.id;
-      const html = C.worldHTML();
-      assert.match(html, new RegExp('data-here="' + tab + '/' + sub.id + '"'), tab + '/' + sub.id + ': the world does not say which building the page is');
-      const bs = buttons(html);
-      const here = bs.filter((b) => / here\b/.test(b.cls));
-      assert.equal(here.length, 1, tab + '/' + sub.id + ': ' + here.length + ' buildings are marked as the one you are on');
-      assert.equal(here[0].t + '/' + here[0].s, tab + '/' + sub.id);
-      assert.match(here[0].attrs, /aria-current="page"/, 'the building you are on does not say so to a screen reader');
-      assert.deepEqual(bs.filter((b) => b.a === 'goto').map((b) => b.t + '/' + b.s), C.subsFor(tab).map((x) => tab + '/' + x.id),
-        tab + '/' + sub.id + ': the district around it is not its own six screens');
-      const back = bs.find((b) => b.a === 'worldfocus');
-      assert.ok(back && back.d === '' && back.t === 'overview', tab + '/' + sub.id + ': City does not lead back to the whole city');
-    }
+  /* the base is what housing costs a single person in the city, at today's prices */
+  const base = 70000 * C.CITY().rentMult * 0.75 * (C.S.cumInfl || 1);
+  const tierAt = (k) => { C.S.fin.budget.housing = Math.round(base * k); return C.homeLook().tier; };
+  assert.deepEqual([0.6, 1.2, 3, 8, 20].map(tierAt), [1, 1, 2, 3, 4], 'the house does not follow the housing spend');
+  /* a family on the same rent lives in the same house, tighter - not a bigger one */
+  C.S.fin.budget.housing = Math.round(base * 3);
+  const single = C.homeLook().tier;
+  C.S.p.married = true; C.S.p.kids = 3;
+  assert.equal(C.homeLook().tier, single, 'marrying moved you to a different house on the same rent');
+  for (const tab of ['overview', 'work', 'money', 'legacy']) {
+    C.UI.tab = tab; C.UI.sub = tab === 'overview' ? '' : C.subsFor(tab)[0].id;
+    const html = C.worldHTML();
+    assert.match(html, /<svg class="homescene"/, tab + ': the scene is not your home');
+    assert.match(html, /class="hud"/, tab + ': the HUD is not over the scene');
+    assert.doesNotMatch(html, /NaN|undefined/, tab + ': the scene drew a number it did not have');
   }
   C.UI.tab = 'overview'; C.UI.sub = '';
-  assert.match(C.worldHTML(), /data-here=""/, 'the overview claims to be a building');
+});
+
+test('what you own and who lives with you are in the picture', async () => {
+  const C = await world();
+  C.S.fin.goods = [];
+  C.S.p.married = false; C.S.p.kids = 0; C.S.house = [];
+  let L = C.homeLook();
+  assert.deepEqual([L.gen, L.solar, L.car, L.spouse, L.kids, L.staff.length], [false, false, 0, false, 0, 0]);
+  const plain = C.homeSceneSVG(L, 300);
+  C.S.fin.goods = [{ id: 'gen', turn: 0 }, { id: 'solar', turn: 0 }, { id: 'car', turn: 0 }, { id: 'car', turn: 1 }, { id: 'car', turn: 2 }];
+  C.S.p.married = true; C.S.p.kids = 2; C.S.house = [{ role: 'driver' }, { role: 'security' }];
+  L = C.homeLook();
+  assert.deepEqual([L.gen, L.solar, L.car, L.spouse, L.kids], [true, true, 2, true, 2], 'the goods and the family do not reach the picture');
+  assert.deepEqual(L.staff.sort(), ['driver', 'security']);
+  assert.ok(C.homeSceneSVG(L, 300).length > plain.length, 'a family, staff, a generator and two cars drew nothing more than an empty compound');
+  /* the view is as tall as it is asked to be, and never shorter than the scene */
+  assert.match(C.homeSceneSVG(L, 600), /viewBox="0 -300 390 600"/);
+  assert.match(C.homeSceneSVG(L, 120), /viewBox="0 0 390 300"/);
+});
+
+test('the air is the quarter\'s: harmattan in Q1, the rains in Q2 and Q3, dry in Q4', async () => {
+  const C = await world();
+  const at = (t) => { C.S.turn = t; return C.homeLook().season; };
+  assert.deepEqual([0, 1, 2, 3, 4, 41].map(at), ['harmattan', 'rain', 'rain', 'dry', 'harmattan', 'rain']);
 });
 
 test('looking at the world changes nothing about the run', async () => {

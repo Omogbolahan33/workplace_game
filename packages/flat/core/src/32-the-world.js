@@ -593,29 +593,14 @@ function worldHere(){
    - any other screen: the camera on that screen's building, the district's
      buildings around it (the one you are in marked), and a way to the city. */
 function worldHTML(){
-  const m = worldModel();
-  const here = worldHere();
-  const focus = here ? here.split('/')[0] : (UI.worldFocus || '');
-  const pin = function(x, y, z){ return ' data-wx="'+x+'" data-wy="'+y+'" data-wz="'+z+'"'; };
-  const lot = function(b){
-    return '<button class="wl wb'+(b.muted?' muted':'')+(b.tone?' t-'+b.tone:'')+(b.id === here ? ' here' : '')+'" data-a="goto" data-t="'+b.tab+'" data-s="'+b.sub+'"'+
-      (b.id === here ? ' aria-current="page"' : '')+pin(b.x, b.h + 0.4, b.z)+'><b>'+esc(b.label)+'</b>'+(b.note ? '<span>'+esc(b.note)+'</span>' : '')+'</button>';
-  };
-  let labels = '';
-  if(!focus){
-    labels = m.districts.map(function(d){
-      return '<button class="wl wd" data-a="worldfocus" data-d="'+d.tab+'"'+pin(d.x, 9, d.z)+'>'+esc(d.label)+'</button>';
-    }).join('');
-  } else {
-    /* from a screen, "City" is the overview with the whole city; from a district
-       on the overview, it is the whole city again */
-    labels = '<button class="wl wback" data-a="worldfocus" data-d=""'+(here ? ' data-t="overview"' : '')+'>\u2039 City</button>' +
-      m.buildings.filter(function(b){ return b.tab === focus; }).map(lot).join('');
-  }
-  return '<div class="world'+(here ? ' compact' : '')+'" id="world" data-focus="'+esc(focus)+'" data-here="'+esc(here)+'">'+
-    '<div class="world-stage" aria-hidden="true"></div>'+
+  /* The scene behind every screen is your home (VISUAL.md, M1): the place you
+     live, drawn from the run. UI.sceneVH is the height of the view the ui
+     measured, so the picture fills it with sky rather than cropping the house.
+     The HUD sits over it, and the ui adds the moves along its foot. */
+  const here = worldHere(), era = eraById(S.era ? S.era.id : 'calm');
+  return '<div class="world home" id="world" data-here="'+esc(here)+'">'+
+    '<div class="world-stage">'+homeSceneSVG(homeLook(), UI.sceneVH)+'</div>'+
     worldHUD()+
-    '<div class="world-labels">'+labels+'</div>'+
-    '<div class="world-cap">'+esc(m.city)+' \u00b7 '+esc(m.date)+(m.era ? ' \u00b7 '+esc(m.era) : '')+'</div>'+
+    '<div class="world-cap">'+esc(CITY().label)+' \u00b7 '+esc(dateLabel(S.turn))+(era ? ' \u00b7 '+esc(era.name) : '')+'</div>'+
     '</div>';
 }
