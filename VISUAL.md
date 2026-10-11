@@ -39,13 +39,13 @@ place on Q1 and on Q90 is two different lives.
 
 ## Roadmap
 
-Each milestone ships on its own, is measured, and is pushed and deployed.
+Each milestone ships on its own, is measured, and is pushed and deployed. ✓ marks what has shipped.
 
 | | milestone | what you see | driven by |
 |---|---|---|---|
-| **M1** | **Your home** | the place you live, behind every screen: room → flat → duplex → estate house; generator, solar, car(s); spouse, children, household staff; the grid, the season, the era, the time of day | housing spend against the city's need, goods, marriage and children, `S.house`, `S.mkt.power`, the quarter, the era, the clock |
-| M2 | Retire the 3D city | the districts, roads and generic buildings go, with three.js (~480 KB) and the walking characters | — |
-| M3 | Your work | employed: the office tower, your desk a floor higher with each promotion; your own company: premises by type and stage — buka → restaurant → chain, two bikes → truck depot, laptop at home → office floor, workshop → factory; staff at stations, customers through the door, a second shift lit at night, outlets as more premises | job and level, `BIZ` type, stage, staff, demand, capacity, quality, commitments, outlets |
+| **M1** ✓ | **Your home** | the place you live, behind every screen: room → flat → duplex → estate house; generator, solar, car(s); spouse, children, household staff; the grid, the season, the era, the time of day | housing spend against the city's need, goods, marriage and children, `S.house`, `S.mkt.power`, the quarter, the era, the clock |
+| **M2** ✓ | Retire the 3D city | the districts, roads and generic buildings go, with three.js (~480 KB) and the walking characters | — |
+| **M3** ✓ | Your work | employed: the office tower, your desk a floor higher with each promotion; your own company: premises by type and stage — buka → restaurant → chain, two bikes → truck depot, laptop at home → office floor, workshop → factory; staff at stations, customers through the door, a second shift lit at night, outlets as more premises | job and level, `BIZ` type, stage, staff, demand, capacity, quality, commitments, outlets |
 | M4 | The quarter as pictures | advancing is a short sequence of scenes from the three months that just happened, before any number | the quarter's digest and log |
 | M5 | Moments | every event, arc and black swan has its own picture with its decision card under it: the sibling at the gate, the robbery, the wedding, the raid | the event decks, arcs, swans |
 | M6 | What comes back | consequences you set in motion are seen on their way and arriving at your gate on the quarter they land | threads, pending, commitments |

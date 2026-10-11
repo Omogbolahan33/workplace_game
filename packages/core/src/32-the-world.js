@@ -390,13 +390,13 @@ function quarterFlowHTML(){
   return flowBarsHTML(rows, {label:'Net', v:net, text:fmt(net)});
 }
 function worldHTML(){
-  /* The scene behind every screen is your home (VISUAL.md, M1): the place you
-     live, drawn from the run. UI.sceneVH is the height of the view the ui
+  /* The scene behind every screen is a place in your life (VISUAL.md): your
+     work under Work's career and company screens, your home everywhere else. UI.sceneVH is the height of the view the ui
      measured, so the picture fills it with sky rather than cropping the house.
      The HUD sits over it, and the ui adds the moves along its foot. */
   const era = eraById(S.era ? S.era.id : 'calm');
   return '<div class="world home" id="world">'+
-    '<div class="world-stage">'+homeSceneSVG(homeLook(), UI.sceneVH)+'</div>'+
+    '<div class="world-stage">'+sceneSVG(UI.sceneVH)+'</div>'+
     worldHUD()+
     '<div class="world-cap">'+esc(CITY().label)+' \u00b7 '+esc(dateLabel(S.turn))+(era ? ' \u00b7 '+esc(era.name) : '')+'</div>'+
     '</div>';

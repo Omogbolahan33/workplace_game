@@ -13,7 +13,7 @@
    screen with `off` - the start screen can open while a run still exists (a new
    run from Settings), and it is no place for your home. It writes #scene (and
    only #scene). */
-import { S, UI, homeLook, homeSceneSVG, routeViewInner, worldGlyph, worldHTML } from '@ledger/core';
+import { S, UI, routeViewInner, sceneSVG, worldGlyph, worldHTML } from '@ledger/core';
 import { toast } from './00-q.js';
 
 /* Generated from src/18-world.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
@@ -39,7 +39,7 @@ export function worldSync(off){
   /* measured now that the stage is laid out: a different height redraws the
      picture once, at the size it is shown */
   const vh = homeVH(), stage = host.querySelector('.world-stage');
-  if(stage && Math.abs(vh - UI.sceneVH) > 8){ UI.sceneVH = vh; stage.innerHTML = homeSceneSVG(homeLook(), vh); }
+  if(stage && Math.abs(vh - UI.sceneVH) > 8){ UI.sceneVH = vh; stage.innerHTML = sceneSVG(vh); }
   worldTiles(host);
   homeBand(host);
 }

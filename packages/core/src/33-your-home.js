@@ -26,23 +26,24 @@ function homeLook(){
     time: hr >= 6 && hr < 17 ? 'day' : hr >= 17 && hr < 19 ? 'dusk' : 'night',
     label: 'Your home: ' + HOME_TIERS[tier - 1].name + ' in ' + c.label};
 }
-/* Your home, drawn from homeLook(): a three-quarter view (front face lit,
-   side face in shade, a cast shadow on the ground), weathered walls, the power
-   lines every Lagos street has, the season's air - harmattan dust, rain - and
-   night lit by whatever is running. The scene is 390 wide and anchored at its
-   foot; `vh` is how tall the view is, and the extra height is sky, so a tall
-   phone shows more sky rather than cropping the house. */
-/* each drawing's gradients and filters get their own ids, so two on one page never borrow each other's sky */
-let homeScenes = 0;
-function homeSceneSVG(st, vh){
+/* The drawing kit every place is drawn with (VISUAL.md): one hand, so your
+   home and your work look like the same city. It lays the backdrop at once -
+   the sky for the hour, season and era, the city behind, the ground (laterite,
+   or interlocking paving when st.ground is 'pave') - and returns the tools:
+   box() for a building in three-quarter view (lit front, shaded side, cast
+   shadow, weathered walls), win() and door() on its front, pole() for the
+   power lines, car(), person(), and finish(), which lays the season's air and
+   returns the picture. `vh` is the view's height; the extra is sky. */
+let sceneDrawings = 0;
+function sceneKit(st, vh, tag){
   const W = 390, H = 300, VH = Math.max(H, Math.round(vh || H)), TOP = H - VH;
-  const u = 'hs' + (++homeScenes) + '-';
+  const u = (tag || 's') + (++sceneDrawings) + '-';
   const id = (n) => u + n, url = (n) => 'url(#' + u + n + ')';
   const night = st.time === 'night', dusk = st.time === 'dusk';
   const blackout = st.grid < 40, genOn = blackout && st.gen;
   const lights = (night || dusk) && (!blackout || genOn || st.solar);
   const out = [], add = (s) => out.push(s);
-  let seed = 11 + st.tier * 7;
+  let seed = st.seed || 11;
   const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
   const f1 = (n) => (+n).toFixed(1);
 
@@ -68,7 +69,7 @@ function homeSceneSVG(st, vh){
     '<linearGradient id="' + id('glassL') + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe2a6"/><stop offset="1" stop-color="#f3a64a"/></linearGradient>' +
     '<radialGradient id="' + id('spill') + '"><stop offset="0" stop-color="' + warm + '" stop-opacity=".5"/><stop offset="1" stop-color="' + warm + '" stop-opacity="0"/></radialGradient>' +
     '<radialGradient id="' + id('sun') + '"><stop offset="0" stop-color="#fff8e0"/><stop offset=".25" stop-color="#fff1c4" stop-opacity=".9"/><stop offset="1" stop-color="#fff1c4" stop-opacity="0"/></radialGradient>' +
-    '<filter id="' + id('grime') + '" x="0" y="0" width="1" height="1"><feTurbulence type="fractalNoise" baseFrequency=".055 .5" numOctaves="3" seed="' + (st.tier + 4) + '"/>' +
+    '<filter id="' + id('grime') + '" x="0" y="0" width="1" height="1"><feTurbulence type="fractalNoise" baseFrequency=".055 .5" numOctaves="3" seed="' + ((st.seed || 11) % 9 + 3) + '"/>' +
       '<feColorMatrix values="0 0 0 0 .22  0 0 0 0 .16  0 0 0 0 .1  0 0 0 -1.4 1.05"/><feComposite in2="SourceGraphic" operator="in"/></filter>' +
     '<filter id="' + id('grain') + '"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="2"/><feColorMatrix values="0 0 0 0 .5  0 0 0 0 .45  0 0 0 0 .4  0 0 0 .09 0"/></filter>' +
     '<filter id="' + id('soft') + '" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>' +
@@ -88,7 +89,7 @@ function homeSceneSVG(st, vh){
   const far = night ? '#151c36' : dusk ? '#6a5876' : st.season === 'harmattan' ? '#b9a688' : '#93a7b9';
   let x = -6;
   while (x < W) {
-    const w = 16 + rnd() * 30, tall = st.tier >= 3 && rnd() > 0.55, h = tall ? 60 + rnd() * 70 : 14 + rnd() * 30, base = 178;
+    const w = 16 + rnd() * 30, tall = !!st.towers && rnd() > 0.55, h = tall ? 60 + rnd() * 70 : 14 + rnd() * 30, base = 178;
     add('<rect x="' + f1(x) + '" y="' + f1(base - h) + '" width="' + f1(w) + '" height="' + f1(h) + '" fill="' + far + '"/>');
     if (!tall && rnd() > 0.55) add('<rect x="' + f1(x + w * .25) + '" y="' + f1(base - h - 10) + '" width="8" height="8" rx="2" fill="' + far + '"/><rect x="' + f1(x + w * .25 + 3) + '" y="' + f1(base - h - 3) + '" width="2" height="3" fill="' + far + '"/>');
     if (!tall && rnd() > 0.93) add('<rect x="' + f1(x + w / 2) + '" y="' + f1(base - h - 34) + '" width="3" height="34" fill="' + far + '"/><circle cx="' + f1(x + w / 2 + 1.5) + '" cy="' + f1(base - h - 36) + '" r="3" fill="' + far + '"/>');   // a minaret
@@ -100,8 +101,8 @@ function homeSceneSVG(st, vh){
 
   /* ---- ground ---- */
   const groundY = 182;
-  add('<rect y="' + groundY + '" width="' + W + '" height="' + (H - groundY) + '" fill="' + (st.tier >= 3 ? url('pave') : url('lat')) + '"/>');
-  if (st.tier < 3) {
+  add('<rect y="' + groundY + '" width="' + W + '" height="' + (H - groundY) + '" fill="' + (st.ground === 'pave' ? url('pave') : url('lat')) + '"/>');
+  if (st.ground !== 'pave') {
     add('<path d="M0 ' + (groundY + 40) + ' q120 -8 240 4 t160 -2" stroke="#000" stroke-opacity=".08" stroke-width="8" fill="none"/>');   // tyre ruts
     add('<ellipse cx="78" cy="268" rx="46" ry="7" fill="' + skyC[1] + '" opacity="' + (st.season === 'rain' ? .75 : .35) + '"/><ellipse cx="78" cy="268" rx="46" ry="7" fill="none" stroke="#000" stroke-opacity=".15"/>');
   }
@@ -148,6 +149,47 @@ function homeSceneSVG(st, vh){
     return s;
   };
 
+  const car = (cx, cy, col, suv) => {
+    const c = shade(col, dayK), r = suv ? 12 : 9;
+    return '<g transform="translate(' + cx + ' ' + cy + ')"><ellipse cx="38" cy="23" rx="44" ry="5" fill="#000" opacity=".35" filter="' + url('blur1') + '"/>' +
+      '<path d="M2 16 q0 -9 12 -10 l10 -' + r + ' q4 -2 10 -2 h' + (suv ? 22 : 16) + ' q6 0 10 4 l10 ' + (r - 2) + ' q12 2 14 8 v6 q0 3 -3 3 h-70 q-3 0 -3 -3z" fill="' + c + '"/>' +
+      '<path d="M26 5 l7 -' + (r - 2) + ' h' + (suv ? 10 : 8) + ' v' + (r - 2) + 'z M' + (suv ? 47 : 43) + ' 5 v-' + (r - 2) + ' h' + (suv ? 10 : 7) + ' l8 ' + (r - 2) + 'z" fill="' + url('glassD') + '"/>' +
+      '<path d="M4 15 h70" stroke="#fff" stroke-opacity=".28" stroke-width="1.2"/>' +
+      '<circle cx="18" cy="22" r="6.5" fill="#141414"/><circle cx="60" cy="22" r="6.5" fill="#141414"/><circle cx="18" cy="22" r="3" fill="#aaa"/><circle cx="60" cy="22" r="3" fill="#aaa"/>' +
+      (night ? '<path d="M76 14 l40 -6 v14z" fill="' + warm + '" opacity=".18"/>' : '') + '</g>';
+  };
+  const person = (px, py, o) => {
+    const k = o.scale || 1, skin = shade(o.skin || '#6b4a32', Math.max(.55, dayK)), top = shade(o.shirt, dayK), legs = shade(o.legs || '#262b36', dayK);
+    let s = '<g transform="translate(' + px + ' ' + py + ') scale(' + k + ')"><ellipse cx="3" cy="0" rx="9" ry="2.4" fill="#000" opacity=".3" filter="' + url('blur1') + '"/>';
+    if (o.dress) s += '<path d="M-6.5 -24 h13 l3 24 h-19z" fill="' + top + '"/><path d="M-6.5 -24 h13 l3 24 h-19z" fill="' + shade(o.trim || '#f2c94c', dayK) + '" opacity=".35" transform="translate(0 -2) scale(1 .3)"/>';
+    else s += '<path d="M-4.4 -15 h3.6 l-.2 15 h-3.4z M.8 -15 h3.6 l.2 15 h-3.4z" fill="' + legs + '"/>';
+    s += '<path d="M-6.5 -31 q6.5 -3.5 13 0 l1.5 16 h-16z" fill="' + top + '"/><path d="M2 -31 q4.5 1 4.5 1 l1.5 16 h-6z" fill="#000" opacity=".16"/>';
+    s += '<path d="M-6.5 -30 l-2 13" stroke="' + top + '" stroke-width="3" stroke-linecap="round"/><path d="M6.5 -30 l2 13" stroke="' + shade(o.shirt, dayK * .85) + '" stroke-width="3" stroke-linecap="round"/>';
+    s += '<rect x="-1.5" y="-34" width="3" height="4" fill="' + skin + '"/><ellipse cx="0" cy="-38.5" rx="4.6" ry="5.2" fill="' + skin + '"/>';
+    if (o.tie) s += '<path d="M0 -30 l-1.4 9 l1.4 2 l1.4 -2z" fill="#c9a227"/>';
+    if (o.gele) s += '<path d="M-7 -41 q7 -10 14 0 q-3 -5 -7 -4 q-4 -1 -7 4z" fill="' + shade(o.gele, dayK) + '"/><path d="M5 -43 l5 -4 l-2 6z" fill="' + shade(o.gele, dayK) + '"/>';
+    else if (o.cap) s += '<path d="M-5 -41 q5 -6 10 0z" fill="' + shade(o.cap, dayK) + '"/>';
+    else s += '<path d="M-4.6 -40 q4.6 -6 9.2 0 q-4.6 -2.5 -9.2 0z" fill="' + (o.grey ? '#bdb8ae' : '#17110c') + '"/>';
+    return s + '</g>';
+  };
+  const finish = (cls, label) => {
+    if (st.season === 'rain') { let r = ''; for (let i = 0; i < 120 + Math.round(-TOP / 3); i++) { const x0 = rnd() * (W + 40) - 20, y0 = TOP + rnd() * VH; r += 'M' + f1(x0) + ' ' + f1(y0) + 'l-3 9'; } add('<path d="' + r + '" stroke="#dfe7ee" stroke-opacity=".45" stroke-width=".7"/>'); }
+    if (st.season === 'harmattan') add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#d9c09a" opacity=".16"/>');
+    if (night) add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#0a1030" opacity=".18"/>');
+    add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" filter="' + url('grain') + '" opacity=".9"/>');
+    if (blackout && !st.gen && !st.solar && (night || dusk) && !st.noNepa) add('<text x="' + W / 2 + '" y="122" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="' + warm + '" opacity=".85">NEPA has taken light</text>');
+    return '<svg class="' + cls + '" viewBox="0 ' + TOP + ' ' + W + ' ' + VH + '" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(label) + '">' + out.join('') + '</svg>';
+  };
+  return {W:W, H:H, VH:VH, TOP:TOP, url:url, night:night, dusk:dusk, blackout:blackout, genOn:genOn, lights:lights,
+    add:add, rnd:rnd, f1:f1, P:P, poly:poly, shade:shade, dayK:dayK, sideK:sideK, warm:warm, skyC:skyC, groundY:groundY,
+    box:box, win:win, door:door, pole:pole, car:car, person:person, finish:finish};
+}
+/* Your home, drawn from homeLook() with the kit: the house for your tier,
+   what you own, who lives there. */
+function homeSceneSVG(st, vh){
+  const k = sceneKit(Object.assign({ground: st.tier >= 3 ? 'pave' : 'earth', towers: st.tier >= 3, seed: 11 + st.tier * 7}, st), vh, 'hs');
+  const add = k.add, rnd = k.rnd, f1 = k.f1, poly = k.poly, shade = k.shade, url = k.url, box = k.box, win = k.win, door = k.door,
+    pole = k.pole, car = k.car, person = k.person, dayK = k.dayK, sideK = k.sideK, groundY = k.groundY, night = k.night, genOn = k.genOn;
   /* ---- the house for your tier ---- */
   const me = { x: 150, y: 262 };
   if (st.tier === 1) {
@@ -226,33 +268,9 @@ function homeSceneSVG(st, vh){
     if (genOn) add('<g fill="#9a9a9a" opacity=".5" filter="' + url('blur1') + '"><circle cx="' + (gx + (big ? 40 : 26)) + '" cy="' + (gy - 26) + '" r="4"/><circle cx="' + (gx + (big ? 46 : 31)) + '" cy="' + (gy - 36) + '" r="6"/><circle cx="' + (gx + (big ? 54 : 38)) + '" cy="' + (gy - 50) + '" r="8"/></g>' +
       '<ellipse cx="' + (gx + 12) + '" cy="' + (gy + 2) + '" rx="40" ry="9" fill="' + url('spill') + '" opacity="' + (night ? .8 : 0) + '"/>');
   }
-  const car = (cx, cy, col, suv) => {
-    const c = shade(col, dayK), r = suv ? 12 : 9;
-    return '<g transform="translate(' + cx + ' ' + cy + ')"><ellipse cx="38" cy="23" rx="44" ry="5" fill="#000" opacity=".35" filter="' + url('blur1') + '"/>' +
-      '<path d="M2 16 q0 -9 12 -10 l10 -' + r + ' q4 -2 10 -2 h' + (suv ? 22 : 16) + ' q6 0 10 4 l10 ' + (r - 2) + ' q12 2 14 8 v6 q0 3 -3 3 h-70 q-3 0 -3 -3z" fill="' + c + '"/>' +
-      '<path d="M26 5 l7 -' + (r - 2) + ' h' + (suv ? 10 : 8) + ' v' + (r - 2) + 'z M' + (suv ? 47 : 43) + ' 5 v-' + (r - 2) + ' h' + (suv ? 10 : 7) + ' l8 ' + (r - 2) + 'z" fill="' + url('glassD') + '"/>' +
-      '<path d="M4 15 h70" stroke="#fff" stroke-opacity=".28" stroke-width="1.2"/>' +
-      '<circle cx="18" cy="22" r="6.5" fill="#141414"/><circle cx="60" cy="22" r="6.5" fill="#141414"/><circle cx="18" cy="22" r="3" fill="#aaa"/><circle cx="60" cy="22" r="3" fill="#aaa"/>' +
-      (night ? '<path d="M76 14 l40 -6 v14z" fill="' + warm + '" opacity=".18"/>' : '') + '</g>';
-  };
   if (st.car === 1) add(car(st.tier === 2 ? 236 : 196, groundY + 56, '#c3c7cc', false));
   if (st.car >= 2) { add(car(214, groundY + 54, '#16181b', true)); add(car(120, groundY + 66, '#7e1820', false)); }
 
-  /* ---- who lives here ---- */
-  const person = (px, py, o) => {
-    const k = o.scale || 1, skin = shade(o.skin || '#6b4a32', Math.max(.55, dayK)), top = shade(o.shirt, dayK), legs = shade(o.legs || '#262b36', dayK);
-    let s = '<g transform="translate(' + px + ' ' + py + ') scale(' + k + ')"><ellipse cx="3" cy="0" rx="9" ry="2.4" fill="#000" opacity=".3" filter="' + url('blur1') + '"/>';
-    if (o.dress) s += '<path d="M-6.5 -24 h13 l3 24 h-19z" fill="' + top + '"/><path d="M-6.5 -24 h13 l3 24 h-19z" fill="' + shade(o.trim || '#f2c94c', dayK) + '" opacity=".35" transform="translate(0 -2) scale(1 .3)"/>';
-    else s += '<path d="M-4.4 -15 h3.6 l-.2 15 h-3.4z M.8 -15 h3.6 l.2 15 h-3.4z" fill="' + legs + '"/>';
-    s += '<path d="M-6.5 -31 q6.5 -3.5 13 0 l1.5 16 h-16z" fill="' + top + '"/><path d="M2 -31 q4.5 1 4.5 1 l1.5 16 h-6z" fill="#000" opacity=".16"/>';
-    s += '<path d="M-6.5 -30 l-2 13" stroke="' + top + '" stroke-width="3" stroke-linecap="round"/><path d="M6.5 -30 l2 13" stroke="' + shade(o.shirt, dayK * .85) + '" stroke-width="3" stroke-linecap="round"/>';
-    s += '<rect x="-1.5" y="-34" width="3" height="4" fill="' + skin + '"/><ellipse cx="0" cy="-38.5" rx="4.6" ry="5.2" fill="' + skin + '"/>';
-    if (o.tie) s += '<path d="M0 -30 l-1.4 9 l1.4 2 l1.4 -2z" fill="#c9a227"/>';
-    if (o.gele) s += '<path d="M-7 -41 q7 -10 14 0 q-3 -5 -7 -4 q-4 -1 -7 4z" fill="' + shade(o.gele, dayK) + '"/><path d="M5 -43 l5 -4 l-2 6z" fill="' + shade(o.gele, dayK) + '"/>';
-    else if (o.cap) s += '<path d="M-5 -41 q5 -6 10 0z" fill="' + shade(o.cap, dayK) + '"/>';
-    else s += '<path d="M-4.6 -40 q4.6 -6 9.2 0 q-4.6 -2.5 -9.2 0z" fill="' + (o.grey ? '#bdb8ae' : '#17110c') + '"/>';
-    return s + '</g>';
-  };
   add(person(me.x, me.y, { shirt: st.job ? '#ece7dc' : '#3c79c4', legs: st.job ? '#20242c' : '#3d3a36', tie: !!st.job, scale: 1.3, grey: st.age >= 50 }));
   if (st.spouse) add(person(me.x + 24, me.y, { shirt: '#b8275f', dress: true, gele: '#d4a017', skin: '#5a3b27', scale: 1.24 }));
   for (let i = 0; i < Math.min(4, st.kids || 0); i++) add(person(me.x + 46 + i * 15, me.y + 1, { shirt: ['#e7b931', '#2fae6a', '#4a8fe0', '#e05a4a'][i], skin: '#7d573b', scale: .72 + (st.kidAge || 0) * .02 }));
@@ -262,11 +280,5 @@ function homeSceneSVG(st, vh){
   if (staff.indexOf('nanny') >= 0) add(person(me.x - 26, me.y + 2, { shirt: '#6f56b3', dress: true, skin: '#5a3b27', scale: 1.15 }));
   if (staff.indexOf('cook') >= 0) add(person(me.x - 48, me.y + 1, { shirt: '#f4f4f0', cap: '#fafafa', skin: '#4a3020', scale: 1.12 }));
 
-  /* ---- the air ---- */
-  if (st.season === 'rain') { let r = ''; for (let i = 0; i < 120 + Math.round(-TOP / 3); i++) { const x0 = rnd() * (W + 40) - 20, y0 = TOP + rnd() * VH; r += 'M' + f1(x0) + ' ' + f1(y0) + 'l-3 9'; } add('<path d="' + r + '" stroke="#dfe7ee" stroke-opacity=".45" stroke-width=".7"/>'); }
-  if (st.season === 'harmattan') add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#d9c09a" opacity=".16"/>');
-  if (night) add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#0a1030" opacity=".18"/>');
-  add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" filter="' + url('grain') + '" opacity=".9"/>');
-  if (blackout && !st.gen && !st.solar && (night || dusk)) add('<text x="' + W / 2 + '" y="122" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="' + warm + '" opacity=".85">NEPA has taken light</text>');
-  return '<svg class="homescene" viewBox="0 ' + TOP + ' ' + W + ' ' + VH + '" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(st.label || 'Your home') + '">' + out.join('') + '</svg>';
+  return k.finish('homescene', st.label || 'Your home');
 }

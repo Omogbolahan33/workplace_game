@@ -360,7 +360,7 @@
    "02-derived-state-personal-finance-career.js: CITY, budgetMonthly, freedomIndex, hoursBudget, hoursLeft, netWorth, passiveMonthly, salaryMonthly",
    "31-afterthreadchoice.js: ambitionOf, ambitionPct",
    "30-eras-you-live-through.js: eraById",
-   "33-your-home.js: homeLook, homeSceneSVG"
+   "34-your-work.js: sceneSVG"
   ],
   "externals": []
  },
@@ -368,6 +368,18 @@
   "needs": [
    "01-game-state.js: S",
    "02-derived-state-personal-finance-career.js: CITY",
+   "00-cities.js: esc"
+  ],
+  "externals": []
+ },
+ "34-your-work.js": {
+  "needs": [
+   "12-main.js: routeKey",
+   "33-your-home.js: homeLook, homeSceneSVG, sceneKit",
+   "01-game-state.js: S",
+   "02-derived-state-personal-finance-career.js: CITY",
+   "04-bizcapacity.js: bizCapacity, bizStage",
+   "03-startbizcost-one-price-for-every-picker.js: leverActive",
    "00-cities.js: esc"
   ],
   "externals": []

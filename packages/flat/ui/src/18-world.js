@@ -35,7 +35,7 @@ function worldSync(off){
   /* measured now that the stage is laid out: a different height redraws the
      picture once, at the size it is shown */
   const vh = homeVH(), stage = host.querySelector('.world-stage');
-  if(stage && Math.abs(vh - UI.sceneVH) > 8){ UI.sceneVH = vh; stage.innerHTML = homeSceneSVG(homeLook(), vh); }
+  if(stage && Math.abs(vh - UI.sceneVH) > 8){ UI.sceneVH = vh; stage.innerHTML = sceneSVG(vh); }
   worldTiles(host);
   homeBand(host);
 }
