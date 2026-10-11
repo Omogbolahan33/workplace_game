@@ -54,7 +54,7 @@ const ACT = {
     const _pend = UI.modal || null;
     UI.modal = {type:'advance', before:_a, after:quarterSnapshot(),
                 rows:advanceRows(_a, quarterSnapshot()), line:advanceLine(_a, quarterSnapshot()),
-                pending:_pend};
+                reel:quarterReel(_a, quarterSnapshot()), pending:_pend};
     render();
     startAdvanceAnim();
   },

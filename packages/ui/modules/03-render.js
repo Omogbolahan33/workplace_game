@@ -127,7 +127,9 @@ export function renderTop(){
 }
 export function startAdvanceAnim(){
   const M = UI.modal; if(!M || M.type!=='advance') return;
-  const DUR = UI.animFast ? 1500 : 5000;
+  /* long enough to see each of the quarter's pictures */
+  const shots = (M.reel || []).length;
+  const DUR = UI.animFast ? Math.max(1500, shots * 700) : Math.max(5000, shots * 1500);
   const nowFn = (typeof performance!=='undefined' && performance.now) ? function(){return performance.now();} : Date.now;
   const t0 = nowFn();
   let raf=null, tw=null, done=false;
@@ -151,6 +153,13 @@ export function startAdvanceAnim(){
     });
     const bar = document.getElementById('avBar');
     if(bar) bar.style.width = (p*100).toFixed(1)+'%';
+    /* the pictures turn on the same clock as the figures */
+    const reel = document.getElementById('avReel');
+    if(reel){
+      const fr = reel.querySelectorAll('.rframe'), dots = reel.querySelectorAll('.rdots i');
+      const on = Math.min(fr.length - 1, Math.floor(p * fr.length));
+      for(let i = 0; i < fr.length; i++){ fr[i].classList.toggle('on', i === on); if(dots[i]) dots[i].classList.toggle('on', i === on); }
+    }
     if(p>=1){ finish(); return; }
     raf = (typeof requestAnimationFrame==='function') ? requestAnimationFrame(frame) : setTimeout(frame,16);
   }

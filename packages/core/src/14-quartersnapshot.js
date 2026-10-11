@@ -1,9 +1,11 @@
 
 function quarterSnapshot(){
   const b = S.biz;
+  /* home: what the house and the people in it looked like, so the quarter's
+     pictures can say what changed */
   return { turn:S.turn, cash:Math.round(S.fin.cash||0), nw:Math.round(netWorth()||0),
     rev: b?Math.round(b.revenue||0):null, profit: b?Math.round(b.profit||0):null,
-    staff: b?(b.staff||[]).length:null, outlets: b?(b.locations||0):null };
+    staff: b?(b.staff||[]).length:null, outlets: b?(b.locations||0):null, home: homeLook() };
 }
 function advanceRows(a,b){
   const rows=[];
@@ -41,7 +43,8 @@ function advanceModal(M){
       '<span class="avarrow">\u2192</span>'+
       '<span class="avto mono" id="av_'+r.key+'">'+fmt(r.from)+'</span></div>';
   });
-  const body =
+  /* the three months as pictures first, the figures counting under them */
+  const body = quarterReelHTML(M.reel)+
     '<div class="tiny muted">'+esc(dateLabel(a.turn))+' &nbsp;\u2192&nbsp; '+
       '<b class="acc">'+esc(dateLabel(b.turn))+'</b></div>'+
     '<div class="avbar"><i id="avBar" style="width:0%"></i></div>'+

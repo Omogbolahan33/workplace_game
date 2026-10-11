@@ -115,3 +115,33 @@ test('looking at your home changes nothing about the run', async () => {
   const strip = (svg) => svg.replace(/hs\d+-/g, 'hs-');
   assert.equal(strip(C.homeSceneSVG(C.homeLook(), 500)), strip(a), 'the same home drew two different pictures');
 });
+
+test('the quarter in pictures: home with what changed, work, the person, the headline', async () => {
+  const C = await world();
+  /* what changed at home, said the way a person would */
+  const a = C.homeLook();
+  const b = Object.assign({}, a, { kids: a.kids + 1 });
+  assert.equal(C.homeChange(a, b), 'A child was born.');
+  assert.match(C.homeChange(a, Object.assign({}, a, { tier: a.tier + 1 })), /^You moved: /);
+  assert.equal(C.homeChange(a, a), '', 'nothing changed and something was said');
+  /* a quarter played: the first picture is home, and every picture has a line */
+  const before = C.quarterSnapshot();
+  playQuarter(C);
+  let reel = C.quarterReel(before, C.quarterSnapshot());
+  assert.equal(reel[0].kind, 'home');
+  assert.ok(reel.length >= 1 && reel.length <= 4, reel.length + ' pictures');
+  for (const f of reel) {
+    assert.ok(f.caption.length > 0 && f.caption.length <= 150, f.kind + ' has no line, or a paragraph: ' + f.caption);
+    assert.doesNotMatch(f.html, /NaN|undefined/, f.kind + ' drew a number it did not have');
+  }
+  /* news about someone shows their face; the world turning is a headline */
+  const c = C.S.cast.find((x) => x.alive);
+  const t = C.S.turn;
+  C.S.digest.push({ turn: t, kind: 'cast', text: c.name + ' got married.', tone: 'neutral', castId: c.id });
+  C.S.digest.push({ turn: t, kind: 'era', text: 'The Bust — The music stopped.', tone: 'bad' });
+  reel = C.quarterReel({ turn: t, home: C.homeLook() }, C.quarterSnapshot());
+  const kinds = reel.map((f) => f.kind);
+  assert.ok(kinds.includes('person'), 'news about ' + c.name + ' did not show them: ' + kinds.join(', '));
+  assert.ok(kinds.includes('world'), 'a new era did not make the paper: ' + kinds.join(', '));
+  assert.match(reel.find((f) => f.kind === 'world').html, /THE BUST/);
+});

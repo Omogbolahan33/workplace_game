@@ -223,7 +223,8 @@ function advanceQuarter(){
 
   // the people in your life
   const castNews = stepCast();
-  castNews.forEach(function(n){ S.digest.push({turn:S.turn, kind:'cast', text:n.text, tone:n.kind==='death'?'bad':'neutral'}); });
+  /* who it is about travels with it, so the quarter's pictures can show their face */
+  castNews.forEach(function(n){ S.digest.push({turn:S.turn, kind:'cast', text:n.text, tone:n.kind==='death'?'bad':'neutral', castId:n.c ? n.c.id : null}); });
 
   // the market you compete in
   const rivalNews = stepRival();

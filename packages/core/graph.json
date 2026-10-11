@@ -155,7 +155,9 @@
   "needs": [
    "01-game-state.js: S, UI",
    "02-derived-state-personal-finance-career.js: netWorth",
+   "33-your-home.js: homeLook",
    "00-cities.js: bar, dateLabel, esc, fmt",
+   "35-the-quarter-in-pictures.js: quarterReelHTML",
    "22-everyday-life-vignette.js: modalHTML",
    "28-votes-and-decisions.js: govDot"
   ],
@@ -381,6 +383,17 @@
    "04-bizcapacity.js: bizCapacity, bizStage",
    "03-startbizcost-one-price-for-every-picker.js: leverActive",
    "00-cities.js: esc"
+  ],
+  "externals": []
+ },
+ "35-the-quarter-in-pictures.js": {
+  "needs": [
+   "33-your-home.js: HOME_TIERS, homeLook, homeSceneSVG, sceneKit",
+   "00-cities.js: dateLabel, esc, fmt",
+   "01-game-state.js: S",
+   "02-derived-state-personal-finance-career.js: CITY",
+   "34-your-work.js: workLook, workSceneSVG",
+   "29-the-cast-who-remembers.js: castFaceHTML"
   ],
   "externals": []
  }

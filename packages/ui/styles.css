@@ -604,6 +604,25 @@ body.terse .prose{display:none}
 /* your home, behind every screen: the picture fills the band above the sheet */
 #scene .world.home .world-stage{bottom:auto;height:calc(var(--sheet-top) + 24px)}
 #scene .world.home .world-stage .homescene{width:100%;height:100%;display:block}
+/* the quarter in pictures, over the figures */
+/* the picture above, its line under it - a caption over the picture hid what the picture was of */
+.reel{position:relative;aspect-ratio:390/372;border-radius:12px;overflow:hidden;margin:0 0 12px;background:#0e1620}
+.reel .rframe{position:absolute;inset:0;margin:0;opacity:0;transition:opacity .45s ease;display:flex;flex-direction:column}
+.reel .rframe.on{opacity:1}
+.reel .rframe>svg{width:100%;flex:1;min-height:0;display:block;transform-origin:50% 70%}
+.reel .rframe.on>svg{animation:reelkb 6s ease-out forwards}
+@keyframes reelkb{from{transform:scale(1)}to{transform:scale(1.07)}}
+@media (prefers-reduced-motion:reduce){.reel .rframe.on>svg{animation:none}.reel .rframe{transition:none}}
+.reel figcaption{flex:none;height:72px;overflow:hidden;padding:10px 12px;background:#0b1017;color:#f2f4f7;font-size:13.5px;line-height:1.4;position:relative;z-index:1}
+.reel .rframe.t-bad figcaption{box-shadow:inset 3px 0 0 var(--bad)}
+.reel .rframe.t-good figcaption{box-shadow:inset 3px 0 0 var(--good)}
+.reel .rframe.t-warn figcaption{box-shadow:inset 3px 0 0 var(--warn)}
+.reel .rface{flex:1;min-height:0;display:grid;place-items:center;background:radial-gradient(80% 70% at 50% 40%,#25344a,#0b1119)}
+.reel .rface .cface{width:150px;height:150px}
+.reel .rface .cface .cbadge,.reel .rface .cface .cfelt,.reel .rface .cface .cstory{width:40px;height:40px;font-size:22px}
+.reel .rdots{position:absolute;top:9px;right:10px;display:flex;gap:5px}
+.reel .rdots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35)}
+.reel .rdots i.on{background:var(--acc)}
 /* the shop as a shelf */
 .gtile .bico{position:relative}
 .gtile .gown{position:absolute;right:0;top:0;font-size:11px;font-weight:700;color:#1a1405;background:var(--acc);border-radius:10px;padding:1px 6px;line-height:1.4}
