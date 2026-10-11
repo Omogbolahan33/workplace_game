@@ -57,17 +57,9 @@ function viewMoneyProperty(){
      buttons, same disabled reasons, same prices. */
   let h = '';
   h += '<div class="card" style="margin-top:12px"><h3>Buy something <span class="tag">cash '+fmt(S.fin.cash)+'</span></h3>';
-  GOODS.forEach(function(g){
-    const cost = Math.round(g.cost*(0.85+0.3*CITY().rentMult/1.3));
-    const owned = S.fin.goods.filter(x=>x.id===g.id).length;
-    h += '<div class="mrow">'+
-      '<div class="between"><b><span class="gfx gico">'+worldGlyph(g.name)+'</span>'+g.name+'</b><span class="row wrap" style="gap:4px;justify-content:flex-end">'+
-        '<span class="emarks">'+effectMarksHTML(g.eff, g.upkeep)+'</span>'+
-        '<span class="chip b">'+fmt(cost)+'</span>'+
-      '</span></div>'+
-      '<button class="btn sm primary block" style="margin-top:6px" data-a="buygood" data-g="'+g.id+'"'+(S.fin.cash<cost?' disabled aria-disabled="true" title="Costs '+fmt(cost)+' \u00b7 you have '+fmt(S.fin.cash)+' \u00b7 short '+fmt(Math.round(cost - S.fin.cash))+'"':'')+'>'+
-      (owned?'Buy another':'Buy')+'</button></div>';
-  });
+  /* a shelf of pictures, two to a row on a phone - goodTileHTML(), the tile
+     the app draws too */
+  h += '<div class="grid g2">'+GOODS.map(function(g){ return goodTileHTML(g); }).join('')+'</div>';
   h += foldHTML('What each thing is for', GOODS.map(function(g){
       return '<div style="margin-bottom:6px"><b>'+g.name+'</b> \u2014 '+g.note+'</div>';
     }).join(''))+'</div>';

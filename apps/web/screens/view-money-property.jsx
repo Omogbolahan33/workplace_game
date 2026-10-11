@@ -3,25 +3,15 @@
 
   The Buy button is the case §22.23 was written for on this screen: it is
   disabled below the price, and the reason travels on the control (costs /
-  you have / short). In the string version that was one concatenated attribute;
-  here it is a small function, because the same three numbers are used in the
-  card and on the button and they should not be able to disagree.
+  you have / short). The shelf of goods is core's goodTileHTML(), so the price,
+  the button and its reason are one function on both renderers and cannot
+  disagree.
 */
-import { S, fmt, CITY, GOODS, worldGlyph, effectMarksHTML } from '@ledger/core';
-
-/* the price of a good where you live: dearer in a dearer city */
-function priceOf(g) {
-  return Math.round(g.cost * (0.85 + 0.3 * CITY().rentMult / 1.3));
-}
+import { S, fmt, GOODS, goodTileHTML } from '@ledger/core';
 
 /* resale value decays 5.5% a quarter from the turn you bought it */
 function resaleOf(def, owned) {
   return Math.max(0, def.cost * (1 - 0.055 * (S.turn - owned.turn)));
-}
-
-function shortfallReason(cost) {
-  return 'Costs ' + fmt(cost) + ' · you have ' + fmt(S.fin.cash) +
-    ' · short ' + fmt(Math.round(cost - S.fin.cash));
 }
 
 export default function ViewMoneyProperty() {
@@ -31,30 +21,8 @@ export default function ViewMoneyProperty() {
     <>
       <div className="card" style={{ marginTop: '12px' }}>
         <h3>Buy something <span className="tag">cash {fmt(S.fin.cash)}</span></h3>
-          {GOODS.map((g) => {
-            const cost = priceOf(g);
-            const have = owned.filter((x) => x.id === g.id).length;
-            const afford = S.fin.cash >= cost;
-            return (
-              <div key={g.id} className="mrow">
-                <div className="between">
-                  <b><span className="gfx gico" dangerouslySetInnerHTML={{ __html: worldGlyph(g.name) }} />{g.name}</b>
-                  <span className="row wrap" style={{ gap: '4px', justifyContent: 'flex-end' }}>
-                    {/* what it does, drawn - core's marks, the same as the string path */}
-                    <span className="emarks" dangerouslySetInnerHTML={{ __html: effectMarksHTML(g.eff, g.upkeep) }} />
-                    <span className="chip b">{fmt(cost)}</span>
-                  </span>
-                </div>
-                <button className="btn sm primary block" style={{ marginTop: '6px' }}
-                  data-a="buygood" data-g={g.id}
-                  disabled={!afford}
-                  aria-disabled={!afford ? 'true' : undefined}
-                  title={!afford ? shortfallReason(cost) : undefined}>
-                  {have ? 'Buy another' : 'Buy'}
-                </button>
-              </div>
-            );
-          })}
+          {/* a shelf of pictures - core's tile, the same as the string path */}
+          <div className="grid g2" dangerouslySetInnerHTML={{ __html: GOODS.map((g) => goodTileHTML(g)).join('') }} />
         <details className="fold">
           <summary>What each thing is for</summary>
           <div>

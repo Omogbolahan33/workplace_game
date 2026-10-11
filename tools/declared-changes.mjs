@@ -894,6 +894,12 @@ const EDITS = [
   { marker: 'function standingHTML()', addition: true,
     name: 'standingHTML — where you stand, at a glance',
     why: 'net worth as the one big number (its start-of-game value shown with the explanations), and freedom and the years to 65 as rings, their meaning in the ring\'s title; replaces three stacked boxes that took most of a phone screen' },
+  { marker: 'function goodPrice(g)', addition: true,
+    name: 'goodPrice — what a thing costs in this city',
+    why: 'the one price formula the shop used inline, named so the tile and the app read the same number' },
+  { marker: 'function goodTileHTML(g)', addition: true,
+    name: 'goodTileHTML — a thing you can buy, as a picture on a shelf',
+    why: 'its drawing with how many you own, name and price, its effects as marks, and when you cannot afford it a bar of how far your cash gets you toward it; the Buy button, its refusal and reason are unchanged. Both renderers draw the shop from this one tile' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

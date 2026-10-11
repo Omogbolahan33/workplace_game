@@ -12865,6 +12865,24 @@ function worldHUD(){
       (UI.details ? 'Hide the explanations' : 'Show every explanation')+'">'+worldIco('info')+'</button>'+
   '</div></div>';
 }
+/* A thing you can buy, as a picture on a shelf: its drawing (with how many
+   you own), its name and price, what it does to you as marks, and - when you
+   cannot afford it yet - how far your cash gets you toward it. The Buy button,
+   its refusal and its reason are the screen's as they were. */
+function goodPrice(g){ return Math.round(g.cost*(0.85+0.3*CITY().rentMult/1.3)); }
+function goodTileHTML(g){
+  const cost = goodPrice(g), have = S.fin.goods.filter(function(x){ return x.id === g.id; }).length;
+  const afford = S.fin.cash >= cost, part = Math.max(0, Math.min(1, S.fin.cash / Math.max(1, cost)));
+  return '<div class="btile gtile'+(afford ? '' : ' off')+'">'+
+    '<div class="gfx bico" aria-hidden="true">'+worldGlyph(g.name)+(have ? '<span class="gown">×'+have+'</span>' : '')+'</div>'+
+    '<div class="bname"><b>'+g.name+'</b><span class="mono">'+fmt(cost)+'</span></div>'+
+    '<span class="emarks">'+effectMarksHTML(g.eff, g.upkeep)+'</span>'+
+    (afford ? '' : '<span class="gfx bmb gsave" role="img" aria-label="you have '+fmt(S.fin.cash)+' of '+fmt(cost)+'" title="you have '+
+      fmt(S.fin.cash)+' of '+fmt(cost)+'"><i style="width:'+Math.max(3, Math.round(part * 100))+'%;background:var(--acc)"></i></span>')+
+    '<button class="btn sm primary block" data-a="buygood" data-g="'+g.id+'"'+(afford ? '' : ' disabled aria-disabled="true" title="Costs '+fmt(cost)+
+      ' · you have '+fmt(S.fin.cash)+' · short '+fmt(Math.round(cost - S.fin.cash))+'"')+'>'+(have ? 'Buy another' : 'Buy')+'</button>'+
+  '</div>';
+}
 /* Where you stand, at a glance: what you are worth as the one big number
    (and in start-of-game money), and freedom and the years of working life
    left as rings. What each means is in the ring's title and, with the
@@ -13009,7 +13027,7 @@ function worldHTML(){
 }
 
 /* -------------------------------------------------------------------------
-   Everything above, exported. 671 names: the simulation's whole surface.
+   Everything above, exported. 673 names: the simulation's whole surface.
    ------------------------------------------------------------------------- */
 export {
   ALL_EVENTS,
@@ -13312,6 +13330,8 @@ export {
   giveRaise,
   gmCoverQ,
   gmul,
+  goodPrice,
+  goodTileHTML,
   goodsResale,
   goodsUpkeep,
   govDot,

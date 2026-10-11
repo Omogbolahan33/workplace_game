@@ -299,6 +299,8 @@
  "giveRaise": "core.js",
  "gmCoverQ": "core.js",
  "gmul": "core.js",
+ "goodPrice": "core.js",
+ "goodTileHTML": "core.js",
  "goodsResale": "core.js",
  "goodsUpkeep": "core.js",
  "govDot": "core.js",

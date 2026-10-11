@@ -603,6 +603,12 @@ body.terse .prose{display:none}
   background:conic-gradient(var(--c) calc(var(--p) * 1%),rgba(255,255,255,.13) 0);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
 .lring .hring em{font-style:normal;width:42px;height:42px;border-radius:50%;background:var(--panel2);display:grid;place-items:center;font-size:20px;color:var(--acc)}
 .lrings.n6{grid-template-columns:repeat(3,1fr);row-gap:12px}
+/* the shop as a shelf */
+.gtile .bico{position:relative}
+.gtile .gown{position:absolute;right:0;top:0;font-size:11px;font-weight:700;color:#1a1405;background:var(--acc);border-radius:10px;padding:1px 6px;line-height:1.4}
+.gtile .emarks{display:flex;flex-wrap:wrap;gap:4px}
+.gtile .gsave{display:block;flex:none;height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}
+.gtile .gsave i{display:block;height:100%;border-radius:3px}
 /* where you stand: the one big number, and two rings */
 .stand{display:grid;grid-template-columns:1.25fr 1fr;gap:10px;align-items:center}
 .stand .lrings{grid-template-columns:1fr 1fr;margin:0}

@@ -91,10 +91,10 @@
  },
  "ui/src/06-view-money-budget.js": {
   "importAt": 2,
-  "importLen": 305,
+  "importLen": 284,
   "exports": [
-   307,
-   3416
+   286,
+   3395
   ]
  },
  "ui/src/07-view-money-position.js": {
