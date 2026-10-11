@@ -76,7 +76,7 @@
   a stale spec should degrade to ungrouped, not to a crash and not to silence.
 */
 import { Children, isValidElement } from 'react';
-import { ROUTE_GROUPS, S, UI, routeKey } from '@ledger/core';
+import { ROUTE_GROUPS, S, UI, routeKey, worldGlyph } from '@ledger/core';
 
 const warned = new Set();
 
@@ -145,14 +145,20 @@ export default function Group({ route, i, tags, html, n, children }) {
   if (!count) return null;
 
   const id = route + '.' + i;
-  const open = (S.grp && (id in S.grp)) ? !S.grp[id] : (!!spec.open || focusOpens(spec));
-  const list = (tags || []).filter(Boolean);
+  /* the same rule as core's: while the explanations are folded away the
+     first section opens and the rest start closed, unless "take me there"
+     named a card in one */
+  const open = (S.grp && (id in S.grp)) ? !S.grp[id] : ((!!spec.open && (!!UI.details || i === 0)) || focusOpens(spec));
+  /* a section folded only by the world-first default shows its picture and
+     title, not figures - the same rule as core's */
+  const list = (spec.open && !(S.grp && (id in S.grp))) ? [] : (tags || []).filter(Boolean);
   const shown = list.slice(0, 3);
 
   return (
     <div className="card sect">
       <button className="sectHead" data-a="toggrp" data-k={id}>
         <span className="sectchev">{open ? '\u25be' : '\u25b8'}</span>
+        <span className="gfx sico" aria-hidden="true" dangerouslySetInnerHTML={{ __html: worldGlyph(spec.t) }} />
         <b>{spec.t}</b>
         {count > 1 ? <span className="tag">{count}</span> : null}
         {!open && shown.length

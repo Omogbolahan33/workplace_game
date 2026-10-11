@@ -35,7 +35,8 @@
    "01-game-state.js: S",
    "02-derived-state-personal-finance-career.js: CITY, log, recompute",
    "04-bizcapacity.js: houseMonthlyBiz",
-   "00-cities.js: clamp, esc, fmt",
+   "32-the-world.js: worldGlyph, worldIco",
+   "00-cities.js: clamp, esc, fmt, foldHTML, pct",
    "26-governance-register-board.js: addHolder, ensureGov, formBoard, grantPct",
    "host-shims.js: render, toast",
    "28-votes-and-decisions.js: confirmBox"
@@ -142,6 +143,7 @@
   "needs": [
    "12-main.js: routeKey, whyHTML",
    "01-game-state.js: S, UI",
+   "32-the-world.js: worldGlyph",
    "host-shims.js: viewAgenda, viewBiz, viewCareer, viewCareerRecord, viewCommitments, viewContracts, viewDeals, viewEngine, viewGovernance, viewGroup, viewHousehold, viewInvestMarkets, viewInvestPortfolio, viewLedgerChronicle, viewLedgerSettings, viewLegacy, viewLevers, viewLife, viewMoneyBudget, viewMoneyPosition, viewMoneyProperty, viewOutlets, viewOverview, viewPeople, viewRival, viewSeason, viewStaffDeep, viewWorkingCapital",
    "18-contracts-and-fulfilment.js: portfolioBar",
    "09-resolving-decisions.js: scoreRun, seasonStatus",
@@ -353,7 +355,7 @@
   "needs": [
    "01-game-state.js: S, UI",
    "03-startbizcost-one-price-for-every-picker.js: bizList",
-   "02-derived-state-personal-finance-career.js: CITY, budgetMonthly, netWorth",
+   "02-derived-state-personal-finance-career.js: CITY, budgetMonthly, freedomIndex, hoursBudget, hoursLeft, netWorth",
    "00-cities.js: dateLabel, esc, fmt",
    "31-afterthreadchoice.js: ambitionOf, ambitionPct",
    "30-eras-you-live-through.js: eraById",

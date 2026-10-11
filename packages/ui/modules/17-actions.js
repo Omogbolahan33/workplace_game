@@ -1,5 +1,5 @@
 
-import { AMBITIONS, ARCS, BIZ, CAREER, CITIES, CITY, DIFFS, FAVOURS, FIRST, HOUSE_ROLES, IC_RATE, LAST, M_city, M_diff, M_get, M_prof, NEG_TERM_POOL, R, S, TRAITS, UI, WHT_RATE, _cfg, _sea, _seaInviteUsed, advanceLine, advanceQuarter, advanceRows, afterThreadChoice, applyDraw, archOf, askAgain, askAmount, bidHead, bizById, bizMomentum, bizValue, budgetMonthly, buildStampStart, buyAsset, buyGood, buyOutPartner, buyoutExternal, callVote, castOf, clamp, closeBiz, closeOutlet, cloudAuth, cloudLogout, cloudPull, cloudPush, commitBreak, commitCancel, commitDrop, commitDropCost, commitSunk, computeTune, confirmBox, dateLabel, deedOf, defaultPlan, deltaOf, diligenceTarget, directorById, divCapacity, doBuyoutExternal, drawFromBiz, ensureGov, ensureProfile, entityCash, entityName, esc, expandBiz, fire, fireHouse, fmt, formBoard, formalizeBiz, freeSeats, fulfilUndertaking, fxChipsHTML, genDirector, genInboundBid, genMD, genPartnerOffer, giveRaise, grantOptions, hire, hireHouse, holderById, housePerkToggle, houseRaise, houseReassign, houseSalaryFor, houseSetPayer, houseToggleDeclare, houseTrain, importStr, injectBiz, intercoLoan, intercoLoans, leverTake, lobbyDirector, location, log, maintainOutlet, makeBid, marketMonthly, marketSalary, message, mgmtPct, needs, negCloseModal, negFinish, negResolveTactic, netWorth, newGame, normTab, noteResume, noteSaved, offerById, offerRemove, openOutlet, openResolution, openResolutions, parseAmt, passiveMonthly, payDividendUp, pct, profReset, promoteGM, quarterSnapshot, relate, renewContract, repayInterco, reservedMatter, resolveOption, resumeLine, runDiligence, salaryMonthly, seaCity, seaCode, seaDifficulty, seaDraftCode, seaDraftReset, seaPins, seaProfile, seasonCodeFrom, seasonFetchAsync, seasonFromURL, seasonLink, seasonPublish, seasonStatus, seasonTurnFor, seasonsLeft, seedOffers, sellAsset, sellBiz, setActiveBiz, setMgmtFee, setS, setSeaInviteUsed, skillRating, startBiz, startBizCost, startNego, submitBid, subsFor, syncCapTable, takeDeal, takePartner, tierLockNote, tierUnlocked, todaysLife, trainStaff, triggerShotgun, upgradeOutlet, vitals, yourPct } from '@ledger/core';
+import { AMBITIONS, ARCS, BIZ, CAREER, CITIES, CITY, DIFFS, FAVOURS, FIRST, HOUSE_ROLES, IC_RATE, LAST, M_city, M_diff, M_get, M_prof, NEG_TERM_POOL, R, ROUTE_GROUPS, S, TRAITS, UI, WHT_RATE, _cfg, _sea, _seaInviteUsed, advanceLine, advanceQuarter, advanceRows, afterThreadChoice, applyDraw, archOf, askAgain, askAmount, bidHead, bizById, bizMomentum, bizValue, budgetMonthly, buildStampStart, buyAsset, buyGood, buyOutPartner, buyoutExternal, callVote, castOf, clamp, closeBiz, closeOutlet, cloudAuth, cloudLogout, cloudPull, cloudPush, commitBreak, commitCancel, commitDrop, commitDropCost, commitSunk, computeTune, confirmBox, dateLabel, deedOf, defaultPlan, deltaOf, diligenceTarget, directorById, divCapacity, doBuyoutExternal, drawFromBiz, ensureGov, ensureProfile, entityCash, entityName, esc, expandBiz, fire, fireHouse, fmt, formBoard, formalizeBiz, freeSeats, fulfilUndertaking, fxChipsHTML, genDirector, genInboundBid, genMD, genPartnerOffer, giveRaise, grantOptions, hire, hireHouse, holderById, housePerkToggle, houseRaise, houseReassign, houseSalaryFor, houseSetPayer, houseToggleDeclare, houseTrain, importStr, injectBiz, intercoLoan, intercoLoans, leverTake, lobbyDirector, location, log, maintainOutlet, makeBid, marketMonthly, marketSalary, message, mgmtPct, needs, negCloseModal, negFinish, negResolveTactic, netWorth, newGame, normTab, noteResume, noteSaved, offerById, offerRemove, openOutlet, openResolution, openResolutions, parseAmt, passiveMonthly, payDividendUp, pct, profReset, promoteGM, quarterSnapshot, relate, renewContract, repayInterco, reservedMatter, resolveOption, resumeLine, runDiligence, salaryMonthly, seaCity, seaCode, seaDifficulty, seaDraftCode, seaDraftReset, seaPins, seaProfile, seasonCodeFrom, seasonFetchAsync, seasonFromURL, seasonLink, seasonPublish, seasonStatus, seasonTurnFor, seasonsLeft, seedOffers, sellAsset, sellBiz, setActiveBiz, setMgmtFee, setS, setSeaInviteUsed, skillRating, startBiz, startBizCost, startNego, submitBid, subsFor, syncCapTable, takeDeal, takePartner, tierLockNote, tierUnlocked, todaysLife, trainStaff, triggerShotgun, upgradeOutlet, vitals, yourPct } from '@ledger/core';
 import { Q, fxToast, inputValue, toast } from './00-q.js';
 import { bestSave, cloudSyncBackground, hasSave, load, save, saveInfo, saveProfile, wipe } from './01-view-working-capital.js';
 import { renderWhy } from './02-view-overview.js';
@@ -111,7 +111,13 @@ export const ACT = {
   toggrp: e=>{
     const k = e.dataset.k;
     if(!S.grp) S.grp = {};
-    S.grp[k] = !S.grp[k];          /* stored as "collapsed" */
+    /* stored as "collapsed". With nothing stored, the section is in its
+       default state - and since world-first folds a default-open section
+       closed, the first tap has to flip what is on screen, not undefined:
+       flipping undefined recorded "collapsed" and the first tap did nothing */
+    const at = k.lastIndexOf('.'), spec = (ROUTE_GROUPS[k.slice(0, at)] || [])[+k.slice(at + 1)] || {};
+    const shut = (k in S.grp) ? !!S.grp[k] : !(!!spec.open && (!!UI.details || +k.slice(at + 1) === 0));
+    S.grp[k] = !shut;
     render();
   },
   installapp: e=>{ doInstall(); },
@@ -345,6 +351,9 @@ export const ACT = {
     if(e.dataset.t){ UI.bellOpen = false; UI.tab = e.dataset.t; UI.sub = ''; UI.modal = null; UI.scrollTop = true; }
     render();
   },
+  /* every explanation the game has, shown or folded away: the world-first
+     screen keeps the prose one tap off, never deleted */
+  details:   e=>{ UI.details = !UI.details; render(); },
   /* the deal is the date's, so pressing it twice deals the same life twice */
   dealtoday: e=>{ _cfg.dealt = todaysLife(); UI.modal = {type:'start'}; render(); },
   undeal:    e=>{ _cfg.dealt = null; UI.modal = {type:'start'}; render(); },

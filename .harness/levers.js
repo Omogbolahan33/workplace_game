@@ -24,6 +24,12 @@ const strip = h => String(h).replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').rep
 
 function fresh() {
   M.newGame({ name: 'Ada', city: 'lagos', profile: 'founder', difficulty: 'realistic', seed: 4242 });
+
+  /* This gate checks what the screens contain. The world-first default folds
+     every section and card closed behind the HUD's (i); the content is the same
+     either way, so it is checked with the explanations shown - the folded
+     default has its own check in group.js. */
+  M.UI.details = true;
   const S = M.getS();
   S.fin.cash = 40000000;
   M.startBiz('tech', 'Testco', 6000000, null);

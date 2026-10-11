@@ -7,7 +7,7 @@
   here it is a small function, because the same three numbers are used in the
   card and on the button and they should not be able to disagree.
 */
-import { S, fmt, CITY, GOODS } from '@ledger/core';
+import { S, fmt, CITY, GOODS, worldGlyph, effectMarksHTML } from '@ledger/core';
 
 /* the price of a good where you live: dearer in a dearer city */
 function priceOf(g) {
@@ -38,14 +38,10 @@ export default function ViewMoneyProperty() {
             return (
               <div key={g.id} className="mrow">
                 <div className="between">
-                  <b>{g.name}</b>
+                  <b><span className="gfx gico" dangerouslySetInnerHTML={{ __html: worldGlyph(g.name) }} />{g.name}</b>
                   <span className="row wrap" style={{ gap: '4px', justifyContent: 'flex-end' }}>
-                    {g.upkeep ? <span className="chip">{fmt(g.upkeep)}/mo upkeep</span> : null}
-                    {Object.keys(g.eff).map((k) => (
-                      <span key={k} className={'chip ' + (g.eff[k] > 0 ? 'g' : 'r')}>
-                        {k} {g.eff[k] > 0 ? '+' : ''}{g.eff[k]}
-                      </span>
-                    ))}
+                    {/* what it does, drawn - core's marks, the same as the string path */}
+                    <span className="emarks" dangerouslySetInnerHTML={{ __html: effectMarksHTML(g.eff, g.upkeep) }} />
                     <span className="chip b">{fmt(cost)}</span>
                   </span>
                 </div>

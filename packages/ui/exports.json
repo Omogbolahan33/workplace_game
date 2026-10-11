@@ -132,6 +132,7 @@
  "worldCar": "src/18-world.js",
  "worldBuild": "src/18-world.js",
  "worldGoal": "src/18-world.js",
+ "worldFrameFor": "src/18-world.js",
  "worldCamera": "src/18-world.js",
  "worldResize": "src/18-world.js",
  "worldLabels": "src/18-world.js",
@@ -159,5 +160,7 @@
  "worldFrame": "src/18-world.js",
  "worldKick": "src/18-world.js",
  "worldTap": "src/18-world.js",
- "worldSync": "src/18-world.js"
+ "worldSync": "src/18-world.js",
+ "worldBand": "src/18-world.js",
+ "worldTiles": "src/18-world.js"
 }

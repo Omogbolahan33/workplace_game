@@ -27,7 +27,7 @@
   The hint popover's open state (`UI.whyOpen`) stays core-side: this reads it and
   renders `class="open"` or nothing, which is what the string path does too.
 */
-import { S, UI, TABS, tabDot, whyHTML, bellHTML, eraChipHTML, seasonChipHTML, saveLineHTML, dateLabel, freedomIndex, CITY, D, fmt, esc } from '@ledger/core';
+import { S, UI, TABS, tabDot, whyHTML, bellHTML, eraChipHTML, seasonChipHTML, saveLineHTML, dateLabel, freedomIndex, CITY, D, fmt, esc, worldGlyph } from '@ledger/core';
 
 /* Markup from core, embedded. display:contents so the wrapper is not a box and
    the chip lays out exactly where it would have without one. */
@@ -82,7 +82,8 @@ export function Tabs() {
     <>
       {TABS.map((t) => (
         <button key={t.id} className={'tab' + (UI.tab === t.id ? ' on' : '')} data-a="tab" data-t={t.id}>
-          {t.label}
+          {/* an icon over a short label - core's glyph, the same one the string path draws */}
+          <span className="gfx tico" aria-hidden="true" dangerouslySetInnerHTML={{ __html: worldGlyph(t.id) }} /><span className="tlbl">{t.label}</span>
           {/* the dot is core's; embedded so the markup is the game's, not a copy */}
           <div style={{ display: 'contents' }} dangerouslySetInnerHTML={{ __html: tabDot(t.id) }} />
         </button>
@@ -99,7 +100,7 @@ export function Subs({ subs }) {
     <>
       {(subs || []).map((sb) => (
         <button key={sb.id} className={'sub' + (UI.sub === sb.id ? ' on' : '')} data-a="sub" data-s={sb.id}>
-          {sb.label}
+          <span className="gfx sbico" aria-hidden="true" dangerouslySetInnerHTML={{ __html: worldGlyph(sb.id) }} />{sb.label}
         </button>
       ))}
     </>

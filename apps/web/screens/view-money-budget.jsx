@@ -20,7 +20,7 @@
   is the honest answer to "what does this screen show right now". When the
   render pipeline itself moves to React this file does not change.
 */
-import { S, fmt, pct, needs, salaryMonthly, passiveMonthly, budgetMonthly, goodsUpkeep, BUDGET_KEYS } from '@ledger/core';
+import { S, fmt, pct, needs, salaryMonthly, passiveMonthly, budgetMonthly, goodsUpkeep, BUDGET_KEYS, budgetJarHTML } from '@ledger/core';
 
 /* Every reading the screen needs, taken once, at the top. The string version
    recomputed several of these inside conditions - the same number, twice, in
@@ -46,13 +46,14 @@ function readings() {
 function Line({ keyName, label, note, value, max, covered, short }) {
   return (
     <>
-      <div className="slider">
+      <div className="slider jarrow">
+        <span className="jarbox" dangerouslySetInnerHTML={{ __html: budgetJarHTML(value, short) }} />
         <span>{label}</span>
         <input type="range" data-inp="budget" data-k={keyName} min="0" max={max} step="5000" defaultValue={value} />
         <span className="mono" style={{ textAlign: 'right' }}>{fmt(value)}</span>
       </div>
       <div className="tiny muted" style={{ margin: '-4px 0 10px 0' }}>
-        {note}{' '}
+        <span className="prose">{note}</span>{' '}
         {covered
           ? <span className="chip g">covered</span>
           : <span className="chip r">below need {fmt(short)}</span>}

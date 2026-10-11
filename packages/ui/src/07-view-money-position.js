@@ -171,7 +171,7 @@ function viewBiz(){
   const b = S.biz;
   if(!b){
     let h = '<div class="card"><h3>Start a company <span class="tag">cash '+fmt(S.fin.cash)+'</span></h3>'+
-      '<div class="small muted" style="margin-bottom:12px">Each of these is a different machine. They differ in how much capital they need, how thin the margin is, how fast they can grow, and how much of your life they will consume. Pick the one that matches the balance sheet you actually have, not the one that sounds impressive.</div>';
+      '<div class="small muted prose" style="margin-bottom:12px">Each of these is a different machine. They differ in how much capital they need, how thin the margin is, how fast they can grow, and how much of your life they will consume. Pick the one that matches the balance sheet you actually have, not the one that sounds impressive.</div>';
     /* Ten greyed-out cards with no explanation read as "this game has no such
        option". They did not. On a fresh run you hold ₦180k and the cheapest
        company is ₦1.5m, so every Start was disabled and nothing said so, or
@@ -194,36 +194,9 @@ function viewBiz(){
           '<button class="btn sm" data-a="goto" data-t="money" data-s="deals">Money &rsaquo; Deals &mdash; borrow or sell</button>'+
         '</div></div>';
     }
-    h += '<div class="grid g2">';
-    BIZ.forEach(function(t){
-      const cost = startBizCost(t.id);
-      const afford = S.fin.cash >= cost;
-      h += '<div style="border:1px solid '+(afford?'#2a3a4c':'var(--line)')+';border-radius:10px;padding:12px;opacity:'+(afford?1:.55)+'">'+
-        '<div class="between"><b>'+t.icon+' '+t.name+'</b><span class="mono">'+fmt(cost)+'</span></div>'+
-        '<div class="tiny muted" style="margin:6px 0 8px">'+t.desc+'</div>'+
-        '<div class="row wrap" style="gap:5px">'+
-          '<span class="chip '+(t.margin>0.5?'g':'')+'">margin '+pct(t.margin,0)+'</span>'+
-          '<span class="chip">growth '+pct(t.growth,0)+'/q</span>'+
-          '<span class="chip '+(t.laborPer>4?'y':'')+'">labour '+t.laborPer+'</span>'+
-          '<span class="chip '+(t.regRisk>0.3?'r':'')+'">reg risk '+pct(t.regRisk,0)+'</span>'+
-        '</div>'+
-        '<div class="row wrap" style="gap:5px;margin-top:8px">'+
-          (afford ? '' : '<span class="chip y">short '+fmt(cost - S.fin.cash)+'</span>')+
-        '</div>'+
-        '<div class="row" style="margin-top:9px;gap:6px">'+
-          '<button class="btn sm '+(afford?'primary':'')+'" style="flex:1" data-a="startbiz" data-t="'+t.id+'"'+
-            (afford?'':' disabled aria-disabled="true" title="Needs '+fmt(cost)+' \u00b7 you have '+
-              fmt(S.fin.cash)+' \u00b7 short '+fmt(cost - S.fin.cash)+' \u00b7 or take a partner"')+'>'+
-            (afford?'Start':'Start alone')+'</button>'+
-          /* a partner is how you afford what you cannot afford alone, so this
-             one is NOT disabled with it */
-          '<button class="btn sm '+(afford?'':'primary')+'" data-a="startbizpartner" data-t="'+t.id+'"'+
-            (S.fin.cash>0?'':' disabled aria-disabled="true"')+
-            ' title="Covers the '+fmt(Math.max(0, cost - S.fin.cash))+' you cannot, for a permanent share of it"'+
-            '>With partner</button>'+
-        '</div></div>';
-    });
-    h += '</div>';
+    /* each kind of company as a picture tile, drawn by core so the app's
+       screen is the same tile */
+    h += '<div class="grid g2">' + BIZ.map(function(t){ return bizTypeTileHTML(t); }).join('') + '</div>';
     h += '<div class="tutorial">Bootstrapping note: whatever you start with, keep at least six months of personal expenses OUTSIDE the business. Most small companies do not die from a bad idea; they die from a good idea with no working capital.</div>';
     h += '</div>';
     return h;

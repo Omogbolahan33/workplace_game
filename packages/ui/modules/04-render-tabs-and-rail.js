@@ -1,5 +1,5 @@
 
-import { TABS, UI, normTab, subsFor, tabDot } from '@ledger/core';
+import { TABS, UI, normTab, subsFor, tabDot, worldGlyph } from '@ledger/core';
 import { Q } from './00-q.js';
 import { renderWhy } from './02-view-overview.js';
 import { shellDraw } from './03-render.js';
@@ -10,8 +10,9 @@ export function renderTabs(){
      containers, one component tree on the app's side */
   if(shellDraw('tabs', { tabs: Q('tabs'), subs: Q('subs'), why: Q('why') })){ centerActiveTab(); return; }
   Q('tabs').innerHTML = TABS.map(t=>{
+    /* an icon over a short label: navigation is a picture first */
     return '<button class="tab'+(UI.tab===t.id?' on':'')+'" data-a="tab" data-t="'+t.id+'">'+
-      t.label+tabDot(t.id)+'</button>';
+      '<span class="gfx tico" aria-hidden="true">'+worldGlyph(t.id)+'</span><span class="tlbl">'+t.label+'</span>'+tabDot(t.id)+'</button>';
   }).join('');
   centerActiveTab();
   renderSubs();
@@ -44,7 +45,7 @@ export function renderSubs(){
   host.style.display = '';
   host.innerHTML = subs.map(function(sb){
     return '<button class="sub'+(UI.sub===sb.id?' on':'')+'" data-a="sub" data-s="'+sb.id+'">'+
-      sb.label+'</button>';
+      '<span class="gfx sbico" aria-hidden="true">'+worldGlyph(sb.id)+'</span>'+sb.label+'</button>';
   }).join('');
 }
 /* Take the disclosure chrome back off the container.
@@ -103,7 +104,11 @@ export function applyDisclosure(){
     if(card.querySelector('[data-a],input,select,button')) return;   // never hide controls
     const label = (h3.textContent||'').trim().slice(0,40);
     const ck = tab+'|'+n+'|'+label;
-    if(UI.collapsed[ck]===undefined) UI.collapsed[ck] = (n>=2);      // first two stay open
+    /* first two stay open - or, with the explanations folded away (the
+       world-first default), the first stays open so the screen leads with its
+       main thing, and the rest start as their headings under the city and the
+       tiles; what the player opens stays open */
+    if(UI.collapsed[ck]===undefined) UI.collapsed[ck] = UI.details ? (n>=2) : (n>=1);
     /* P5: never leave the card the rail pointed at collapsed. */
     if(UI.focus && label && label.indexOf(UI.focus)>=0) UI.collapsed[ck] = false;
     h3.setAttribute('data-disc', ck);

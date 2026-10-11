@@ -62,6 +62,42 @@ function connBonus(b){ b = b || S.biz; if(!b) return 0; return (b.staff||[]).red
 
 /* ------------------------- portfolio: several companies -------------------- */
 function bizList(){ return (S.bizs||[]).filter(Boolean); }
+/* A kind of company, as a picture: its icon, its name and price, and the four
+   things that decide whether it suits you - margin, growth, labour, regulatory
+   risk - as meters, with the exact figures one tap away in the fold. Both
+   renderers draw the start-a-company grid from this one tile, so they cannot
+   disagree about it; the buttons are the screen's own, with their refusal. */
+function bizTypeTileHTML(t){
+  const cost = startBizCost(t.id), afford = S.fin.cash >= cost;
+  const meter = function(ico, label, v, tone){
+    return '<div class="bmeter" title="'+label+'"><span class="gfx bmi" aria-hidden="true">'+ico+'</span>'+
+      '<span class="gfx bmb" role="img" aria-label="'+label+'"><i style="width:'+Math.round(Math.max(4, Math.min(100, v * 100)))+'%;background:'+tone+'"></i></span></div>';
+  };
+  return '<div class="btile'+(afford ? '' : ' off')+'">'+
+    '<div class="gfx bico" aria-hidden="true">'+worldGlyph(t.id)+'</div>'+
+    '<div class="bname"><b>'+t.name+'</b><span class="mono">'+fmt(cost)+'</span></div>'+
+    '<div class="bmeters">'+
+      meter(worldIco('coins'), 'margin '+pct(t.margin, 0), t.margin, t.margin > 0.5 ? 'var(--good)' : 'var(--info)')+
+      meter(worldIco('trend'), 'growth '+pct(t.growth, 0)+' a quarter', t.growth / 0.3, 'var(--info)')+
+      meter(worldIco('people'), 'labour '+t.laborPer, t.laborPer / 6, t.laborPer > 4 ? 'var(--warn)' : 'var(--info)')+
+      meter(worldIco('warn'), 'regulatory risk '+pct(t.regRisk, 0), t.regRisk * 2, t.regRisk > 0.3 ? 'var(--bad)' : 'var(--info)')+
+    '</div>'+
+    foldHTML('What it is', t.desc+' Margin '+pct(t.margin, 0)+' · growth '+pct(t.growth, 0)+'/q · labour '+
+      t.laborPer+' · regulatory risk '+pct(t.regRisk, 0)+'.')+
+    (afford ? '' : '<div class="row wrap" style="gap:5px"><span class="chip y">short '+fmt(cost - S.fin.cash)+'</span></div>')+
+    '<div class="row" style="gap:6px">'+
+      '<button class="btn sm '+(afford ? 'primary' : '')+'" style="flex:1" data-a="startbiz" data-t="'+t.id+'"'+
+        (afford ? '' : ' disabled aria-disabled="true" title="Needs '+fmt(cost)+' · you have '+
+          fmt(S.fin.cash)+' · short '+fmt(cost - S.fin.cash)+' · or take a partner"')+'>'+
+        (afford ? 'Start' : 'Start alone')+'</button>'+
+      /* a partner is how you afford what you cannot afford alone, so this one
+         is NOT disabled with it */
+      '<button class="btn sm '+(afford ? '' : 'primary')+'" data-a="startbizpartner" data-t="'+t.id+'"'+
+        (S.fin.cash > 0 ? '' : ' disabled aria-disabled="true"')+
+        ' title="Covers the '+fmt(Math.max(0, cost - S.fin.cash))+' you cannot, for a permanent share of it"'+
+        '>With partner</button>'+
+    '</div></div>';
+}
 function bizById(id){ return bizList().find(function(b){ return b.id===id; }) || null; }
 function setActiveBiz(id){
   const b = bizById(id); if(!b) return false;

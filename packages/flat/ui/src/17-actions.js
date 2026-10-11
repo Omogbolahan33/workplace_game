@@ -101,7 +101,13 @@ const ACT = {
   toggrp: e=>{
     const k = e.dataset.k;
     if(!S.grp) S.grp = {};
-    S.grp[k] = !S.grp[k];          /* stored as "collapsed" */
+    /* stored as "collapsed". With nothing stored, the section is in its
+       default state - and since world-first folds a default-open section
+       closed, the first tap has to flip what is on screen, not undefined:
+       flipping undefined recorded "collapsed" and the first tap did nothing */
+    const at = k.lastIndexOf('.'), spec = (ROUTE_GROUPS[k.slice(0, at)] || [])[+k.slice(at + 1)] || {};
+    const shut = (k in S.grp) ? !!S.grp[k] : !(!!spec.open && (!!UI.details || +k.slice(at + 1) === 0));
+    S.grp[k] = !shut;
     render();
   },
   installapp: e=>{ doInstall(); },
@@ -335,6 +341,9 @@ const ACT = {
     if(e.dataset.t){ UI.bellOpen = false; UI.tab = e.dataset.t; UI.sub = ''; UI.modal = null; UI.scrollTop = true; }
     render();
   },
+  /* every explanation the game has, shown or folded away: the world-first
+     screen keeps the prose one tap off, never deleted */
+  details:   e=>{ UI.details = !UI.details; render(); },
   /* the deal is the date's, so pressing it twice deals the same life twice */
   dealtoday: e=>{ _cfg.dealt = todaysLife(); UI.modal = {type:'start'}; render(); },
   undeal:    e=>{ _cfg.dealt = null; UI.modal = {type:'start'}; render(); },

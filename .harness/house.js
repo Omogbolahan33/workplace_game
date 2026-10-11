@@ -21,6 +21,12 @@ M.UI.noAnim = true;
    so a failure can appear once and never reproduce. */
 
 M.newGame({name:'Ada', city:'lagos', profile:'founder', difficulty:'realistic', seed:4242});
+
+/* This gate checks what the screens contain. The world-first default folds
+   every section and card closed behind the HUD's (i); the content is the same
+   either way, so it is checked with the explanations shown - the folded
+   default has its own check in group.js. */
+M.UI.details = true;
 const S = M.getS();
 for(let q=0;q<6 && !S.gameOver;q++){ M.ACT.advance(); M.UI.modal=null; }
 if(!S.biz){ try{ M.startBiz('retail', null, 8000000, null); }catch(e){ bad.push('startBiz: '+e.message); } }

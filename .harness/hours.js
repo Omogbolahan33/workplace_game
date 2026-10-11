@@ -8,6 +8,12 @@ const S = () => M.getS();
 
 /* ---------------- 1. the budget is real and finite ---------------- */
 M.newGame({ name: 'Ada', city: 'lagos', profile: 'grad', difficulty: 'realistic', seed: 4242 });
+
+/* This gate checks what the screens contain. The world-first default folds
+   every section and card closed behind the HUD's (i); the content is the same
+   either way, so it is checked with the explanations shown - the folded
+   default has its own check in group.js. */
+M.UI.details = true;
 ck(typeof M.hoursBudget === 'function', 'hoursBudget is missing');
 const budget = M.hoursBudget();
 console.log('weekly free hours    :', M.weeklyFreeHours());

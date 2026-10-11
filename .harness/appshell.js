@@ -347,7 +347,10 @@ const get = (pathname) => new Promise((resolve, reject) => {
   await off.waitForTimeout(1500);
   const offline = offErr ? { failed: offErr } : await off.evaluate(() => ({
     top: (document.getElementById('toprow') || {}).getAttribute ? document.getElementById('toprow').getAttribute('data-react-shell') : null,
-    chars: ((document.getElementById('toprow') || {}).innerText || '').replace(/\s+/g, ' ').trim().length,
+    /* the header's content, not what is painted: world-first on a phone draws
+       the header's numbers as the HUD over the city, so they are in the row but
+       not shown in it - the question is whether the app drew a header at all */
+    chars: ((document.getElementById('toprow') || {}).textContent || '').replace(/\s+/g, ' ').trim().length,
     screen: !!document.querySelector('#modalHost [data-a="stepnext"]'),
     body: document.body.innerText.replace(/\s+/g, ' ').slice(0, 40)
   }));

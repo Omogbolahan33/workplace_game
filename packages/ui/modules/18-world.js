@@ -29,7 +29,8 @@
      been evaluated in the app. So the state is a bare `var` (hoisted, never
      reset by an initialiser) and every table is a function. A `let` here threw
      on every reload of a saved run. */
-import { S, UI, worldHTML, worldHere, worldModel } from '@ledger/core';
+import { S, UI, esc, routeViewInner, worldGlyph, worldHTML, worldHere, worldIco, worldModel } from '@ledger/core';
+import { toast } from './00-q.js';
 
 /* Generated from src/18-world.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export var WORLD;
@@ -329,7 +330,15 @@ export function worldBuild(m){
    or, on any screen but the overview, that screen's building, close. Framed by
    width, because a phone in portrait runs out of width first. */
 export function worldGoal(m, focus, here){
-  const W = WORLD, aspect = W.w && W.h ? W.w / W.h : 1;
+  const W = WORLD, bh = W.band ? Math.max(120, W.band.bot - W.band.top) : W.h;
+  const aspect = W.w && bh ? W.w / bh : 1;
+  const g = worldFrameFor(m, focus, here, aspect);
+  /* framed for the band of city between the nav and the sheet, not the whole
+     canvas behind them */
+  g.size = g.size * (W.h && bh ? W.h / bh : 1);
+  return g;
+}
+export function worldFrameFor(m, focus, here, aspect){
   const b = here ? m.buildings.find(function(x){ return x.id === here; }) : null;
   /* close on the building, and tall enough to hold all of it and its label */
   if(b) return {x:b.x, y:b.h * 0.45, z:b.z, size: Math.max(4.6, 7.4 / aspect, b.h * 0.62 + 1.6)};
@@ -347,6 +356,11 @@ export function worldCamera(){
   cam.position.set(v.x + dist * 0.519, v.y + dist * 0.685, v.z + dist * 0.519);
   cam.near = Math.max(1, dist * 0.2); cam.far = dist * 3;
   cam.lookAt(v.x, v.y, v.z);
+  /* the city's centre sits in the middle of the visible band, not of the canvas */
+  if(W.band && W.h && !W.pip){
+    const mid = (W.band.top + W.band.bot) / 2;
+    cam.setViewOffset(W.w, W.h, 0, Math.round(W.h / 2 - mid), W.w, W.h);
+  } else if(cam.view) cam.clearViewOffset();
   cam.updateProjectionMatrix();
   if(W.scene.fog){ W.scene.fog.near = dist * 1.05; W.scene.fog.far = dist * 2.4; }
 }
@@ -372,13 +386,14 @@ export function worldLabels(){
     /* measured while shown: a label hidden last frame is 0px wide */
     el.style.display = '';
     const ow = el.offsetWidth, oh = el.offsetHeight;
-    if(!el.classList.contains('wd') && (x < ow * 0.3 || x > W.w - ow * 0.3 || y < oh * 0.6 || y > W.h - 8 || v.z > 1)){
+    const top = W.band ? W.band.top : 0, bot = W.band ? W.band.bot : W.h;
+    if(!el.classList.contains('wd') && (x < ow * 0.3 || x > W.w - ow * 0.3 || y < top + oh * 0.6 || y > bot - 8 || v.z > 1)){
       el.style.display = 'none';
       return;
     }
     el.style.display = '';
     x = Math.max(ow/2 + 6, Math.min(W.w - ow/2 - 6, x));
-    y = Math.max(oh + 6, Math.min(W.h - 30, y));
+    y = Math.max(top + oh + 6, Math.min(bot - 30, y));
     el.style.left = Math.round(x) + 'px';
     el.style.top = Math.round(y) + 'px';
     el.classList.add('placed');
@@ -468,7 +483,8 @@ export function worldPeople(m){
                           W.here ? worldDoor(W.here) : {x:0.9, z:0.9});
     W.me.speed = 3.2;
   }
-  W.me.status = m.me.mood === 'ill' ? '\u{1F912}' : m.me.mood === 'tired' ? '\u{1F62E}‍\u{1F4A8}' : '';
+  W.me.status = m.me.mood === 'ill' ? worldIco('heart') : m.me.mood === 'tired' ? worldIco('bolt') : '';
+  W.me.statusTone = m.me.mood === 'ill' || m.me.mood === 'tired' ? 'bad' : '';
   W.me.body.top.color.set(m.me.suit ? '#e9e4d8' : '#3f7fd0');
   m.people.forEach(function(p){
     seen[p.id] = true;
@@ -476,10 +492,12 @@ export function worldPeople(m){
     const home = worldDoor(p.home);
     if(!c){ c = W.people[p.id] = worldCharacter(p.id, 'cast', worldLook(p), {x:home.x + 0.8, z:home.z + 0.5}); }
     c.home = home; c.name = p.name; c.mood = p.mood;
-    c.status = p.story ? '! ' + p.name : '';
+    c.status = p.story ? '<b>!</b> ' + esc(p.name) : '';
+    c.statusTone = p.story ? 'story' : '';
     if(p.felt && c.felt !== p.felt + ':' + m.date){
       c.felt = p.felt + ':' + m.date;
-      c.say = p.felt === 'up' ? '❤️' : '\u{1F4A2}'; c.sayUntil = performance.now() + 6000;
+      c.say = worldIco(p.felt === 'up' ? 'heart' : 'bolt'); c.sayTone = p.felt === 'up' ? 'good' : 'bad';
+      c.sayUntil = performance.now() + 6000;
     }
   });
   Object.keys(W.people).forEach(function(id){
@@ -508,14 +526,15 @@ export function worldWalkTo(c, to){
 }
 /* What you do, and how it looks. `kind` comes from what the move did. */
 export function worldActSpec(kind){
-  return ({work:['\u{1F4BC}', 2800], rest:['\u{1F634}', 3200], family:['\u{1F46A}', 3000], talk:['\u{1F4AC}', 2800],
-           spend:['\u{1F6CD}️', 2400], earn:['\u{1F4B0}', 2400], deal:['\u{1F91D}', 2800], cheer:['\u{1F389}', 2400],
-           slump:['\u{1F623}', 2600], think:['\u{1F4AD}', 2200], home:['\u{1F319}', 3200]})[kind] || ['✨', 2000];
+  /* LEDGER's own ink: the activity's drawing in the bubble, gold */
+  return ({work:['case', 2800], rest:['moon', 3200], family:['home', 3000], talk:['chat', 2800],
+           spend:['cart', 2400], earn:['coins', 2400], deal:['hands', 2800], cheer:['star', 2400],
+           slump:['down', 2600], think:['spark', 2200], home:['moon', 3200]})[kind] || ['spark', 2000];
 }
 export function worldDo(c, kind, at){
   const spec = worldActSpec(kind);
   c.then = {kind:kind, ms:spec[1], at:at || null};
-  c.say = spec[0]; c.sayUntil = performance.now() + spec[1] + (c.path.length ? 2600 : 0);
+  c.say = worldIco(spec[0]); c.sayTone = kind === 'slump' ? 'bad' : ''; c.sayUntil = performance.now() + spec[1] + (c.path.length ? 2600 : 0);
   if(!c.path.length) worldBegin(c, performance.now());
   if(c === WORLD.me) worldWatch(c.sayUntil);
   worldKick();
@@ -530,10 +549,9 @@ export function worldWatch(until){
   const W = WORLD;
   if(!W || W.flat || !W.host || W.still) return;
   if(W.pip){ W.pip.until = Math.max(W.pip.until, until + 700); return; }
-  const r = W.host.getBoundingClientRect();
-  const tw = document.getElementById('tabwrap');
-  const topEdge = tw ? tw.getBoundingClientRect().bottom : 0;
-  if(r.bottom > topEdge + 60 && r.top < window.innerHeight - 60) return;
+  worldBand();
+  const topEdge = W.band ? W.band.top : 0;
+  if(W.band && W.band.sheet - W.band.top > 160) return;
   let box = document.getElementById('worldpip');
   if(!box){
     box = document.createElement('div');
@@ -690,11 +708,13 @@ export function worldBubbles(t){
   if(!layer) return;
   const v = new W.T.Vector3();
   worldEveryone().forEach(function(c){
-    const text = t < c.sayUntil ? c.say : c.status;
-    if(!text){ c.bub.style.display = 'none'; return; }
+    const saying = t < c.sayUntil, html = saying ? c.say : c.status;
+    if(!html){ c.bub.style.display = 'none'; return; }
     if(c.bub.parentNode !== layer) layer.appendChild(c.bub);
-    if(c.bub.textContent !== text) c.bub.textContent = text;
-    c.bub.classList.toggle('story', !(t < c.sayUntil) && text.charAt(0) === '!');
+    /* core's drawings and an escaped name: nothing here is the player's text */
+    if(c.bub.innerHTML !== html) c.bub.innerHTML = html;
+    const tone = saying ? c.sayTone : c.statusTone;
+    c.bub.className = 'wbub' + (tone ? ' ' + tone : '');
     v.set(c.x, 1.72 * c.body.g.scale.y + (c.body.g.position.y - 0.25), c.z).project(W.camera);
     const x = (v.x + 1) / 2 * W.w, y = (1 - v.y) / 2 * W.h;
     if(x < 8 || x > W.w - 8 || y < 12 || y > W.h - 8 || v.z > 1){ c.bub.style.display = 'none'; return; }
@@ -748,6 +768,7 @@ export function worldFrame(t){
   if(!W || W.flat) return;
   W.raf = 0;
   if(!W.host || !W.host.isConnected || document.hidden) return;
+  if(!W.pip && W.band && W.band.sheet - W.band.top < 40) return;
   const dt = Math.min(0.1, (t - (W.last || t)) / 1000);
   W.last = t;
   worldResize();
@@ -816,6 +837,7 @@ export function worldSync(off){
   if(!scene) return;
   if(off || !S){
     scene.innerHTML = '';
+    document.body.classList.remove('has-world', 'terse');
     if(WORLD && WORLD.raf){ cancelAnimationFrame(WORLD.raf); WORLD.raf = 0; }
     if(WORLD && !WORLD.flat) WORLD.host = null;
     return;
@@ -824,6 +846,11 @@ export function worldSync(off){
   const host = /** @type {HTMLElement} */ (scene.querySelector('#world'));
   /* a document that does not parse markup (a test's stub) has no world to draw */
   if(!host) return;
+  /* world-first: the city fills the screen and the page is a sheet over it;
+     the explanations are one tap off unless the player asked for them */
+  document.body.classList.add('has-world');
+  document.body.classList.toggle('terse', !UI.details);
+  worldTiles(host);
   if(!WORLD) WORLD = worldInit();
   if(WORLD.flat){ host.classList.add('flat'); return; }
   const stage = /** @type {HTMLElement} */ (host.querySelector('.world-stage'));
@@ -834,6 +861,7 @@ export function worldSync(off){
   if(WORLD.pip) WORLD.pip.stage = stage;
   else { stage.appendChild(WORLD.canvas); WORLD.stage = stage; }
   worldResize();
+  worldBand();
   const m = worldModel();
   const sig = JSON.stringify([m.buildings, m.people, m.plaza, m.tone]);
   if(sig !== WORLD.sig){ worldBuild(m); WORLD.sig = sig; }
@@ -859,5 +887,85 @@ export function worldSync(off){
   worldDraw(performance.now());
   worldKick();
 }
+/* The band of city the player can see: from under the nav to the top of the
+   sheet. Everything the world places - the HUD, the tiles, the labels, the
+   camera's centre - is placed in it, and it moves as the sheet scrolls. */
+export function worldBand(){
+  const W = WORLD;
+  if(!W || W.flat || !W.host) return;
+  const tw = document.getElementById('tabwrap'), main = document.getElementById('main');
+  const top = Math.max(0, tw ? tw.getBoundingClientRect().bottom : 0);
+  const bot = Math.max(top, Math.min(window.innerHeight, main ? main.getBoundingClientRect().top : window.innerHeight));
+  /* the tiles sit over the bottom of the band; the city is framed above them */
+  const tiles = /** @type {HTMLElement} */ (W.host.querySelector('.wtiles'));
+  const under = tiles && bot - top > 260 ? tiles.offsetHeight + 16 : 0;
+  W.band = {top: top, bot: Math.max(top, bot - under), sheet: bot};
+  W.host.style.setProperty('--band-top', Math.round(top) + 'px');
+  W.host.style.setProperty('--band-bot', Math.round(window.innerHeight - bot) + 'px');
+  W.host.classList.toggle('narrow', bot - top <= 260);
+}
+/* "Things to do here": the moves on the page, as tiles along the bottom of the
+   city. Read from the page itself after it is drawn - every button that does
+   something rather than goes somewhere - so a tile can never offer a move the
+   screen does not, and pressing a tile presses the screen's own button: the
+   same action, the same dispatcher, the same refusal when it cannot be done. */
+export function worldTiles(host){
+  const W = WORLD;
+  const NAV = /^(goto|tab|sub|toggrp|discall|worldfocus|details|help|settings|close|step|stepnext|stepback|profile|goprofile|bell|bellopen|why|whyhide|fold|advance)$/;
+  const strip = document.createElement('div');
+  strip.className = 'wtiles';
+  /* every move on the screen, from its full markup - a group that starts
+     closed keeps its buttons off the page, and a tile must still offer them */
+  const src = document.createElement('div');
+  src.innerHTML = routeViewInner();
+  const btns = Array.prototype.slice.call(src.querySelectorAll('button[data-a]')).filter(function(b){
+    return !NAV.test(b.dataset.a);
+  }).slice(0, 16);
+  if(!btns.length){ return; }
+  const head = document.createElement('div');
+  head.className = 'wtiles-h';
+  head.textContent = 'Things to do here';
+  strip.appendChild(head);
+  const row = document.createElement('div');
+  row.className = 'wtiles-r';
+  btns.forEach(function(b){
+    const ctx = /** @type {HTMLElement} */ (b.closest('.mrow, .opt, li, tr, .kv, .card'));
+    const named = ctx ? ctx.querySelector('b, strong, h4, .ol') : null;
+    let title = (named && named.textContent || b.textContent || '').trim().replace(/\s+/g, ' ');
+    if(title.length > 30) title = title.slice(0, 29) + '…';
+    const costEl = ctx ? Array.prototype.slice.call(ctx.querySelectorAll('.chip')).find(function(c){ return /₦|\d+h\b/.test(c.textContent || ''); }) : null;
+    const said = (b.textContent || '').trim();
+    const cost = /₦/.test(said) ? said.replace(/^[^₦]*/, '').replace(/[()]/g, '') : costEl ? costEl.textContent.trim() : '';
+    const t = document.createElement('button');
+    t.type = 'button';
+    t.className = 'wtile' + (b.disabled ? ' off' : '');
+    t.title = b.disabled ? (b.title || 'Not possible right now') : said;
+    /* core's own drawing for what the move is about - static markup from core, never the move's text */
+    const ic = document.createElement('span'); ic.className = 'gfx ti'; ic.innerHTML = worldGlyph(title + ' ' + said + ' ' + b.dataset.a);
+    const nm = document.createElement('b'); nm.textContent = title || said;
+    t.appendChild(ic); t.appendChild(nm);
+    if(cost){ const c = document.createElement('span'); c.className = 'tc'; c.textContent = cost.slice(0, 12); t.appendChild(c); }
+    /* the screen's own button, pressed: a copy of it joins the page for the
+       moment of the click, so the move goes through the one dispatcher */
+    t.addEventListener('click', function(){
+      if(b.disabled){ toast(b.title || 'Not possible right now', 3200); return; }
+      const real = /** @type {HTMLElement} */ (b.cloneNode(true));
+      real.style.display = 'none';
+      host.appendChild(real);
+      real.click();
+      real.remove();
+    });
+    row.appendChild(t);
+  });
+  strip.appendChild(row);
+  host.appendChild(strip);
+}
 document.addEventListener('visibilitychange', function(){ if(!document.hidden) worldKick(); });
-window.addEventListener('resize', function(){ if(WORLD && !WORLD.flat && WORLD.host){ worldResize(); worldKick(); } });
+window.addEventListener('resize', function(){ if(WORLD && !WORLD.flat && WORLD.host){ worldResize(); worldBand(); worldKick(); } });
+/* the sheet scrolls over the city: the band shrinks, and the city stops
+   drawing when there is none of it left to see */
+window.addEventListener('scroll', function(){
+  if(!WORLD || WORLD.flat || !WORLD.host) return;
+  worldBand();
+  if(WORLD.band && WORLD.band.sheet - WORLD.band.top >= 40){ WORLD.goal = worldGoal(worldModel(), WORLD.focus, WORLD.here); worldKick(); }
+}, {passive:true});

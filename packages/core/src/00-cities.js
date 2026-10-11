@@ -56,5 +56,6 @@ function foldHTML(label, html){
 }
 function bar(v, max, color){
   const p = clamp((v/max)*100, 0, 100);
-  return '<div class="bar"><i style="width:'+p+'%;background:'+(color||'var(--acc)')+'"></i></div>';
+  /* gfx: a bar is a picture of a number, and the visual audit counts it as one */
+  return '<div class="bar gfx"><i style="width:'+p+'%;background:'+(color||'var(--acc)')+'"></i></div>';
 }

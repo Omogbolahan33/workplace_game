@@ -19,6 +19,12 @@ const bad = [];
 const ck = (c, m) => { if (!c) bad.push(m); };
 
 M.newGame({ name: 'Ada', city: 'lagos', profile: 'founder', difficulty: 'realistic', seed: 4242 });
+
+/* This gate checks what the screens contain. The world-first default folds
+   every section and card closed behind the HUD's (i); the content is the same
+   either way, so it is checked with the explanations shown - the folded
+   default has its own check in group.js. */
+M.UI.details = true;
 const S = M.getS();
 S.fin.cash = 40000000;
 M.startBiz('tech', 'Testco', 6000000, null);
@@ -155,5 +161,37 @@ const hReg = headerOf(regShut, 'governance/register.0');
 ck(/equity value/.test(hReg), 'collapsed "Who owns what" lost its equity figure: ' + hReg);
 S.grp = {};
 console.log('collapsed headers  : promote their cards\' own figures (detail hidden, state kept)');
+
+/* ---- 6. world-first: the folded default ------------------------------ */
+/* With the explanations folded away (the HUD's (i) off), a screen's first
+   section opens and every later section that would open by default starts
+   closed - folded only by that default, it shows its picture and title, not
+   figures. The player's own choice still wins, on the first tap. */
+M.UI.details = false;
+let wfKey = '', wfIndex = -1;
+for (const key of keys) {
+  const gs = M.ROUTE_GROUPS[key] || [];
+  const j = gs.findIndex((g, n) => n > 0 && g.open);
+  if (j > 0) { wfKey = key; wfIndex = j; break; }
+}
+ck(wfKey, 'world-first: no route has a default-open section past its first, so the fold was not checked');
+if (wfKey) {
+  const [wt, ws] = wfKey.split('/');
+  M.UI.tab = wt; M.UI.sub = ws || ''; if (wt === 'governance') M.UI.govSub = ws; S.grp = {};
+  const id = wfKey + '.' + wfIndex;
+  const wf = String(M.routeView());
+  const head = (wf.match(new RegExp('data-k="' + id.replace(/[/.]/g, '\\$&') + '"[\\s\\S]*?</button>')) || [''])[0];
+  const body = (s) => (s.match(new RegExp('data-k="' + id.replace(/[/.]/g, '\\$&') + '"[\\s\\S]*?</button>(<div class="sectBody">)?')) || [])[1];
+  ck(head, 'world-first: ' + id + ' has no header');
+  ck(!body(wf), 'world-first: ' + id + ' opened by default with the explanations folded away');
+  ck(/class="gfx sico"/.test(head), 'world-first: the folded section ' + id + ' has no picture on its header');
+  ck(!/secttags/.test(head), 'world-first: ' + id + ', folded only by the default, shows figures');
+  ck(/data-k="[^"]*\.0"[\s\S]*?<\/button><div class="sectBody">/.test(wf) || !(M.ROUTE_GROUPS[wfKey][0] || {}).open,
+     'world-first: the first section of ' + wfKey + ' did not open');
+  M.ACT.toggrp({ dataset: { k: id } });
+  ck(body(String(M.routeView())), 'world-first: the first tap on folded ' + id + ' did not open it');
+  console.log('world-first        : ' + wfKey + ' opens its first section; ' + id + ' starts folded, picture and title only; the first tap opens it');
+}
+M.UI.details = true; S.grp = {};
 
 console.log('\n' + (bad.length ? 'GROUP ISSUES:\n - ' + bad.join('\n - ') : 'GROUP CLEAN'));

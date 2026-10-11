@@ -1,6 +1,6 @@
 
 
-import { BUDGET_KEYS, CITY, GOODS, S, budgetMonthly, fmt, foldHTML, goodsUpkeep, needs, passiveMonthly, pct, salaryMonthly } from '@ledger/core';
+import { BUDGET_KEYS, CITY, GOODS, S, budgetJarHTML, budgetMonthly, effectMarksHTML, fmt, foldHTML, goodsUpkeep, needs, passiveMonthly, pct, salaryMonthly, worldGlyph } from '@ledger/core';
 
 /* Generated from src/06-view-money-budget.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export function viewMoneyBudget(){
@@ -29,10 +29,10 @@ export function viewMoneyBudget(){
     const need = nd[k[0]]||0;
     const v = b[k[0]]||0;
     const mark = v>=need ? '<span class="chip g">covered</span>' : '<span class="chip r">below need '+fmt(need)+'</span>';
-    h += '<div class="slider"><span>'+k[1].split(' ')[0]+'</span>'+
+    h += '<div class="slider jarrow"><span class="jarbox">'+budgetJarHTML(v, need)+'</span><span>'+k[1].split(' ')[0]+'</span>'+
       '<input type="range" data-inp="budget" data-k="'+k[0]+'" min="0" max="'+Math.max(400000, Math.round(need*3))+'" step="5000" value="'+v+'">'+
       '<span class="mono" style="text-align:right">'+fmt(v)+'</span></div>'+
-      '<div class="tiny muted" style="margin:-4px 0 10px 0">'+k[2]+' '+mark+'</div>';
+      '<div class="tiny muted" style="margin:-4px 0 10px 0"><span class="prose">'+k[2]+'</span> '+mark+'</div>';
   });
   h += '<hr class="sep"><div class="row wrap">'+
     '<button class="btn sm" data-a="preset" data-p="survive">Survival mode</button>'+
@@ -64,9 +64,8 @@ export function viewMoneyProperty(){
     const cost = Math.round(g.cost*(0.85+0.3*CITY().rentMult/1.3));
     const owned = S.fin.goods.filter(x=>x.id===g.id).length;
     h += '<div class="mrow">'+
-      '<div class="between"><b>'+g.name+'</b><span class="row wrap" style="gap:4px;justify-content:flex-end">'+
-        (g.upkeep?'<span class="chip">'+fmt(g.upkeep)+'/mo upkeep</span>':'')+
-        Object.keys(g.eff).map(function(k){ return '<span class="chip '+(g.eff[k]>0?'g':'r')+'">'+k+' '+(g.eff[k]>0?'+':'')+g.eff[k]+'</span>'; }).join('')+
+      '<div class="between"><b><span class="gfx gico">'+worldGlyph(g.name)+'</span>'+g.name+'</b><span class="row wrap" style="gap:4px;justify-content:flex-end">'+
+        '<span class="emarks">'+effectMarksHTML(g.eff, g.upkeep)+'</span>'+
         '<span class="chip b">'+fmt(cost)+'</span>'+
       '</span></div>'+
       '<button class="btn sm primary block" style="margin-top:6px" data-a="buygood" data-g="'+g.id+'"'+(S.fin.cash<cost?' disabled aria-disabled="true" title="Costs '+fmt(cost)+' \u00b7 you have '+fmt(S.fin.cash)+' \u00b7 short '+fmt(Math.round(cost - S.fin.cash))+'"':'')+'>'+

@@ -96,6 +96,7 @@ function sect(id, title, note, inner, opt){
   return '<div class="card sect">'
     + '<button class="sectHead" data-a="toggrp" data-k="' + id + '">'
     +   '<span class="sectchev">' + (open ? '&#9662;' : '&#9656;') + '</span>'
+    +   '<span class="gfx sico" aria-hidden="true">' + worldGlyph(title) + '</span>'
     +   '<b>' + title + '</b>'
     +   (opt.n > 1 ? '<span class="tag">' + opt.n + '</span>' : '')
     +   sum
@@ -169,7 +170,17 @@ function groupLevel(html, st){
     const tags = members[g].map(function(j){ return cardTag(units[j].html); })
                            .filter(Boolean);
     out += u.lead + sect(st.key + '.' + g, spec.t, spec.note || '', inner,
-                         { open: !!spec.open || fhit.has(g), n: members[g].length, tags: tags });
+                         /* with the explanations folded away (the world-first
+                            default) the screen's first section opens and the rest
+                            start closed - one-line headers under the city and the
+                            tiles - unless "take me there" named a card in one; (i)
+                            brings the old defaults back, and the player's own
+                            choice always wins */
+                         /* a section folded only by that default shows its picture
+                            and title, not figures - fewer words is the point, and the
+                            app's sections, drawn by React, say the same thing */
+                         { open: (!!spec.open && (!!UI.details || g === 0)) || fhit.has(g), n: members[g].length,
+                           tags: (spec.open && !((st.key + '.' + g) in (S.grp || {}))) ? [] : tags });
   });
   return out;
 }

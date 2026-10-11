@@ -31,7 +31,7 @@
 */
 import {
   S, fmt, esc, pct, bar, BIZ, TRAITS, bizValue, startBizCost, priceBand,
-  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel
+  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML
 } from '@ledger/core';
 
 /* --------------------------------------------------------------------------
@@ -44,7 +44,7 @@ export function StartCompanyCard() {
   return (
     <div className="card">
       <h3>Start a company <span className="tag">cash {fmt(S.fin.cash)}</span></h3>
-      <div className="small muted" style={{ marginBottom: '12px' }}>
+      <div className="small muted prose" style={{ marginBottom: '12px' }}>
         Each of these is a different machine. They differ in how much capital they need, how thin the margin
         is, how fast they can grow, and how much of your life they will consume. Pick the one that matches the
         balance sheet you actually have, not the one that sounds impressive.
@@ -65,51 +65,9 @@ export function StartCompanyCard() {
         </div>
       ) : null}
 
-      <div className="grid g2">
-        {BIZ.map((t) => {
-          const cost = startBizCost(t.id);
-          const afford = S.fin.cash >= cost;
-          return (
-            <div key={t.id} style={{
-              border: '1px solid ' + (afford ? '#2a3a4c' : 'var(--line)'),
-              borderRadius: '10px', padding: '12px', opacity: afford ? 1 : 0.55
-            }}>
-              <div className="between">
-                <b>{t.icon} {t.name}</b>
-                <span className="mono">{fmt(cost)}</span>
-              </div>
-              <div className="tiny muted" style={{ margin: '6px 0 8px' }}>{t.desc}</div>
-              <div className="row wrap" style={{ gap: '5px' }}>
-                <span className={'chip ' + (t.margin > 0.5 ? 'g' : '')}>margin {pct(t.margin, 0)}</span>
-                <span className="chip">growth {pct(t.growth, 0)}/q</span>
-                <span className={'chip ' + (t.laborPer > 4 ? 'y' : '')}>labour {t.laborPer}</span>
-                <span className={'chip ' + (t.regRisk > 0.3 ? 'r' : '')}>reg risk {pct(t.regRisk, 0)}</span>
-              </div>
-              <div className="row wrap" style={{ gap: '5px', marginTop: '8px' }}>
-                {afford ? null : <span className="chip y">short {fmt(cost - S.fin.cash)}</span>}
-              </div>
-              <div className="row" style={{ marginTop: '9px', gap: '6px' }}>
-                <button className={'btn sm ' + (afford ? 'primary' : '')} style={{ flex: 1 }}
-                  data-a="startbiz" data-t={t.id}
-                  disabled={!afford} aria-disabled={!afford ? 'true' : undefined}
-                  title={!afford
-                    ? 'Needs ' + fmt(cost) + ' · you have ' + fmt(S.fin.cash) + ' · short ' +
-                      fmt(cost - S.fin.cash) + ' · or take a partner'
-                    : undefined}>
-                  {afford ? 'Start' : 'Start alone'}
-                </button>
-                {/* a partner is how you afford what you cannot afford alone */}
-                <button className={'btn sm ' + (afford ? '' : 'primary')} data-a="startbizpartner" data-t={t.id}
-                  disabled={S.fin.cash <= 0} aria-disabled={S.fin.cash <= 0 ? 'true' : undefined}
-                  title={'Covers the ' + fmt(Math.max(0, cost - S.fin.cash)) +
-                    ' you cannot, for a permanent share of it'}>
-                  With partner
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* each kind of company as a picture tile - core's tile, the same one the
+          string path draws */}
+      <div className="grid g2" dangerouslySetInnerHTML={{ __html: BIZ.map((t) => bizTypeTileHTML(t)).join('') }} />
 
       <div className="tutorial">
         Bootstrapping note: whatever you start with, keep at least six months of personal expenses OUTSIDE
