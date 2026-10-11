@@ -170,3 +170,25 @@ test('every decision has its moment: a place, the people in it, drawn', async ()
   /* and the card carries it */
   assert.match(C.momentHTML({ ev: C.ALL_EVENTS.find((e) => e.id === 'wedding') }), /^<div class="moment"><svg class="momentscene"/);
 });
+
+test('what comes back: on its way up the road, on the strip, and at your gate', async () => {
+  const C = await world();
+  C.S.pending = [];
+  C.S.active = [];
+  C.UI.tab = 'overview'; C.UI.sub = '';
+  const quiet = C.worldHTML();
+  C.S.pending.push({ turn: C.S.turn + 1, title: 'The call you were dreading', text: 'x', kind: 'bad', eff: {} });
+  C.S.pending.push({ turn: C.S.turn + 5, title: 'The loan comes back', text: 'y', kind: 'good', eff: {} });
+  assert.ok(C.worldHTML().length > quiet.length, 'two consequences on their way and the scene did not change');
+  /* the strip marks each one at its quarter, with its date and title on the mark */
+  const road = C.roadAheadSVG(C.comingBack());
+  assert.equal((road.match(/<title>/g) || []).length, 2);
+  assert.match(road, /The call you were dreading/);
+  /* the card leads with the road, outside the fold */
+  assert.match(C.comingBackHTML(), /^<div class="roadwrap"><svg class="gfx road"/);
+  /* and the arrival is a picture of them at your gate */
+  const arr = C.arrivalHTML([C.S.pending[0]]);
+  assert.match(arr, /^<div class="moment"><svg class="homescene"/);
+  assert.match(arr, /At your gate: The call you were dreading/);
+  assert.doesNotMatch(arr + road, /NaN|undefined/);
+});

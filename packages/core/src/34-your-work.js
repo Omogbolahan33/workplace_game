@@ -34,7 +34,10 @@ function workSceneFor(sub){
    company screens, your home everywhere else */
 function sceneSVG(vh){
   const k = routeKey(), mode = k.indexOf('work/') === 0 ? workSceneFor(k.slice(5)) : '';
-  return mode ? workSceneSVG(workLook(mode), vh) : homeSceneSVG(homeLook(), vh);
+  if(mode) return workSceneSVG(workLook(mode), vh);
+  /* at home, whatever you set in motion is on its way up the road to you */
+  const coming = comingBack();
+  return homeSceneSVG(coming.length ? Object.assign({}, homeLook(), {extra: arrivalsLayer(coming)}) : homeLook(), vh);
 }
 function workLook(mode){
   const air = homeLook(), p = S.p, b = S.biz || null;

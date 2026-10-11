@@ -1,5 +1,5 @@
 
-import { D, PRINCIPLES, S, UI, advanceModal, anotherBizModal, archOf, bizAccounts, bizById, clamp, dateLabel, deedOf, endModal, esc, evBody, evText, fmt, govVoteModal, helpModal, modalHTML, momentHTML, negFmt, negoModal, negoTacticButtons, optHint, optLabel, pct, profileModal, resultFxHTML, runInfoModal, seasonModal, settingsModal, startModal, yearModal } from '@ledger/core';
+import { D, PRINCIPLES, S, UI, advanceModal, anotherBizModal, archOf, arrivalHTML, bizAccounts, bizById, clamp, dateLabel, deedOf, endModal, esc, evBody, evText, fmt, govVoteModal, helpModal, modalHTML, momentHTML, negFmt, negoModal, negoTacticButtons, optHint, optLabel, pct, profileModal, resultFxHTML, runInfoModal, seasonModal, settingsModal, startModal, yearModal } from '@ledger/core';
 import { Q } from './00-q.js';
 import { render, shellDraw } from './03-render.js';
 
@@ -63,8 +63,9 @@ export function renderModal(){
     return;
   }
   if(M.type==='pending'){
+    /* they arrive at your gate, as a picture, and then in words */
     host.innerHTML = modalHTML('<h2>Consequences arrive</h2>',
-      M.items.map(i=>'<div class="logline" style="border-left-color:'+(i.kind==='good'?'var(--good)':'var(--bad)')+'"><div class="t">'+esc(i.title)+'</div>'+esc(i.text)+'</div>').join(''),
+      arrivalHTML(M.items)+M.items.map(i=>'<div class="logline" style="border-left-color:'+(i.kind==='good'?'var(--good)':'var(--bad)')+'"><div class="t">'+esc(i.title)+'</div>'+esc(i.text)+'</div>').join(''),
       '<button class="btn primary" data-a="close">Understood</button>');
     return;
   }

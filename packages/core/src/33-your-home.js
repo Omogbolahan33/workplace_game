@@ -274,14 +274,16 @@ function homeSceneSVG(st, vh){
   if (st.car === 1) add(car(st.tier === 2 ? 236 : 196, groundY + 56, '#c3c7cc', false));
   if (st.car >= 2) { add(car(214, groundY + 54, '#16181b', true)); add(car(120, groundY + 66, '#7e1820', false)); }
 
-  add(person(me.x, me.y, { shirt: st.job ? '#ece7dc' : '#3c79c4', legs: st.job ? '#20242c' : '#3d3a36', tie: !!st.job, scale: 1.3, grey: st.age >= 50 }));
-  if (st.spouse) add(person(me.x + 24, me.y, { shirt: '#b8275f', dress: true, gele: '#d4a017', skin: '#5a3b27', scale: 1.24 }));
-  for (let i = 0; i < Math.min(4, st.kids || 0); i++) add(person(me.x + 46 + i * 15, me.y + 1, { shirt: ['#e7b931', '#2fae6a', '#4a8fe0', '#e05a4a'][i], skin: '#7d573b', scale: .72 + (st.kidAge || 0) * .02 }));
-  const staff = st.staff || [];
-  if (staff.indexOf('security') >= 0) add(person(st.tier >= 3 ? 64 : 30, groundY + 46, { shirt: '#2c3a52', legs: '#1e2633', cap: '#1e2633', skin: '#4a3020', scale: 1.1 }));
-  if (staff.indexOf('driver') >= 0 && st.car) add(person(st.tier >= 3 ? 206 : 226, groundY + 84, { shirt: '#f0f0ee', skin: '#5a3b27', scale: 1.15 }));
-  if (staff.indexOf('nanny') >= 0) add(person(me.x - 26, me.y + 2, { shirt: '#6f56b3', dress: true, skin: '#5a3b27', scale: 1.15 }));
-  if (staff.indexOf('cook') >= 0) add(person(me.x - 48, me.y + 1, { shirt: '#f4f4f0', cap: '#fafafa', skin: '#4a3020', scale: 1.12 }));
-
+  /* in a moment or an arrival the moment's people are the only people */
+  if (!st.alone) {
+    add(person(me.x, me.y, { shirt: st.job ? '#ece7dc' : '#3c79c4', legs: st.job ? '#20242c' : '#3d3a36', tie: !!st.job, scale: 1.3, grey: st.age >= 50 }));
+    if (st.spouse) add(person(me.x + 24, me.y, { shirt: '#b8275f', dress: true, gele: '#d4a017', skin: '#5a3b27', scale: 1.24 }));
+    for (let i = 0; i < Math.min(4, st.kids || 0); i++) add(person(me.x + 46 + i * 15, me.y + 1, { shirt: ['#e7b931', '#2fae6a', '#4a8fe0', '#e05a4a'][i], skin: '#7d573b', scale: .72 + (st.kidAge || 0) * .02 }));
+    const staff = st.staff || [];
+    if (staff.indexOf('security') >= 0) add(person(st.tier >= 3 ? 64 : 30, groundY + 46, { shirt: '#2c3a52', legs: '#1e2633', cap: '#1e2633', skin: '#4a3020', scale: 1.1 }));
+    if (staff.indexOf('driver') >= 0 && st.car) add(person(st.tier >= 3 ? 206 : 226, groundY + 84, { shirt: '#f0f0ee', skin: '#5a3b27', scale: 1.15 }));
+    if (staff.indexOf('nanny') >= 0) add(person(me.x - 26, me.y + 2, { shirt: '#6f56b3', dress: true, skin: '#5a3b27', scale: 1.15 }));
+    if (staff.indexOf('cook') >= 0) add(person(me.x - 48, me.y + 1, { shirt: '#f4f4f0', cap: '#fafafa', skin: '#4a3020', scale: 1.12 }));
+  }
   return k.finish('homescene', st.label || 'Your home');
 }

@@ -77,7 +77,10 @@ function comingBack(){
 function comingBackHTML(){
   const items = comingBack();
   if(!items.length) return '';
-  return '<div class="card" style="margin-bottom:12px"><h3>Coming back to you</h3>'+
+  /* the road ahead as a picture first, outside the card so it is never folded
+     away: late consequences are the game, and they should always be in sight */
+  return '<div class="roadwrap">'+roadAheadSVG(items)+'</div>'+
+    '<div class="card" style="margin-bottom:12px"><h3>Coming back to you</h3>'+
     items.slice(0, 6).map(function(i){
       const q = i.turn - S.turn;
       return '<div class="logline" style="border-left-color:'+

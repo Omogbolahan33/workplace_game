@@ -165,11 +165,11 @@
  },
  "ui/src/13-render-modal.js": {
   "importAt": 1,
-  "importLen": 572,
+  "importLen": 585,
   "exports": [
-   573,
-   17471,
-   17609
+   586,
+   17573,
+   17711
   ]
  },
  "ui/src/14-view-register.js": {

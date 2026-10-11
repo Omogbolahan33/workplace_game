@@ -43,7 +43,7 @@
 import { useEffect } from 'react';
 import {
   S, UI, D, esc, fmt, pct, clamp, dateLabel, PRINCIPLES,
-  momentHTML,
+  momentHTML, arrivalHTML,
   optLabel, optHint, evText, evBody, negFmt, archOf, bizById, deedOf, bizAccounts,
   startModal, profileModal, runInfoModal, advanceModal, anotherBizModal,
   yearModal, endModal, helpModal, seasonModal, settingsModal, negoModal,
@@ -159,7 +159,7 @@ function Body({ M }) {
     return (
       <Frame
         head={'<h2>Consequences arrive</h2>'}
-        body={M.items.map((i) => '<div class="logline" style="border-left-color:' +
+        body={arrivalHTML(M.items) + M.items.map((i) => '<div class="logline" style="border-left-color:' +
           (i.kind === 'good' ? 'var(--good)' : 'var(--bad)') + '"><div class="t">' + esc(i.title) + '</div>' + esc(i.text) + '</div>').join('')}
         foot={'<button class="btn primary" data-a="close">Understood</button>'}
       />

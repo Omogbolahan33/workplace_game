@@ -188,7 +188,7 @@ function momentSceneSVG(m, vh){
   };
   if (m.place === 'news') return newsSceneSVG(home, m.title, vh);
   /* at home and at work the people and things join that scene, drawn by its own kit */
-  if (m.place === 'home') return homeSceneSVG(Object.assign({}, home, {extra: overlay}), vh);
+  if (m.place === 'home') return homeSceneSVG(Object.assign({}, home, {alone: true, extra: overlay}), vh);
   if (m.place === 'work') return workSceneSVG(Object.assign({}, workLook(S.biz ? 'biz' : 'job'), {extra: overlay}), vh);
   const st = Object.assign({ground: /bank|office|airport|boardroom|court/.test(m.place) ? 'pave' : 'earth', towers: /bank|office|airport/.test(m.place), seed: 53 + m.place.length, noNepa: true}, air);
   const k = sceneKit(st, vh, 'ms');

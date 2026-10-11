@@ -626,6 +626,9 @@ body.terse .prose{display:none}
 /* an event's moment, above its words */
 .moment{margin:-2px 0 12px;border-radius:12px;overflow:hidden;aspect-ratio:390/250;background:#0e1620}
 .moment>svg{width:100%;height:100%;display:block}
+/* the road ahead: each thing coming back at its quarter */
+.roadwrap{margin:0 0 10px;padding:8px 10px 4px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
+.road{width:100%;display:block}
 /* the shop as a shelf */
 .gtile .bico{position:relative}
 .gtile .gown{position:absolute;right:0;top:0;font-size:11px;font-weight:700;color:#1a1405;background:var(--acc);border-radius:10px;padding:1px 6px;line-height:1.4}

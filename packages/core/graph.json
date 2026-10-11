@@ -85,6 +85,7 @@
    "01-game-state.js: D, S, TX, UI, stepMarket",
    "02-derived-state-personal-finance-career.js: bizValue, budgetMonthly, debtTotal, freedomIndex, hoursLeft, log, netWorth, recompute, stepPersonal, tx",
    "00-cities.js: START_YEAR, clamp, dateLabel, esc, fmt",
+   "37-what-comes-back.js: roadAheadSVG",
    "05-investments-goods.js: applyEff, flushPending, stepAssets",
    "08-events-reactive-to-people.js: ALL_EVENTS",
    "host-shims.js: cloudSyncBackground, render, renderThreadStage, save, toast",
@@ -377,7 +378,9 @@
  "34-your-work.js": {
   "needs": [
    "12-main.js: routeKey",
+   "09-resolving-decisions.js: comingBack",
    "33-your-home.js: homeLook, homeSceneSVG, sceneKit",
+   "37-what-comes-back.js: arrivalsLayer",
    "01-game-state.js: S",
    "02-derived-state-personal-finance-career.js: CITY",
    "04-bizcapacity.js: bizCapacity, bizStage",
@@ -406,6 +409,14 @@
    "00-cities.js: esc",
    "35-the-quarter-in-pictures.js: newsSceneSVG",
    "34-your-work.js: workLook, workSceneSVG"
+  ],
+  "externals": []
+ },
+ "37-what-comes-back.js": {
+  "needs": [
+   "01-game-state.js: S",
+   "00-cities.js: dateLabel, esc",
+   "33-your-home.js: homeLook, homeSceneSVG"
   ],
   "externals": []
  }

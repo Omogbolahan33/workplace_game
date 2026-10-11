@@ -58,8 +58,9 @@ function renderModal(){
     return;
   }
   if(M.type==='pending'){
+    /* they arrive at your gate, as a picture, and then in words */
     host.innerHTML = modalHTML('<h2>Consequences arrive</h2>',
-      M.items.map(i=>'<div class="logline" style="border-left-color:'+(i.kind==='good'?'var(--good)':'var(--bad)')+'"><div class="t">'+esc(i.title)+'</div>'+esc(i.text)+'</div>').join(''),
+      arrivalHTML(M.items)+M.items.map(i=>'<div class="logline" style="border-left-color:'+(i.kind==='good'?'var(--good)':'var(--bad)')+'"><div class="t">'+esc(i.title)+'</div>'+esc(i.text)+'</div>').join(''),
       '<button class="btn primary" data-a="close">Understood</button>');
     return;
   }
