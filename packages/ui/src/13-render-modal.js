@@ -37,6 +37,8 @@ function renderModal(){
       '<div class="between"><span class="chip '+(ev.cat==='biz'?'p':ev.cat==='money'?'b':ev.cat==='health'?'r':'')+'">'+(ev.cat||'life')+'</span>'+
       '<span class="tiny muted">'+dateLabel(S.turn)+'</span></div>'+
       '<h2 style="margin-top:8px;font-size:19px">'+esc(evText(ev))+'</h2>',
+      /* the moment, as a picture of where it is happening (VISUAL.md, M5) */
+      momentHTML(M)+
       '<div style="font-size:14.5px;line-height:1.65">'+esc(evBody(ev))+'</div>'+
       (principle?'<div class="principle"><b>Coaching note.</b> '+esc(principle)+'</div>':'')+
       '<hr class="sep">'+opts,

@@ -396,5 +396,17 @@
    "29-the-cast-who-remembers.js: castFaceHTML"
   ],
   "externals": []
+ },
+ "36-moments.js": {
+  "needs": [
+   "01-game-state.js: S",
+   "09-resolving-decisions.js: evText",
+   "33-your-home.js: homeLook, homeSceneSVG, sceneKit",
+   "29-the-cast-who-remembers.js: castLook",
+   "00-cities.js: esc",
+   "35-the-quarter-in-pictures.js: newsSceneSVG",
+   "34-your-work.js: workLook, workSceneSVG"
+  ],
+  "externals": []
  }
 }

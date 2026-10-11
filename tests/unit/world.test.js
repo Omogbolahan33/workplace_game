@@ -145,3 +145,28 @@ test('the quarter in pictures: home with what changed, work, the person, the hea
   assert.ok(kinds.includes('world'), 'a new era did not make the paper: ' + kinds.join(', '));
   assert.match(reel.find((f) => f.kind === 'world').html, /THE BUST/);
 });
+
+test('every decision has its moment: a place, the people in it, drawn', async () => {
+  const C = await world();
+  const places = new Set(['home', 'work', 'hall', 'hospital', 'office', 'bank', 'court', 'church', 'school', 'airport', 'land', 'street', 'market', 'boardroom', 'news']);
+  for (const ev of C.ALL_EVENTS) {
+    const m = C.momentOf(ev, null);
+    assert.ok(places.has(m.place), ev.id + ' happens nowhere the game can draw: ' + m.place);
+  }
+  /* every row the table names is a place it can draw, and draws without a missing number */
+  for (const key of Object.keys(C.MOMENTS)) {
+    const m = C.momentOf({ id: key, cat: 'life', title: key }, null);
+    assert.ok(places.has(m.place), key + ' names a place that is not drawn: ' + m.place);
+    assert.doesNotMatch(C.momentSceneSVG(m, 250), /NaN|undefined/, key + ' drew a number it did not have');
+  }
+  /* a story's moment has the person the story is with in it */
+  const c = C.S.cast.find((x) => x.alive);
+  const m = C.momentOf({ id: 'x', cat: 'life', title: 'The Cousin' }, { arc: 'thecousin', castId: c.id });
+  assert.equal(m.cast && m.cast.id, c.id, 'the story with ' + c.name + ' does not have them in it');
+  assert.equal(m.place, 'home');
+  /* governance meets in the boardroom, a wedding in a hall */
+  assert.equal(C.momentOf({ id: 'deadlock_now', cat: 'biz', title: 'x' }, null).place, 'boardroom');
+  assert.equal(C.momentOf(C.ALL_EVENTS.find((e) => e.id === 'wedding'), null).place, 'hall');
+  /* and the card carries it */
+  assert.match(C.momentHTML({ ev: C.ALL_EVENTS.find((e) => e.id === 'wedding') }), /^<div class="moment"><svg class="momentscene"/);
+});

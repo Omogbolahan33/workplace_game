@@ -32,7 +32,7 @@ function newsSceneSVG(st, head, vh){
   words.forEach((w) => { if((cur + ' ' + w).trim().length > 20 && cur){ lines.push(cur); cur = w; } else cur = (cur + ' ' + w).trim(); });
   if(cur) lines.push(cur);
   const L = lines.slice(0, 3), paper = shade('#f1ece0', Math.max(.8, dayK)), ink = '#1d1b18';
-  add('<g transform="translate(195 ' + (groundY + 30) + ') rotate(-4)">' +
+  add('<g transform="translate(195 ' + (groundY + 44) + ') rotate(-4)">' +
     '<rect x="-150" y="-170" width="300" height="210" fill="#000" opacity=".3" transform="translate(6 8)"/>' +
     '<rect x="-150" y="-170" width="300" height="210" fill="' + paper + '"/>' +
     '<text x="0" y="-146" font-family="Georgia,serif" font-weight="700" font-size="20" text-anchor="middle" fill="' + ink + '">The Daily Ledger</text>' +

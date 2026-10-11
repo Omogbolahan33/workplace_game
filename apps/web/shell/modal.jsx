@@ -43,6 +43,7 @@
 import { useEffect } from 'react';
 import {
   S, UI, D, esc, fmt, pct, clamp, dateLabel, PRINCIPLES,
+  momentHTML,
   optLabel, optHint, evText, evBody, negFmt, archOf, bizById, deedOf, bizAccounts,
   startModal, profileModal, runInfoModal, advanceModal, anotherBizModal,
   yearModal, endModal, helpModal, seasonModal, settingsModal, negoModal,
@@ -131,7 +132,7 @@ function Body({ M }) {
         head={'<div class="between"><span class="chip ' + (ev.cat === 'biz' ? 'p' : ev.cat === 'money' ? 'b' : ev.cat === 'health' ? 'r' : '') + '">' + (ev.cat || 'life') + '</span>' +
           '<span class="tiny muted">' + dateLabel(S.turn) + '</span></div>' +
           '<h2 style="margin-top:8px;font-size:19px">' + esc(evText(ev)) + '</h2>'}
-        body={'<div style="font-size:14.5px;line-height:1.65">' + esc(evBody(ev)) + '</div>' +
+        body={momentHTML(M) + '<div style="font-size:14.5px;line-height:1.65">' + esc(evBody(ev)) + '</div>' +
           (principle ? '<div class="principle"><b>Coaching note.</b> ' + esc(principle) + '</div>' : '') +
           '<hr class="sep">' + opts}
         foot={'<button class="btn ghost" data-a="close">Not now</button>'}

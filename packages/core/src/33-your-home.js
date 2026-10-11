@@ -173,6 +173,8 @@ function sceneKit(st, vh, tag){
     return s + '</g>';
   };
   const finish = (cls, label) => {
+    /* a moment's people and things, laid over the place before the air */
+    if (st.extra) add(typeof st.extra === 'function' ? st.extra(self) : st.extra);
     if (st.season === 'rain') { let r = ''; for (let i = 0; i < 120 + Math.round(-TOP / 3); i++) { const x0 = rnd() * (W + 40) - 20, y0 = TOP + rnd() * VH; r += 'M' + f1(x0) + ' ' + f1(y0) + 'l-3 9'; } add('<path d="' + r + '" stroke="#dfe7ee" stroke-opacity=".45" stroke-width=".7"/>'); }
     if (st.season === 'harmattan') add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#d9c09a" opacity=".16"/>');
     if (night) add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#0a1030" opacity=".18"/>');
@@ -180,9 +182,10 @@ function sceneKit(st, vh, tag){
     if (blackout && !st.gen && !st.solar && (night || dusk) && !st.noNepa) add('<text x="' + W / 2 + '" y="122" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="' + warm + '" opacity=".85">NEPA has taken light</text>');
     return '<svg class="' + cls + '" viewBox="0 ' + TOP + ' ' + W + ' ' + VH + '" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(label) + '">' + out.join('') + '</svg>';
   };
-  return {W:W, H:H, VH:VH, TOP:TOP, url:url, night:night, dusk:dusk, blackout:blackout, genOn:genOn, lights:lights,
+  const self = {W:W, H:H, VH:VH, TOP:TOP, url:url, night:night, dusk:dusk, blackout:blackout, genOn:genOn, lights:lights,
     add:add, rnd:rnd, f1:f1, P:P, poly:poly, shade:shade, dayK:dayK, sideK:sideK, warm:warm, skyC:skyC, groundY:groundY,
     box:box, win:win, door:door, pole:pole, car:car, person:person, finish:finish};
+  return self;
 }
 /* Your home, drawn from homeLook() with the kit: the house for your tier,
    what you own, who lives there. */
