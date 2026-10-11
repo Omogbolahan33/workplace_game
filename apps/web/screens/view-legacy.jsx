@@ -21,55 +21,19 @@
   simulation, not to a screen.
 */
 import {
-  S, esc, bar, statRow, clamp, AMBITIONS, ambitionOf, ambitionPct,
-  freedomIndex, estateLine, willLine, inheritanceNote
+  estateLine, willLine, inheritanceNote, ambitionHTML, standRingsHTML, scoreboardRingsHTML
 } from '@ledger/core';
 import Group from './group.jsx';
 
-const STAND_LABELS = {
-  family: 'Your family', industry: 'Your industry', community: 'Your community',
-  state: 'The state', street: 'The street'
-};
-
-const standColour = (v) => (v >= 60 ? 'var(--good)' : v >= 35 ? 'var(--acc)' : 'var(--bad)');
-
 export default function ViewLegacy() {
-  const a = ambitionOf();
-  const pctv = ambitionPct();
-  const stand = S.stand || {};
-
   return (
     <div className="grid g2">
       <div>
         <Group route="legacy/ambition" i={0}>
         <div className="card">
           <h3>What you are actually trying to do</h3>
-          {a ? (
-            <>
-              <div className="between">
-                <b style={{ fontSize: '16px' }}>{a.name}</b>
-                <span className={'chip ' + (pctv >= 100 ? 'g' : pctv >= 50 ? '' : 'r')}>{pctv}%</span>
-              </div>
-              <div style={{ margin: '8px 0' }} dangerouslySetInnerHTML={{
-                __html: bar(pctv, 100, pctv >= 100 ? 'var(--good)' : 'var(--acc)')
-              }} />
-              <div className="tiny muted">{a.blurb}</div>
-              {pctv >= 100 ? <div className="principle" style={{ marginTop: '9px' }}>{a.done}</div> : null}
-              <hr className="sep" />
-              <details className="fold">
-                <summary>Changing your mind</summary>
-                <div>You can change what you are aiming at. People do.</div>
-              </details>
-              <div className="row wrap">
-                {AMBITIONS.map((x) => (
-                  <button key={x.id} className={'btn xs ' + (x.id === a.id ? 'primary' : '')}
-                    data-a="setambition" data-m={x.id}>
-                    {x.name}
-                  </button>
-                ))}
-              </div>
-            </>
-          ) : <div className="tiny muted">No ambition set.</div>}
+          {/* the ambition as a ring and the five as picture tiles - core's */}
+          <div dangerouslySetInnerHTML={{ __html: ambitionHTML() }} />
         </div>
 
         <div className="card" style={{ marginTop: '12px' }}>
@@ -78,15 +42,7 @@ export default function ViewLegacy() {
             <summary>Why five</summary>
             <div>Five constituencies. You cannot please all of them, and the game will keep asking you to choose.</div>
           </details>
-          {Object.keys(stand).map((k) => (
-            <div key={k} style={{ marginBottom: '9px' }}>
-              <div className="between">
-                <span className="small">{STAND_LABELS[k] || k}</span>
-                <span className="tiny muted">{Math.round(stand[k])}</span>
-              </div>
-              <div dangerouslySetInnerHTML={{ __html: bar(stand[k], 100, standColour(stand[k])) }} />
-            </div>
-          ))}
+          <div dangerouslySetInnerHTML={{ __html: standRingsHTML() }} />
         </div>
         </Group>
       </div>
@@ -95,13 +51,7 @@ export default function ViewLegacy() {
         <Group route="legacy/ambition" i={1}>
         <div className="card">
           <h3>The scoreboard that matters at 65</h3>
-          <div dangerouslySetInnerHTML={{ __html: statRow('Reputation', S.p.rep) }} />
-          <div dangerouslySetInnerHTML={{ __html: statRow('Freedom index', freedomIndex()) }} />
-          <div dangerouslySetInnerHTML={{ __html: statRow('Family', S.p.family) }} />
-          <div dangerouslySetInnerHTML={{ __html: statRow('Health', S.p.health) }} />
-          <div dangerouslySetInnerHTML={{
-            __html: statRow('Wealth built (real)', clamp((S.der.nw / Math.max(1, S.cumInfl)) / 6e8 * 100, 0, 100))
-          }} />
+          <div dangerouslySetInnerHTML={{ __html: scoreboardRingsHTML() }} />
           <hr className="sep" />
           <details className="fold">
             <summary>Why this scoreboard</summary>

@@ -62,11 +62,13 @@ export default function ViewLedgerSettings() {
       <Group route="legacy/settings" i={0}>
         <div className="card">
           <h3>Save &amp; load</h3>
-          {slots.map((s, i) => (
-            <div key={s} dangerouslySetInnerHTML={{
-              __html: saveSlotRowHTML(s, 'Slot ' + (i + 1), parseSaveRaw(storedSlot(s))),
-            }} />
-          ))}
+          <div className="stiles">
+            {slots.map((s, i) => (
+              <div key={s} dangerouslySetInnerHTML={{
+                __html: saveSlotRowHTML(s, 'Slot ' + (i + 1), parseSaveRaw(storedSlot(s))),
+              }} />
+            ))}
+          </div>
           <div className={'tiny' + (hardcore ? '' : ' muted')}
             style={hardcore ? { marginTop: '9px', color: 'var(--warn)' } : { marginTop: '9px' }}>
             {hardcore

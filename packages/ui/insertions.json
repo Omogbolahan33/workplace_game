@@ -91,10 +91,10 @@
  },
  "ui/src/06-view-money-budget.js": {
   "importAt": 2,
-  "importLen": 284,
+  "importLen": 336,
   "exports": [
-   286,
-   3395
+   338,
+   2996
   ]
  },
  "ui/src/07-view-money-position.js": {
@@ -147,11 +147,11 @@
  },
  "ui/src/11-view-legacy.js": {
   "importAt": 84,
-  "importLen": 268,
+  "importLen": 248,
   "exports": [
-   352,
-   4626,
-   6640
+   332,
+   3158,
+   5172
   ]
  },
  "ui/src/12-view-ledger-settings.js": {
@@ -160,7 +160,7 @@
   "exports": [
    1559,
    1656,
-   5627
+   5659
   ]
  },
  "ui/src/13-render-modal.js": {

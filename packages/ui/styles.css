@@ -603,6 +603,40 @@ body.terse .prose{display:none}
   background:conic-gradient(var(--c) calc(var(--p) * 1%),rgba(255,255,255,.13) 0);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
 .lring .hring em{font-style:normal;width:42px;height:42px;border-radius:50%;background:var(--panel2);display:grid;place-items:center;font-size:20px;color:var(--acc)}
 .lrings.n6{grid-template-columns:repeat(3,1fr);row-gap:12px}
+/* the budget: your month as one bar, each line's state under its amount, presets as pictures */
+.bsplit{margin:2px 0 12px}
+.bsbar{position:relative;display:flex;height:16px;border-radius:8px;background:rgba(255,255,255,.08);overflow:visible}
+.bsbar i{display:block;height:100%}
+.bsbar i:first-child{border-radius:8px 0 0 8px}
+.bsbar i:last-of-type{border-radius:0 8px 8px 0}
+.bsbar .bsinc{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:#e8eef5;border-radius:1px}
+.bskey{display:flex;flex-wrap:wrap;gap:4px 10px;margin:7px 0 2px;font-size:10.5px;color:var(--dim)}
+.bskey span{display:inline-flex;align-items:center;gap:4px}
+.bskey i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.bamt{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;text-align:right}
+.bmark{font-size:10px;font-weight:600}
+.bmark.good{color:var(--good)} .bmark.bad{color:var(--bad)}
+.presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.presets .pbtn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;white-space:normal;line-height:1.15;text-align:center}
+.presets .pbtn .gfx{font-size:24px;line-height:1;color:var(--acc)}
+.presets .pbtn.primary .gfx{color:inherit}
+/* the ambition as a ring, and the five as picture tiles */
+.ahero{display:flex;align-items:center;gap:14px}
+.ahero .abig{width:88px;height:88px;flex:none;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--c) calc(var(--p) * 1%),rgba(255,255,255,.13) 0);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
+.ahero .abig em{font-style:normal;width:72px;height:72px;border-radius:50%;background:var(--panel2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:24px;color:var(--acc)}
+.ahero .abig em b{font-size:13px;color:var(--txt)}
+.ahero .aname{font-size:16px;line-height:1.25;display:block;margin-bottom:3px}
+.lrings.n5{grid-template-columns:repeat(3,1fr);row-gap:12px}
+/* save slots as disks */
+.stiles{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.stiles > div{display:flex}
+.stile{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;border:1px solid var(--line2);border-radius:14px;padding:10px 6px;background:var(--panel2)}
+.stile .sdisk{font-size:28px;line-height:1;color:var(--dim2)}
+.stile.filled .sdisk{color:var(--acc)}
+.stile .tiny{line-height:1.25;word-break:break-word}
+.stile .spair{display:grid;grid-template-columns:1fr 1fr;gap:4px;width:100%;margin-top:auto}
+.stile .spair .btn{padding-left:4px;padding-right:4px}
 /* the shop as a shelf */
 .gtile .bico{position:relative}
 .gtile .gown{position:absolute;right:0;top:0;font-size:11px;font-weight:700;color:#1a1405;background:var(--acc);border-radius:10px;padding:1px 6px;line-height:1.4}
@@ -673,10 +707,10 @@ body.terse .prose{display:none}
 .wbub.bad{color:var(--bad);border-color:rgba(255,95,109,.5)}
 .wbub.story{color:var(--acc);border-color:var(--acc)}
 /* the budget as jars, filling toward the line of what each part of life needs */
-.slider.jarrow{grid-template-columns:28px 92px 1fr 72px}
+.slider.jarrow{grid-template-columns:28px 78px 1fr 92px}
 .jarbox{display:block;line-height:0}
 .jarbox .jar{width:26px;height:34px}
-@media (max-width:640px){ .slider.jarrow{grid-template-columns:28px 72px 1fr 60px} }
+@media (max-width:640px){ .slider.jarrow{grid-template-columns:28px 66px 1fr 92px} }
 /* what a thing does to you, drawn */
 .emarks{display:inline-flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
 .emark{display:inline-flex;align-items:center;gap:1px;padding:2px 7px;border-radius:999px;border:1px solid var(--line2);

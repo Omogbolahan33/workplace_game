@@ -81,12 +81,14 @@ function saveSlotRowHTML(slot, label, info){
   const what = filled
     ? '<b>'+esc(String(info.head.name).slice(0,14))+'</b> \u00b7 '+dateLabel(info.turn||0)+' \u00b7 '+fmt(info.nw||0)
     : 'empty';
-  return '<div class="kv"><span class="muted">'+label+'</span>'+
-    '<span class="row" style="gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end">'+
-      '<span class="tiny'+(filled?'':' muted')+'">'+what+'</span>'+
-      '<button class="btn xs" data-a="save" data-s="'+slot+'">Save</button>'+
-      '<button class="btn xs" data-a="load" data-s="'+slot+'">Load</button>'+
-    '</span></div>';
+  /* a slot is a disk: lit when something is on it, with whose life, when and
+     what it was worth; Save and Load under it */
+  return '<div class="stile'+(filled ? ' filled' : '')+'">'+
+    '<span class="gfx sdisk" aria-hidden="true">'+worldIco('disk')+'</span>'+
+    '<b>'+label+'</b><span class="tiny'+(filled?'':' muted')+'">'+what+'</span>'+
+    '<span class="spair"><button class="btn xs" data-a="save" data-s="'+slot+'">Save</button>'+
+      '<button class="btn xs" data-a="load" data-s="'+slot+'">Load</button></span>'+
+  '</div>';
 }
 function saveLineHTML(){
   if(!S || !S.p) return '';

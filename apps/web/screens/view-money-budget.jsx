@@ -20,7 +20,8 @@
   is the honest answer to "what does this screen show right now". When the
   render pipeline itself moves to React this file does not change.
 */
-import { S, fmt, pct, needs, salaryMonthly, passiveMonthly, budgetMonthly, goodsUpkeep, BUDGET_KEYS, budgetJarHTML } from '@ledger/core';
+import { S, fmt, pct, needs, salaryMonthly, passiveMonthly, budgetMonthly, goodsUpkeep, BUDGET_KEYS, budgetJarHTML,
+  budgetMarkHTML, budgetSplitHTML, budgetPresetsHTML } from '@ledger/core';
 
 /* Every reading the screen needs, taken once, at the top. The string version
    recomputed several of these inside conditions - the same number, twice, in
@@ -41,23 +42,21 @@ function readings() {
    on a props type that came from a JSDoc - React's own types do the same thing
    with `Attributes`. Nothing in the body reads it. */
 /**
- * @param {{ keyName: string, label: string, note: string, value: any, max: any, covered: any, short: any, key?: any }} props
+ * @param {{ keyName: string, label: string, note: string, value: any, max: any, short: any, key?: any }} props
  */
-function Line({ keyName, label, note, value, max, covered, short }) {
+function Line({ keyName, label, note, value, max, short }) {
   return (
     <>
       <div className="slider jarrow">
         <span className="jarbox" dangerouslySetInnerHTML={{ __html: budgetJarHTML(value, short) }} />
         <span>{label}</span>
         <input type="range" data-inp="budget" data-k={keyName} min="0" max={max} step="5000" defaultValue={value} />
-        <span className="mono" style={{ textAlign: 'right' }}>{fmt(value)}</span>
+        <span className="bamt">
+          <span className="mono">{fmt(value)}</span>
+          <span dangerouslySetInnerHTML={{ __html: budgetMarkHTML(value, short) }} />
+        </span>
       </div>
-      <div className="tiny muted" style={{ margin: '-4px 0 10px 0' }}>
-        <span className="prose">{note}</span>{' '}
-        {covered
-          ? <span className="chip g">covered</span>
-          : <span className="chip r">below need {fmt(short)}</span>}
-      </div>
+      <div className="tiny muted prose" style={{ margin: '-4px 0 10px 0' }}>{note}</div>
     </>
   );
 }
@@ -65,12 +64,6 @@ function Line({ keyName, label, note, value, max, covered, short }) {
 export default function ViewMoneyBudget() {
   const { budget, need, income, total, upkeep, eroded, over } = readings();
   const outOfStep = eroded > 1.18;
-  const inflationButton = (
-    <button className={'btn sm' + (outOfStep ? ' primary' : '')} data-a="infladj">
-      Adjust for inflation{outOfStep ? ' (+' + pct(eroded - 1, 0) + ')' : ''}
-    </button>
-  );
-
   return (
     <div className="card">
       <h3>Monthly budget <span className="tag">affordable: {fmt(income)}/mo</span></h3>
@@ -86,7 +79,9 @@ export default function ViewMoneyBudget() {
         </div>
       )}
 
-      <div className="tiny muted" style={{ marginBottom: '10px' }}>
+      {/* your month as one bar against what you earn - core's */}
+      <div dangerouslySetInnerHTML={{ __html: budgetSplitHTML() }} />
+      <div className="tiny muted prose" style={{ marginBottom: '10px' }}>
         You are committing <b>{fmt(total)}</b> a month.{' '}
         {over
           ? <span className="bad">That is more than you earn — the gap is being funded by savings or debt.</span>
@@ -94,7 +89,6 @@ export default function ViewMoneyBudget() {
       </div>
 
       {BUDGET_KEYS.map((k) => {
-        const covered = (budget[k[0]] || 0) >= (need[k[0]] || 0);
         return (
           <Line key={k[0]}
             keyName={k[0]}
@@ -102,21 +96,14 @@ export default function ViewMoneyBudget() {
             note={k[2]}
             value={budget[k[0]] || 0}
             max={Math.max(400000, Math.round((need[k[0]] || 0) * 3))}
-            covered={covered}
             short={need[k[0]] || 0} />
         );
       })}
 
       <hr className="sep" />
-      <div className="row wrap">
-        <button className="btn sm" data-a="preset" data-p="survive">Survival mode</button>
-        <button className="btn sm" data-a="preset" data-p="balanced">Balanced</button>
-        <button className="btn sm" data-a="preset" data-p="invest">Invest in myself</button>
-        <button className="btn sm" data-a="preset" data-p="flex">Status &amp; family</button>
-        {inflationButton}
-      </div>
+      <div dangerouslySetInnerHTML={{ __html: budgetPresetsHTML() }} />
 
-      <div className="tiny muted" style={{ marginTop: '8px' }}>
+      <div className="tiny muted prose" style={{ marginTop: '8px' }}>
         Total: <b>{fmt(total)}</b>/month plus {fmt(upkeep)} of asset upkeep. Annual: {fmt((total + upkeep) * 12)}.
       </div>
     </div>

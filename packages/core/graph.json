@@ -269,9 +269,9 @@
   "needs": [
    "01-game-state.js: S",
    "00-cities.js: dateLabel, esc, fmt",
+   "32-the-world.js: worldIco",
    "10a-cloud-api.js: cloudCfg, cloudReady",
-   "11-profilesummary-and-strings.js: profileSummary",
-   "32-the-world.js: worldIco"
+   "11-profilesummary-and-strings.js: profileSummary"
   ],
   "externals": []
  },
@@ -357,8 +357,8 @@
   "needs": [
    "01-game-state.js: S, UI",
    "03-startbizcost-one-price-for-every-picker.js: bizList",
-   "02-derived-state-personal-finance-career.js: CITY, budgetMonthly, freedomIndex, hoursBudget, hoursLeft, netWorth",
-   "00-cities.js: dateLabel, esc, fmt, pct",
+   "02-derived-state-personal-finance-career.js: CITY, budgetMonthly, freedomIndex, hoursBudget, hoursLeft, netWorth, passiveMonthly, salaryMonthly",
+   "00-cities.js: clamp, dateLabel, esc, fmt, foldHTML, pct",
    "31-afterthreadchoice.js: ambitionOf, ambitionPct",
    "30-eras-you-live-through.js: eraById",
    "11-profilesummary-and-strings.js: subsFor",

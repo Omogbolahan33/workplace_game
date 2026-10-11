@@ -287,6 +287,51 @@ function budgetJarHTML(v, need){
     '<path d="M3.5 13h19" stroke="#e8eef5" stroke-width="1" stroke-dasharray="2 2"/>'+
   '</svg>';
 }
+/* Whether a budget line covers what that part of life needs, said in the
+   line itself under its amount: a word in the jar's colour, the shortfall in
+   the title too. */
+function budgetMarkHTML(v, need){
+  return v >= need ? '<span class="bmark good">covered</span>'
+    : '<span class="bmark bad" title="below need '+fmt(need)+'">below need '+fmt(need)+'</span>';
+}
+/* Your month as one bar: each part of life a segment as wide as its share of
+   what you earn, in the order the lines are listed, with a mark where your
+   income ends - a budget past the mark is visibly paid for by savings or debt.
+   Under it, the surplus or the overspend, rising or falling. */
+const BUDGET_TINT = {housing:'#f5b301', food:'#2fd47a', transport:'#5aa9ff', lifestyle:'#a78bfa',
+  family:'#ff9f43', learning:'#4dd0c8', giving:'#f78fb3'};
+function budgetSplitHTML(){
+  const b = S.fin.budget, inc = salaryMonthly() + (S.informalIncome||0) + passiveMonthly(), total = budgetMonthly();
+  const span = Math.max(inc, total, 1), net = inc - total;
+  const segs = BUDGET_KEYS.map(function(k){
+    const v = b[k[0]] || 0; if(v <= 0) return '';
+    const say = k[1].split(' ')[0]+' '+fmt(v);
+    return '<i style="width:'+(v / span * 100).toFixed(2)+'%;background:'+BUDGET_TINT[k[0]]+'" title="'+esc(say)+'"></i>';
+  }).join('');
+  return '<div class="bsplit">'+
+    '<span class="gfx bsbar" role="img" aria-label="'+esc('Committing '+fmt(total)+' of '+fmt(inc)+' a month')+'">'+segs+
+      '<b class="bsinc" style="left:'+(inc / span * 100).toFixed(2)+'%" title="what you earn: '+fmt(inc)+'"></b></span>'+
+    '<div class="bskey">'+BUDGET_KEYS.map(function(k){
+      return '<span><i style="background:'+BUDGET_TINT[k[0]]+'"></i>'+esc(k[1].split(' ')[0])+'</span>'; }).join('')+'</div>'+
+    '<div class="qnet '+(net >= 0 ? 'good' : 'bad')+'"><span class="gfx" aria-hidden="true">'+worldIco(net >= 0 ? 'up' : 'down')+'</span>'+
+      '<span class="tiny muted">'+(net >= 0 ? 'Surplus' : 'Overspending')+'</span><b class="mono">'+fmt(Math.abs(net))+'/mo</b></div>'+
+  '</div>';
+}
+/* The budget's presets as picture buttons: what each one is for, drawn. The
+   inflation adjustment is lit when prices have outrun the budget. */
+function budgetPresetsHTML(){
+  const eroded = S.cumInfl / Math.max(0.0001, S.budgetInfl || 1), late = eroded > 1.18;
+  const btn = function(ico, attrs, label, cls){
+    return '<button class="btn sm pbtn'+(cls ? ' '+cls : '')+'" '+attrs+'><span class="gfx" aria-hidden="true">'+worldIco(ico)+'</span>'+label+'</button>';
+  };
+  return '<div class="presets">'+
+    btn('lock', 'data-a="preset" data-p="survive"', 'Survival mode')+
+    btn('sliders', 'data-a="preset" data-p="balanced"', 'Balanced')+
+    btn('cap', 'data-a="preset" data-p="invest"', 'Invest in myself')+
+    btn('home', 'data-a="preset" data-p="flex"', 'Status &amp; family')+
+    btn('trend', 'data-a="infladj"', 'Adjust for inflation'+(late ? ' (+'+pct(eroded - 1, 0)+')' : ''), late ? 'primary' : '')+
+  '</div>';
+}
 /* What a thing does to you, drawn: the stat's picture with a rising or falling
    mark and the size of it, toned by whether it helps (less stress helps), and
    what it costs to keep. */
@@ -394,6 +439,38 @@ function goodTileHTML(g){
     '<button class="btn sm primary block" data-a="buygood" data-g="'+g.id+'"'+(afford ? '' : ' disabled aria-disabled="true" title="Costs '+fmt(cost)+
       ' · you have '+fmt(S.fin.cash)+' · short '+fmt(Math.round(cost - S.fin.cash))+'"')+'>'+(have ? 'Buy another' : 'Buy')+'</button>'+
   '</div>';
+}
+/* What you are trying to do, drawn: the ambition as a large ring filling
+   toward it, its name beside it, what it means shown with the explanations,
+   and the five you could choose as picture tiles - the one you hold lit. */
+const AMBITION_ICO = {million:'coins', dynasty:'towers', free:'door', builder:'crane', land:'key'};
+function ambitionHTML(){
+  const a = ambitionOf(), pc = ambitionPct();
+  if(!a) return '<div class="tiny muted">No ambition set.</div>';
+  const tone = pc >= 100 ? 'var(--good)' : pc >= 50 ? 'var(--acc)' : 'var(--warn)';
+  return '<div class="ahero">'+
+      '<span class="gfx hring abig" role="img" aria-label="'+esc(a.name+' '+pc+'%')+'" style="--p:'+Math.max(0, Math.min(100, pc))+';--c:'+tone+'">'+
+        '<em>'+worldIco(AMBITION_ICO[a.id] || 'target')+'<b>'+pc+'%</b></em></span>'+
+      '<div><b class="aname">'+esc(a.name)+'</b><div class="tiny muted prose">'+esc(a.blurb)+'</div></div>'+
+    '</div>'+
+    (pc >= 100 ? '<div class="principle" style="margin-top:9px">'+esc(a.done)+'</div>' : '')+
+    '<hr class="sep">'+foldHTML('Changing your mind', 'You can change what you are aiming at. People do.')+
+    '<div class="presets apick">'+AMBITIONS.map(function(x){
+      return '<button class="btn sm pbtn'+(x.id === a.id ? ' primary' : '')+'" data-a="setambition" data-m="'+x.id+'">'+
+        '<span class="gfx" aria-hidden="true">'+worldIco(AMBITION_ICO[x.id] || 'target')+'</span>'+esc(x.name)+'</button>';
+    }).join('')+'</div>';
+}
+/* The five constituencies and the scoreboard at 65, as rings. */
+const STAND_RINGS = [['family','home','Your family'], ['industry','factory','Your industry'], ['community','people','Your community'],
+  ['state','seal','The state'], ['street','shop','The street']];
+function standRingsHTML(){
+  const st = S.stand || {};
+  return ringsHTML(STAND_RINGS.filter(function(r){ return r[0] in st; }).map(function(r){ return {ico:r[1], label:r[2], v:st[r[0]]}; }));
+}
+function scoreboardRingsHTML(){
+  return ringsHTML([{ico:'star', label:'Reputation', v:S.p.rep}, {ico:'door', label:'Freedom index', v:freedomIndex()},
+    {ico:'home', label:'Family', v:S.p.family}, {ico:'heart', label:'Health', v:S.p.health},
+    {ico:'coins', label:'Wealth built (real)', v:clamp((S.der.nw/Math.max(1,S.cumInfl))/6e8*100,0,100)}]);
 }
 /* Where you stand, at a glance: what you are worth as the one big number
    (and in start-of-game money), and freedom and the years of working life

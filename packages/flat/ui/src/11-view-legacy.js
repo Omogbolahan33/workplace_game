@@ -2,36 +2,19 @@
 
 /* ---------------------------------- Legacy --------------------------------- */
 function viewLegacy(){
-  const a = ambitionOf();
-  const pctv = ambitionPct();
   let h = '';
   h += '<div class="grid g2"><div>';
   h += '<div class="card"><h3>What you are actually trying to do</h3>';
-  if(a){
-    h += '<div class="between"><b style="font-size:16px">'+esc(a.name)+'</b><span class="chip '+(pctv>=100?'g':pctv>=50?'':'r')+'">'+pctv+'%</span></div>'+
-      '<div style="margin:8px 0">'+bar(pctv,100, pctv>=100?'var(--good)':'var(--acc)')+'</div>'+
-      '<div class="tiny muted">'+esc(a.blurb)+'</div>'+
-      (pctv>=100? '<div class="principle" style="margin-top:9px">'+esc(a.done)+'</div>':'')+
-      '<hr class="sep">'+foldHTML('Changing your mind', 'You can change what you are aiming at. People do.')+
-      '<div class="row wrap">'+AMBITIONS.map(function(x){
-        return '<button class="btn xs '+(x.id===a.id?'primary':'')+'" data-a="setambition" data-m="'+x.id+'">'+esc(x.name)+'</button>';
-      }).join('')+'</div>';
-  } else h += '<div class="tiny muted">No ambition set.</div>';
+  /* the ambition as a ring and the five as picture tiles - ambitionHTML(),
+     the app's too */
+  h += ambitionHTML();
   h += '</div>';
   h += '<div class="card" style="margin-top:12px"><h3>Where you stand</h3>'+
     foldHTML('Why five', 'Five constituencies. You cannot please all of them, and the game will keep asking you to choose.')+
-    Object.keys(S.stand||{}).map(function(k){
-      const labels = {family:'Your family', industry:'Your industry', community:'Your community', state:'The state', street:'The street'};
-      return '<div style="margin-bottom:9px"><div class="between"><span class="small">'+(labels[k]||k)+'</span><span class="tiny muted">'+Math.round((S.stand||{})[k])+'</span></div>'+
-        bar((S.stand||{})[k],100,(S.stand||{})[k]>=60?'var(--good)':(S.stand||{})[k]>=35?'var(--acc)':'var(--bad)')+'</div>';
-    }).join('')+'</div>';
+    standRingsHTML()+'</div>';
   h += '</div><div>';
   h += '<div class="card"><h3>The scoreboard that matters at 65</h3>'+
-    statRow('Reputation', S.p.rep)+
-    statRow('Freedom index', freedomIndex())+
-    statRow('Family', S.p.family)+
-    statRow('Health', S.p.health)+
-    statRow('Wealth built (real)', clamp((S.der.nw/Math.max(1,S.cumInfl))/6e8*100,0,100))+
+    scoreboardRingsHTML()+
     '<hr class="sep">'+foldHTML('Why this scoreboard',
     'Nobody at your funeral is going to mention your quarterly returns. The game keeps the other score anyway, '+
     'so that you can see the trade you are making while there is still time to make a different one.')+'</div>';

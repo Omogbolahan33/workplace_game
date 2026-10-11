@@ -626,6 +626,40 @@ body.terse .prose{display:none}
   background:conic-gradient(var(--c) calc(var(--p) * 1%),rgba(255,255,255,.13) 0);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
 .lring .hring em{font-style:normal;width:42px;height:42px;border-radius:50%;background:var(--panel2);display:grid;place-items:center;font-size:20px;color:var(--acc)}
 .lrings.n6{grid-template-columns:repeat(3,1fr);row-gap:12px}
+/* the budget: your month as one bar, each line's state under its amount, presets as pictures */
+.bsplit{margin:2px 0 12px}
+.bsbar{position:relative;display:flex;height:16px;border-radius:8px;background:rgba(255,255,255,.08);overflow:visible}
+.bsbar i{display:block;height:100%}
+.bsbar i:first-child{border-radius:8px 0 0 8px}
+.bsbar i:last-of-type{border-radius:0 8px 8px 0}
+.bsbar .bsinc{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:#e8eef5;border-radius:1px}
+.bskey{display:flex;flex-wrap:wrap;gap:4px 10px;margin:7px 0 2px;font-size:10.5px;color:var(--dim)}
+.bskey span{display:inline-flex;align-items:center;gap:4px}
+.bskey i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.bamt{display:flex;flex-direction:column;align-items:flex-end;line-height:1.15;text-align:right}
+.bmark{font-size:10px;font-weight:600}
+.bmark.good{color:var(--good)} .bmark.bad{color:var(--bad)}
+.presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px}
+.presets .pbtn{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 6px;white-space:normal;line-height:1.15;text-align:center}
+.presets .pbtn .gfx{font-size:24px;line-height:1;color:var(--acc)}
+.presets .pbtn.primary .gfx{color:inherit}
+/* the ambition as a ring, and the five as picture tiles */
+.ahero{display:flex;align-items:center;gap:14px}
+.ahero .abig{width:88px;height:88px;flex:none;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--c) calc(var(--p) * 1%),rgba(255,255,255,.13) 0);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
+.ahero .abig em{font-style:normal;width:72px;height:72px;border-radius:50%;background:var(--panel2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:24px;color:var(--acc)}
+.ahero .abig em b{font-size:13px;color:var(--txt)}
+.ahero .aname{font-size:16px;line-height:1.25;display:block;margin-bottom:3px}
+.lrings.n5{grid-template-columns:repeat(3,1fr);row-gap:12px}
+/* save slots as disks */
+.stiles{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.stiles > div{display:flex}
+.stile{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;border:1px solid var(--line2);border-radius:14px;padding:10px 6px;background:var(--panel2)}
+.stile .sdisk{font-size:28px;line-height:1;color:var(--dim2)}
+.stile.filled .sdisk{color:var(--acc)}
+.stile .tiny{line-height:1.25;word-break:break-word}
+.stile .spair{display:grid;grid-template-columns:1fr 1fr;gap:4px;width:100%;margin-top:auto}
+.stile .spair .btn{padding-left:4px;padding-right:4px}
 /* the shop as a shelf */
 .gtile .bico{position:relative}
 .gtile .gown{position:absolute;right:0;top:0;font-size:11px;font-weight:700;color:#1a1405;background:var(--acc);border-radius:10px;padding:1px 6px;line-height:1.4}
@@ -696,10 +730,10 @@ body.terse .prose{display:none}
 .wbub.bad{color:var(--bad);border-color:rgba(255,95,109,.5)}
 .wbub.story{color:var(--acc);border-color:var(--acc)}
 /* the budget as jars, filling toward the line of what each part of life needs */
-.slider.jarrow{grid-template-columns:28px 92px 1fr 72px}
+.slider.jarrow{grid-template-columns:28px 78px 1fr 92px}
 .jarbox{display:block;line-height:0}
 .jarbox .jar{width:26px;height:34px}
-@media (max-width:640px){ .slider.jarrow{grid-template-columns:28px 72px 1fr 60px} }
+@media (max-width:640px){ .slider.jarrow{grid-template-columns:28px 66px 1fr 92px} }
 /* what a thing does to you, drawn */
 .emarks{display:inline-flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
 .emark{display:inline-flex;align-items:center;gap:1px;padding:2px 7px;border-radius:999px;border:1px solid var(--line2);
@@ -12297,12 +12331,14 @@ function saveSlotRowHTML(slot, label, info){
   const what = filled
     ? '<b>'+esc(String(info.head.name).slice(0,14))+'</b> \u00b7 '+dateLabel(info.turn||0)+' \u00b7 '+fmt(info.nw||0)
     : 'empty';
-  return '<div class="kv"><span class="muted">'+label+'</span>'+
-    '<span class="row" style="gap:5px;align-items:center;flex-wrap:wrap;justify-content:flex-end">'+
-      '<span class="tiny'+(filled?'':' muted')+'">'+what+'</span>'+
-      '<button class="btn xs" data-a="save" data-s="'+slot+'">Save</button>'+
-      '<button class="btn xs" data-a="load" data-s="'+slot+'">Load</button>'+
-    '</span></div>';
+  /* a slot is a disk: lit when something is on it, with whose life, when and
+     what it was worth; Save and Load under it */
+  return '<div class="stile'+(filled ? ' filled' : '')+'">'+
+    '<span class="gfx sdisk" aria-hidden="true">'+worldIco('disk')+'</span>'+
+    '<b>'+label+'</b><span class="tiny'+(filled?'':' muted')+'">'+what+'</span>'+
+    '<span class="spair"><button class="btn xs" data-a="save" data-s="'+slot+'">Save</button>'+
+      '<button class="btn xs" data-a="load" data-s="'+slot+'">Load</button></span>'+
+  '</div>';
 }
 function saveLineHTML(){
   if(!S || !S.p) return '';
@@ -17235,6 +17271,51 @@ function budgetJarHTML(v, need){
     '<path d="M3.5 13h19" stroke="#e8eef5" stroke-width="1" stroke-dasharray="2 2"/>'+
   '</svg>';
 }
+/* Whether a budget line covers what that part of life needs, said in the
+   line itself under its amount: a word in the jar's colour, the shortfall in
+   the title too. */
+function budgetMarkHTML(v, need){
+  return v >= need ? '<span class="bmark good">covered</span>'
+    : '<span class="bmark bad" title="below need '+fmt(need)+'">below need '+fmt(need)+'</span>';
+}
+/* Your month as one bar: each part of life a segment as wide as its share of
+   what you earn, in the order the lines are listed, with a mark where your
+   income ends - a budget past the mark is visibly paid for by savings or debt.
+   Under it, the surplus or the overspend, rising or falling. */
+const BUDGET_TINT = {housing:'#f5b301', food:'#2fd47a', transport:'#5aa9ff', lifestyle:'#a78bfa',
+  family:'#ff9f43', learning:'#4dd0c8', giving:'#f78fb3'};
+function budgetSplitHTML(){
+  const b = S.fin.budget, inc = salaryMonthly() + (S.informalIncome||0) + passiveMonthly(), total = budgetMonthly();
+  const span = Math.max(inc, total, 1), net = inc - total;
+  const segs = BUDGET_KEYS.map(function(k){
+    const v = b[k[0]] || 0; if(v <= 0) return '';
+    const say = k[1].split(' ')[0]+' '+fmt(v);
+    return '<i style="width:'+(v / span * 100).toFixed(2)+'%;background:'+BUDGET_TINT[k[0]]+'" title="'+esc(say)+'"></i>';
+  }).join('');
+  return '<div class="bsplit">'+
+    '<span class="gfx bsbar" role="img" aria-label="'+esc('Committing '+fmt(total)+' of '+fmt(inc)+' a month')+'">'+segs+
+      '<b class="bsinc" style="left:'+(inc / span * 100).toFixed(2)+'%" title="what you earn: '+fmt(inc)+'"></b></span>'+
+    '<div class="bskey">'+BUDGET_KEYS.map(function(k){
+      return '<span><i style="background:'+BUDGET_TINT[k[0]]+'"></i>'+esc(k[1].split(' ')[0])+'</span>'; }).join('')+'</div>'+
+    '<div class="qnet '+(net >= 0 ? 'good' : 'bad')+'"><span class="gfx" aria-hidden="true">'+worldIco(net >= 0 ? 'up' : 'down')+'</span>'+
+      '<span class="tiny muted">'+(net >= 0 ? 'Surplus' : 'Overspending')+'</span><b class="mono">'+fmt(Math.abs(net))+'/mo</b></div>'+
+  '</div>';
+}
+/* The budget's presets as picture buttons: what each one is for, drawn. The
+   inflation adjustment is lit when prices have outrun the budget. */
+function budgetPresetsHTML(){
+  const eroded = S.cumInfl / Math.max(0.0001, S.budgetInfl || 1), late = eroded > 1.18;
+  const btn = function(ico, attrs, label, cls){
+    return '<button class="btn sm pbtn'+(cls ? ' '+cls : '')+'" '+attrs+'><span class="gfx" aria-hidden="true">'+worldIco(ico)+'</span>'+label+'</button>';
+  };
+  return '<div class="presets">'+
+    btn('lock', 'data-a="preset" data-p="survive"', 'Survival mode')+
+    btn('sliders', 'data-a="preset" data-p="balanced"', 'Balanced')+
+    btn('cap', 'data-a="preset" data-p="invest"', 'Invest in myself')+
+    btn('home', 'data-a="preset" data-p="flex"', 'Status &amp; family')+
+    btn('trend', 'data-a="infladj"', 'Adjust for inflation'+(late ? ' (+'+pct(eroded - 1, 0)+')' : ''), late ? 'primary' : '')+
+  '</div>';
+}
 /* What a thing does to you, drawn: the stat's picture with a rising or falling
    mark and the size of it, toned by whether it helps (less stress helps), and
    what it costs to keep. */
@@ -17342,6 +17423,38 @@ function goodTileHTML(g){
     '<button class="btn sm primary block" data-a="buygood" data-g="'+g.id+'"'+(afford ? '' : ' disabled aria-disabled="true" title="Costs '+fmt(cost)+
       ' · you have '+fmt(S.fin.cash)+' · short '+fmt(Math.round(cost - S.fin.cash))+'"')+'>'+(have ? 'Buy another' : 'Buy')+'</button>'+
   '</div>';
+}
+/* What you are trying to do, drawn: the ambition as a large ring filling
+   toward it, its name beside it, what it means shown with the explanations,
+   and the five you could choose as picture tiles - the one you hold lit. */
+const AMBITION_ICO = {million:'coins', dynasty:'towers', free:'door', builder:'crane', land:'key'};
+function ambitionHTML(){
+  const a = ambitionOf(), pc = ambitionPct();
+  if(!a) return '<div class="tiny muted">No ambition set.</div>';
+  const tone = pc >= 100 ? 'var(--good)' : pc >= 50 ? 'var(--acc)' : 'var(--warn)';
+  return '<div class="ahero">'+
+      '<span class="gfx hring abig" role="img" aria-label="'+esc(a.name+' '+pc+'%')+'" style="--p:'+Math.max(0, Math.min(100, pc))+';--c:'+tone+'">'+
+        '<em>'+worldIco(AMBITION_ICO[a.id] || 'target')+'<b>'+pc+'%</b></em></span>'+
+      '<div><b class="aname">'+esc(a.name)+'</b><div class="tiny muted prose">'+esc(a.blurb)+'</div></div>'+
+    '</div>'+
+    (pc >= 100 ? '<div class="principle" style="margin-top:9px">'+esc(a.done)+'</div>' : '')+
+    '<hr class="sep">'+foldHTML('Changing your mind', 'You can change what you are aiming at. People do.')+
+    '<div class="presets apick">'+AMBITIONS.map(function(x){
+      return '<button class="btn sm pbtn'+(x.id === a.id ? ' primary' : '')+'" data-a="setambition" data-m="'+x.id+'">'+
+        '<span class="gfx" aria-hidden="true">'+worldIco(AMBITION_ICO[x.id] || 'target')+'</span>'+esc(x.name)+'</button>';
+    }).join('')+'</div>';
+}
+/* The five constituencies and the scoreboard at 65, as rings. */
+const STAND_RINGS = [['family','home','Your family'], ['industry','factory','Your industry'], ['community','people','Your community'],
+  ['state','seal','The state'], ['street','shop','The street']];
+function standRingsHTML(){
+  const st = S.stand || {};
+  return ringsHTML(STAND_RINGS.filter(function(r){ return r[0] in st; }).map(function(r){ return {ico:r[1], label:r[2], v:st[r[0]]}; }));
+}
+function scoreboardRingsHTML(){
+  return ringsHTML([{ico:'star', label:'Reputation', v:S.p.rep}, {ico:'door', label:'Freedom index', v:freedomIndex()},
+    {ico:'home', label:'Family', v:S.p.family}, {ico:'heart', label:'Health', v:S.p.health},
+    {ico:'coins', label:'Wealth built (real)', v:clamp((S.der.nw/Math.max(1,S.cumInfl))/6e8*100,0,100)}]);
 }
 /* Where you stand, at a glance: what you are worth as the one big number
    (and in start-of-game money), and freedom and the years of working life
@@ -18410,26 +18523,22 @@ function viewMoneyBudget(){
       ' <button class="btn xs" data-a="infladj" style="margin-left:6px">Adjust for inflation</button>'+
       foldHTML('What that means', 'You are now buying '+pct((1/eroded-1),0)+' less life than you were.')+'</div>';
   }
-  h += '<div class="tiny muted" style="margin-bottom:10px">You are committing <b>'+fmt(total)+'</b> a month. '+
+  /* your month as one bar against what you earn - budgetSplitHTML(), the app's
+     too; the sentence that reads it is shown with the explanations */
+  h += budgetSplitHTML();
+  h += '<div class="tiny muted prose" style="margin-bottom:10px">You are committing <b>'+fmt(total)+'</b> a month. '+
        (total>inc?'<span class="bad">That is more than you earn — the gap is being funded by savings or debt.</span>':'<span class="good">Surplus of '+fmt(inc-total)+' a month.</span>')+'</div>';
   BUDGET_KEYS.forEach(function(k){
     const def = GOODS.find(x=>1); // noop
     const need = nd[k[0]]||0;
     const v = b[k[0]]||0;
-    const mark = v>=need ? '<span class="chip g">covered</span>' : '<span class="chip r">below need '+fmt(need)+'</span>';
     h += '<div class="slider jarrow"><span class="jarbox">'+budgetJarHTML(v, need)+'</span><span>'+k[1].split(' ')[0]+'</span>'+
       '<input type="range" data-inp="budget" data-k="'+k[0]+'" min="0" max="'+Math.max(400000, Math.round(need*3))+'" step="5000" value="'+v+'">'+
-      '<span class="mono" style="text-align:right">'+fmt(v)+'</span></div>'+
-      '<div class="tiny muted" style="margin:-4px 0 10px 0"><span class="prose">'+k[2]+'</span> '+mark+'</div>';
+      '<span class="bamt"><span class="mono">'+fmt(v)+'</span>'+budgetMarkHTML(v, need)+'</span></div>'+
+      '<div class="tiny muted prose" style="margin:-4px 0 10px 0">'+k[2]+'</div>';
   });
-  h += '<hr class="sep"><div class="row wrap">'+
-    '<button class="btn sm" data-a="preset" data-p="survive">Survival mode</button>'+
-    '<button class="btn sm" data-a="preset" data-p="balanced">Balanced</button>'+
-    '<button class="btn sm" data-a="preset" data-p="invest">Invest in myself</button>'+
-    '<button class="btn sm" data-a="preset" data-p="flex">Status &amp; family</button>'+
-    '<button class="btn sm '+(eroded>1.18?'primary':'')+'" data-a="infladj">Adjust for inflation'+(eroded>1.18?' (+'+pct(eroded-1,0)+')':'')+'</button>'+
-    '</div>';
-  h += '<div class="tiny muted" style="margin-top:8px">Total: <b>'+fmt(total)+'</b>/month plus '+fmt(gu)+' of asset upkeep. Annual: '+fmt((total+gu)*12)+'.</div>';
+  h += '<hr class="sep">'+budgetPresetsHTML();
+  h += '<div class="tiny muted prose" style="margin-top:8px">Total: <b>'+fmt(total)+'</b>/month plus '+fmt(gu)+' of asset upkeep. Annual: '+fmt((total+gu)*12)+'.</div>';
   h += '</div>';
   return h;
 }
@@ -19592,36 +19701,19 @@ function viewCareerRecord(){
 
 /* ---------------------------------- Legacy --------------------------------- */
 function viewLegacy(){
-  const a = ambitionOf();
-  const pctv = ambitionPct();
   let h = '';
   h += '<div class="grid g2"><div>';
   h += '<div class="card"><h3>What you are actually trying to do</h3>';
-  if(a){
-    h += '<div class="between"><b style="font-size:16px">'+esc(a.name)+'</b><span class="chip '+(pctv>=100?'g':pctv>=50?'':'r')+'">'+pctv+'%</span></div>'+
-      '<div style="margin:8px 0">'+bar(pctv,100, pctv>=100?'var(--good)':'var(--acc)')+'</div>'+
-      '<div class="tiny muted">'+esc(a.blurb)+'</div>'+
-      (pctv>=100? '<div class="principle" style="margin-top:9px">'+esc(a.done)+'</div>':'')+
-      '<hr class="sep">'+foldHTML('Changing your mind', 'You can change what you are aiming at. People do.')+
-      '<div class="row wrap">'+AMBITIONS.map(function(x){
-        return '<button class="btn xs '+(x.id===a.id?'primary':'')+'" data-a="setambition" data-m="'+x.id+'">'+esc(x.name)+'</button>';
-      }).join('')+'</div>';
-  } else h += '<div class="tiny muted">No ambition set.</div>';
+  /* the ambition as a ring and the five as picture tiles - ambitionHTML(),
+     the app's too */
+  h += ambitionHTML();
   h += '</div>';
   h += '<div class="card" style="margin-top:12px"><h3>Where you stand</h3>'+
     foldHTML('Why five', 'Five constituencies. You cannot please all of them, and the game will keep asking you to choose.')+
-    Object.keys(S.stand||{}).map(function(k){
-      const labels = {family:'Your family', industry:'Your industry', community:'Your community', state:'The state', street:'The street'};
-      return '<div style="margin-bottom:9px"><div class="between"><span class="small">'+(labels[k]||k)+'</span><span class="tiny muted">'+Math.round((S.stand||{})[k])+'</span></div>'+
-        bar((S.stand||{})[k],100,(S.stand||{})[k]>=60?'var(--good)':(S.stand||{})[k]>=35?'var(--acc)':'var(--bad)')+'</div>';
-    }).join('')+'</div>';
+    standRingsHTML()+'</div>';
   h += '</div><div>';
   h += '<div class="card"><h3>The scoreboard that matters at 65</h3>'+
-    statRow('Reputation', S.p.rep)+
-    statRow('Freedom index', freedomIndex())+
-    statRow('Family', S.p.family)+
-    statRow('Health', S.p.health)+
-    statRow('Wealth built (real)', clamp((S.der.nw/Math.max(1,S.cumInfl))/6e8*100,0,100))+
+    scoreboardRingsHTML()+
     '<hr class="sep">'+foldHTML('Why this scoreboard',
     'Nobody at your funeral is going to mention your quarterly returns. The game keeps the other score anyway, '+
     'so that you can see the trade you are making while there is still time to make a different one.')+'</div>';
@@ -19740,7 +19832,7 @@ function viewLedgerSettings(){
   /* 1. this run: what is saved, and whether it is being saved for you */
   const hardcore = !D().saveScum;   /* the tier with no rewinding is Hardcore */
   h += '<div class="card"><h3>Save &amp; load</h3>'+
-    slotRowHTML('s1','Slot 1') + slotRowHTML('s2','Slot 2') + slotRowHTML('s3','Slot 3')+
+    '<div class="stiles">'+slotRowHTML('s1','Slot 1') + slotRowHTML('s2','Slot 2') + slotRowHTML('s3','Slot 3')+'</div>'+
     '<div class="tiny '+(hardcore?'':'muted')+'" style="margin-top:9px'+(hardcore?';color:var(--warn)':'')+'">'+
       (hardcore ? 'Hardcore: nothing is auto-saved. Save a slot before you close.'
                 : 'Auto-saved after every move'+(SAVE.at ? ' \u00b7 last at '+savedAtLabel() : '')+'.')+

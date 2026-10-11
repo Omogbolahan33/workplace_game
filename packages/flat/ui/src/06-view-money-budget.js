@@ -19,26 +19,22 @@ function viewMoneyBudget(){
       ' <button class="btn xs" data-a="infladj" style="margin-left:6px">Adjust for inflation</button>'+
       foldHTML('What that means', 'You are now buying '+pct((1/eroded-1),0)+' less life than you were.')+'</div>';
   }
-  h += '<div class="tiny muted" style="margin-bottom:10px">You are committing <b>'+fmt(total)+'</b> a month. '+
+  /* your month as one bar against what you earn - budgetSplitHTML(), the app's
+     too; the sentence that reads it is shown with the explanations */
+  h += budgetSplitHTML();
+  h += '<div class="tiny muted prose" style="margin-bottom:10px">You are committing <b>'+fmt(total)+'</b> a month. '+
        (total>inc?'<span class="bad">That is more than you earn — the gap is being funded by savings or debt.</span>':'<span class="good">Surplus of '+fmt(inc-total)+' a month.</span>')+'</div>';
   BUDGET_KEYS.forEach(function(k){
     const def = GOODS.find(x=>1); // noop
     const need = nd[k[0]]||0;
     const v = b[k[0]]||0;
-    const mark = v>=need ? '<span class="chip g">covered</span>' : '<span class="chip r">below need '+fmt(need)+'</span>';
     h += '<div class="slider jarrow"><span class="jarbox">'+budgetJarHTML(v, need)+'</span><span>'+k[1].split(' ')[0]+'</span>'+
       '<input type="range" data-inp="budget" data-k="'+k[0]+'" min="0" max="'+Math.max(400000, Math.round(need*3))+'" step="5000" value="'+v+'">'+
-      '<span class="mono" style="text-align:right">'+fmt(v)+'</span></div>'+
-      '<div class="tiny muted" style="margin:-4px 0 10px 0"><span class="prose">'+k[2]+'</span> '+mark+'</div>';
+      '<span class="bamt"><span class="mono">'+fmt(v)+'</span>'+budgetMarkHTML(v, need)+'</span></div>'+
+      '<div class="tiny muted prose" style="margin:-4px 0 10px 0">'+k[2]+'</div>';
   });
-  h += '<hr class="sep"><div class="row wrap">'+
-    '<button class="btn sm" data-a="preset" data-p="survive">Survival mode</button>'+
-    '<button class="btn sm" data-a="preset" data-p="balanced">Balanced</button>'+
-    '<button class="btn sm" data-a="preset" data-p="invest">Invest in myself</button>'+
-    '<button class="btn sm" data-a="preset" data-p="flex">Status &amp; family</button>'+
-    '<button class="btn sm '+(eroded>1.18?'primary':'')+'" data-a="infladj">Adjust for inflation'+(eroded>1.18?' (+'+pct(eroded-1,0)+')':'')+'</button>'+
-    '</div>';
-  h += '<div class="tiny muted" style="margin-top:8px">Total: <b>'+fmt(total)+'</b>/month plus '+fmt(gu)+' of asset upkeep. Annual: '+fmt((total+gu)*12)+'.</div>';
+  h += '<hr class="sep">'+budgetPresetsHTML();
+  h += '<div class="tiny muted prose" style="margin-top:8px">Total: <b>'+fmt(total)+'</b>/month plus '+fmt(gu)+' of asset upkeep. Annual: '+fmt((total+gu)*12)+'.</div>';
   h += '</div>';
   return h;
 }

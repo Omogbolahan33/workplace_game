@@ -31,7 +31,7 @@ export function viewLedgerSettings(){
   /* 1. this run: what is saved, and whether it is being saved for you */
   const hardcore = !D().saveScum;   /* the tier with no rewinding is Hardcore */
   h += '<div class="card"><h3>Save &amp; load</h3>'+
-    slotRowHTML('s1','Slot 1') + slotRowHTML('s2','Slot 2') + slotRowHTML('s3','Slot 3')+
+    '<div class="stiles">'+slotRowHTML('s1','Slot 1') + slotRowHTML('s2','Slot 2') + slotRowHTML('s3','Slot 3')+'</div>'+
     '<div class="tiny '+(hardcore?'':'muted')+'" style="margin-top:9px'+(hardcore?';color:var(--warn)':'')+'">'+
       (hardcore ? 'Hardcore: nothing is auto-saved. Save a slot before you close.'
                 : 'Auto-saved after every move'+(SAVE.at ? ' \u00b7 last at '+savedAtLabel() : '')+'.')+
