@@ -11,30 +11,22 @@
   four dials and two figures is the ordinary state, and a nought-hours line would
   be the game telling you about a thing that is not happening.
 */
-import { S, statRow, hoursLeft, hoursBudget, sleepDebt } from '@ledger/core';
+import { S, ringsHTML, hoursLeft, hoursBudget, sleepDebt } from '@ledger/core';
 
 export default function ViewPressure() {
   const p = S.p;
   const debt = sleepDebt();
-  const rows = [
-    ['Health', p.health, p.health > 60 ? 'var(--good)' : p.health > 30 ? 'var(--warn)' : 'var(--bad)'],
-    ['Stress (lower better)', 100 - p.stress, p.stress < 40 ? 'var(--good)' : p.stress < 70 ? 'var(--warn)' : 'var(--bad)'],
-    ['Happiness', p.happy, 'var(--acc)'],
-    ['Family', p.family, 'var(--info)'],
-    ['Reputation', p.rep, 'var(--purple)']
-  ];
+  /* the dials that end runs as rings, the HUD's own pictures, with the hours
+     you have left as the sixth - core's, drawn the same by both renderers */
+  const rings = ringsHTML([{ ico: 'heart', label: 'Health', v: p.health }, { ico: 'bolt', label: 'Calm', v: 100 - p.stress, note: 'Stress ' + Math.round(p.stress) },
+    { ico: 'smile', label: 'Happiness', v: p.happy }, { ico: 'home', label: 'Family', v: p.family },
+    { ico: 'star', label: 'Reputation', v: p.rep },
+    { ico: 'glass', label: 'Hours left', v: hoursLeft() / Math.max(1, hoursBudget()) * 100, tone: 'var(--info)', text: hoursLeft() + 'h of ' + hoursBudget() }]);
 
   return (
     <div className="card">
       <h3>What is at risk</h3>
-      {rows.map(([label, value, colour]) => (
-        <div key={label} dangerouslySetInnerHTML={{ __html: statRow(label, value, colour) }} />
-      ))}
-      <hr className="sep" />
-      <div className="kv">
-        <span className="muted">Hours left this quarter</span>
-        <span className="mono">{hoursLeft()}h of {hoursBudget()}</span>
-      </div>
+      <div dangerouslySetInnerHTML={{ __html: rings }} />
       {debt > 0 ? (
         <div className="kv">
           <span className="muted">Sleep debt</span>

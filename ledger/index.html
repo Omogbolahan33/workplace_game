@@ -625,6 +625,47 @@ body.terse .prose{display:none}
 .lring .hring{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;
   background:conic-gradient(var(--c) calc(var(--p) * 1%),rgba(255,255,255,.13) 0);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
 .lring .hring em{font-style:normal;width:42px;height:42px;border-radius:50%;background:var(--panel2);display:grid;place-items:center;font-size:20px;color:var(--acc)}
+.lrings.n6{grid-template-columns:repeat(3,1fr);row-gap:12px}
+/* where you stand: the one big number, and two rings */
+.stand{display:grid;grid-template-columns:1.25fr 1fr;gap:10px;align-items:center}
+.stand .lrings{grid-template-columns:1fr 1fr;margin:0}
+.snw{display:flex;flex-direction:column;gap:2px}
+.snw .gfx{font-size:24px;line-height:1;color:var(--acc)}
+.snw b{font-size:26px;line-height:1.15}
+/* the first quarter's loop, and its three moves as picture tiles */
+.fmloop{display:flex;align-items:center;justify-content:center;gap:10px;margin:2px 0 10px;color:var(--acc)}
+.fmloop span{display:flex;flex-direction:column;align-items:center;font-size:30px;line-height:1;gap:4px}
+.fmloop span i{font-style:normal;font-size:11px;color:var(--dim);letter-spacing:.05em;text-transform:uppercase}
+.fmloop b{font-size:18px;transform:rotate(90deg);color:var(--dim)}
+.fmloop b.back{transform:none;font-size:22px;color:var(--acc)}
+.fmmoves{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.fmmoves .fmrow{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;padding:11px 6px;white-space:normal;line-height:1.2}
+.fmmoves .fmi{font-size:30px;line-height:1;color:var(--acc)}
+.fmmoves .fmrow b{font-size:12.5px}
+/* the economy as gauges */
+.gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 8px}
+.gauge{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.gauge .gdial{position:relative;width:68px;height:42px;display:block}
+.gauge .gdial svg{width:100%;height:100%;display:block}
+.gauge .gdial em{position:absolute;left:50%;bottom:1px;transform:translateX(-50%);font-style:normal;font-size:17px;color:var(--acc);line-height:1}
+.gauge b{font-size:14px}
+/* the skills as one shape */
+.radar{position:relative;width:100%;max-width:300px;margin:4px auto 0;aspect-ratio:240/200}
+.radar > svg{position:absolute;inset:0;width:100%;height:100%}
+.radar .rlab{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;line-height:1.1;color:var(--acc);font-size:18px;gap:1px}
+.radar .rlab b{font-size:12px;color:var(--txt)}
+.radar .rlab i{font-style:normal;font-size:10px;color:var(--dim);letter-spacing:.03em}
+/* the quarter's money as bars against each other */
+.qflow{display:grid;gap:8px}
+.qrow{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:8px}
+.qrow .qi{font-size:17px;line-height:1;color:var(--acc)}
+.qrow .qb{height:12px;border-radius:6px;background:rgba(255,255,255,.08);overflow:hidden;display:block}
+.qrow .qb i{display:block;height:100%;border-radius:6px}
+.qrow .mono{font-size:12px;min-width:74px;text-align:right}
+.qnet{display:flex;align-items:center;gap:8px;justify-content:flex-end;border-top:1px solid var(--line);padding-top:8px}
+.qnet .gfx{font-size:20px;line-height:1}
+.qnet b{font-size:19px}
+.qnet.good,.qnet.good .gfx{color:var(--good)} .qnet.bad,.qnet.bad .gfx{color:var(--bad)}
 @media (max-width:640px){
   .ctiles{grid-template-columns:1fr 1fr;gap:8px}
   .ctile{padding:9px 8px}
@@ -12322,19 +12363,26 @@ function firstMovesHTML(){
   if(S.flags && S.flags.fm) return '';
   if(profileSummary().n > 0) return '';        /* not their first run: they know */
   const moves = [
-    { t:'work',  s:'business', head:'Set your price', why:'The fastest thing you control.' },
-    { t:'money', s:'position', head:'See your money', why:'What comes in, what goes out, what is left.' },
-    { t:'legacy',s:'ambition', head:'Pick an ambition', why:'What you are building toward, and how you are judged.' }
+    { t:'work',  s:'business', ico:'tag',    head:'Set your price', why:'The fastest thing you control.' },
+    { t:'money', s:'position', ico:'jar',    head:'See your money', why:'What comes in, what goes out, what is left.' },
+    { t:'legacy',s:'ambition', ico:'target', head:'Pick an ambition', why:'What you are building toward, and how you are judged.' }
   ];
+  /* the loop as a picture - a move, then the quarter turns, and round again -
+     with the sentence that says it shown alongside the explanations */
   let h = '<div class="card fmcard"><h3>First quarter <span class="tag">the loop</span></h3>'+
-    '<div class="small" style="margin-bottom:9px">Make a move, then advance the quarter. '+
-    'That is the whole game — everything else is what you spend and what you own.</div>';
+    '<div class="gfx fmloop" role="img" aria-label="Make a move, then advance the quarter">'+
+      '<span>'+worldIco('hands')+'<i>move</i></span><b>'+worldIco('up')+'</b>'+
+      '<span>'+worldIco('calendar')+'<i>quarter</i></span>'+
+      '<b class="back"><svg class="ico" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg></b></div>'+
+    '<div class="small prose" style="margin-bottom:9px">Make a move, then advance the quarter. '+
+    'That is the whole game — everything else is what you spend and what you own.</div>'+
+    '<div class="fmmoves">';
   moves.forEach(function(m){
-    h += '<button class="btn block fmrow" data-a="goto" data-t="'+m.t+'" data-s="'+m.s+'" '+
-      'style="text-align:left;margin-bottom:5px"><b>'+esc(m.head)+'</b>'+
-      '<span class="tiny muted" style="display:block">'+esc(m.why)+'</span></button>';
+    h += '<button class="btn fmrow" data-a="goto" data-t="'+m.t+'" data-s="'+m.s+'">'+
+      '<span class="gfx fmi" aria-hidden="true">'+worldIco(m.ico)+'</span><b>'+esc(m.head)+'</b>'+
+      '<span class="tiny muted prose" style="display:block">'+esc(m.why)+'</span></button>';
   });
-  h += '<div class="row wrap" style="gap:5px;margin-top:8px">'+
+  h += '</div><div class="row wrap" style="gap:5px;margin-top:8px">'+
     '<button class="btn xs primary" data-a="advance">Advance the quarter \u25b8</button>'+
     '<button class="btn xs ghost" data-a="fmdone">Got it</button></div></div>';
   return h;
@@ -14905,19 +14953,12 @@ function castTileHTML(c){
       '</div></div>' : '')+
   '</div>';
 }
-/* How home is, as four rings: the household's health in the same pictures the
-   HUD uses, the number in the ring's title and its label underneath. Stress is
-   drawn as calm, so a full ring is good on all four. */
+/* How home is, as four rings: the household's health in the HUD's own ring
+   pictures. Stress is drawn as calm, so a full ring is good on all four. */
 function lifeRingsHTML(){
   const p = S.p;
-  const ring = function(ico, label, v){
-    const tone = v >= 60 ? 'var(--good)' : v >= 35 ? 'var(--warn)' : 'var(--bad)';
-    return '<div class="lring"><span class="gfx hring" role="img" aria-label="'+label+' '+Math.round(v)+'" title="'+label+' '+Math.round(v)+'" '+
-      'style="--p:'+Math.round(Math.max(0, Math.min(100, v)))+';--c:'+tone+'"><em>'+worldIco(ico)+'</em></span>'+
-      '<span class="tiny muted">'+label+' '+Math.round(v)+'</span></div>';
-  };
-  return '<div class="lrings">'+ring('home', 'Family', p.family)+ring('smile', 'Happiness', p.happy)+
-    ring('heart', 'Health', p.health)+ring('bolt', 'Calm', 100 - p.stress)+'</div>';
+  return ringsHTML([{ico:'home', label:'Family', v:p.family}, {ico:'smile', label:'Happiness', v:p.happy},
+    {ico:'heart', label:'Health', v:p.health}, {ico:'bolt', label:'Calm', v:100 - p.stress, note:'Stress '+Math.round(p.stress)}]);
 }
 /* People drift. Fortunes change. Some of them die. */
 function stepCast(){
@@ -17263,6 +17304,105 @@ function worldHUD(){
       (UI.details ? 'Hide the explanations' : 'Show every explanation')+'">'+worldIco('info')+'</button>'+
   '</div></div>';
 }
+/* Where you stand, at a glance: what you are worth as the one big number
+   (and in start-of-game money), and freedom and the years of working life
+   left as rings. What each means is in the ring's title and, with the
+   explanations shown, under it. */
+function standingHTML(){
+  const nw = netWorth(), fr = freedomIndex(), age = S.p.age, left = Math.max(0, 65 - age);
+  const real = nw / Math.max(0.01, S.cumInfl);
+  return '<div class="stand">'+
+    '<div class="snw"><span class="gfx" aria-hidden="true">'+worldIco('trend')+'</span>'+
+      '<span class="tiny muted">Net worth</span><b class="mono">'+fmt(nw)+'</b>'+
+      '<span class="tiny muted prose">'+fmt(real)+' in start-of-game money</span></div>'+
+    ringsHTML([
+      {ico:'door', label:'Freedom', v:fr, tone: fr > 70 ? 'var(--good)' : fr > 40 ? 'var(--warn)' : 'var(--bad)',
+        note: fr > 70 ? 'work is optional' : fr > 40 ? 'not yet optional' : 'work pays for this'},
+      {ico:'glass', label:'Years to 65', v: left / 47 * 100, tone:'var(--info)', text:String(left), note:'you are '+age}])+
+  '</div>';
+}
+/* Numbers a player reads at a glance, drawn - shared by both renderers.
+
+   ringsHTML: each a ring filling 0-100, its picture in the middle, the label
+   and number underneath (or `text` in place of the number); toned by the
+   value unless a tone is given. A full ring is always good: anything where
+   less is better (stress) is passed inverted and named for its good side. */
+function ringsHTML(list){
+  return '<div class="lrings n'+list.length+'">'+list.map(function(r){
+    const v = Math.max(0, Math.min(100, r.v)), say = r.label+' '+(r.text != null ? r.text : Math.round(r.v)) + (r.note ? ' \u00b7 '+r.note : '');
+    const tone = r.tone || (v >= 60 ? 'var(--good)' : v >= 35 ? 'var(--warn)' : 'var(--bad)');
+    return '<div class="lring"><span class="gfx hring" role="img" aria-label="'+esc(say)+'" title="'+esc(say)+'" '+
+      'style="--p:'+Math.round(v)+';--c:'+tone+'"><em>'+worldIco(r.ico)+'</em></span>'+
+      '<span class="tiny muted">'+esc(r.label+' '+(r.text != null ? r.text : Math.round(r.v)))+'</span>'+
+      (r.note ? '<span class="tiny muted prose">'+esc(r.note)+'</span>' : '')+'</div>';
+  }).join('')+'</div>';
+}
+/* The economy as six gauges: an arc filling toward where the number gets
+   dangerous (or good), the indicator's picture under it, its reading and its
+   name. The thresholds are the ones the words used to be coloured by. */
+function economyHTML(){
+  const m = S.mkt, base = CITY().fxBase || m.usd || 1;
+  const tone = function(good, warn){ return good ? 'var(--good)' : warn ? 'var(--warn)' : 'var(--bad)'; };
+  const g = [
+    {ico:'trend', label:'Inflation', val:pct(m.infl, 1), f:m.infl / 0.4, c: m.infl > 0.25 ? 'var(--bad)' : m.infl > 0.12 ? 'var(--warn)' : 'var(--good)'},
+    {ico:'globe', label:CITY().fxName, val:Math.round(m.usd).toLocaleString(), f:m.usd / (base * 2.5), c: tone(m.usd <= (m.usdPrev || m.usd), m.usd < base * 1.5)},
+    {ico:'bank', label:'Policy rate', val:pct(m.mpr, 1), f:m.mpr / 0.4, c:'var(--info)'},
+    {ico:'cart', label:'Demand', val:(m.demand * 100).toFixed(0), f:m.demand / 1.6, c: tone(m.demand >= 1, m.demand >= 0.85)},
+    {ico:'plug', label:'Grid', val:Math.round(m.power)+'%', f:m.power / 100, c: tone(m.power >= 60, m.power >= 35)},
+    {ico:'smile', label:'Confidence', val:String(Math.round(m.sentiment)), f:m.sentiment / 100, c: tone(m.sentiment >= 55, m.sentiment >= 35)}];
+  const L = Math.PI * 26;
+  return '<div class="gauges">'+g.map(function(x){
+    const f = Math.max(0.03, Math.min(1, x.f));
+    return '<div class="gauge" title="'+esc(x.label+' '+x.val)+'">'+
+      '<span class="gfx gdial" role="img" aria-label="'+esc(x.label+' '+x.val)+'"><svg viewBox="0 0 64 38" aria-hidden="true">'+
+        '<path d="M6 34a26 26 0 0 1 52 0" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="6" stroke-linecap="round"/>'+
+        '<path d="M6 34a26 26 0 0 1 52 0" fill="none" stroke="'+x.c+'" stroke-width="6" stroke-linecap="round" stroke-dasharray="'+(L * f).toFixed(1)+' '+L.toFixed(1)+'"/>'+
+      '</svg><em>'+worldIco(x.ico)+'</em></span>'+
+      '<b class="mono" style="color:'+x.c+'">'+esc(x.val)+'</b><span class="tiny muted">'+esc(x.label)+'</span></div>';
+  }).join('')+'</div>';
+}
+/* Your five skills as one shape: a pentagon whose corners reach out as each
+   skill grows, so a lopsided career looks lopsided. Each corner carries the
+   skill's picture, its name and its number. */
+const SKILL_ICO = {finance:'coins', ops:'gear', hustle:'bolt', network:'people', tech:'laptop'};
+function skillsRadarHTML(){
+  const ks = ['finance','ops','hustle','network','tech'], sk = S.p.skills, cx = 120, cy = 104, R = 70;
+  const pt = function(i, f){ const a = (-90 + i * 72) * Math.PI / 180; return [cx + Math.cos(a) * R * f, cy + Math.sin(a) * R * f]; };
+  const poly = function(fs){ return fs.map(function(f, i){ const q = pt(i, f); return q[0].toFixed(1)+','+q[1].toFixed(1); }).join(' '); };
+  const grid = [1/3, 2/3, 1].map(function(f){ return '<polygon points="'+poly([f,f,f,f,f])+'" fill="none" stroke="rgba(255,255,255,'+(f === 1 ? '.2' : '.09')+'"/>'; }).join('')+
+    ks.map(function(k, i){ const q = pt(i, 1); return '<line x1="'+cx+'" y1="'+cy+'" x2="'+q[0].toFixed(1)+'" y2="'+q[1].toFixed(1)+'" stroke="rgba(255,255,255,.08)"/>'; }).join('');
+  const vals = ks.map(function(k){ return Math.max(0.04, Math.min(1, (sk[k] || 0) / 100)); });
+  const say = ks.map(function(k){ return k+' '+Math.round(sk[k] || 0); }).join(', ');
+  return '<div class="gfx radar" role="img" aria-label="Skills: '+say+'">'+
+    '<svg viewBox="0 0 240 200" aria-hidden="true">'+grid+
+      '<polygon points="'+poly(vals)+'" fill="rgba(77,163,255,.28)" stroke="var(--info)" stroke-width="2" stroke-linejoin="round"/>'+
+      vals.map(function(f, i){ const q = pt(i, f); return '<circle cx="'+q[0].toFixed(1)+'" cy="'+q[1].toFixed(1)+'" r="3.2" fill="var(--info)"/>'; }).join('')+
+    '</svg>'+
+    ks.map(function(k, i){
+      const q = pt(i, 1.36);
+      return '<span class="rlab" style="left:'+(q[0] / 2.4).toFixed(1)+'%;top:'+(q[1] / 2).toFixed(1)+'%">'+worldIco(SKILL_ICO[k])+
+        '<b>'+Math.round(sk[k] || 0)+'</b><i>'+k+'</i></span>';
+    }).join('')+
+  '</div>';
+}
+/* The quarter's money as bars against each other - what came in, what the
+   business made or lost, what living and debt took - each as long as its share
+   of the biggest, and the net under them, rising or falling. */
+function quarterFlowHTML(){
+  const q = S.quarter || {}, inc = Math.round(q.income || 0), exp = Math.round(q.expense || 0);
+  const profit = S.biz ? (S.biz.profit || 0) : 0, net = inc - exp + profit;
+  const rows = [{ico:'note', label:'Income', v:inc, c:'var(--good)', t:fmt(inc)}];
+  if(S.biz) rows.push({ico:'case', label:'Business P&L', v:profit, c: profit >= 0 ? 'var(--good)' : 'var(--bad)', t:fmt(profit)});
+  rows.push({ico:'cart', label:'Living + debt', v:exp, c:'var(--bad)', t:'−'+fmt(exp)});
+  const top = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.v); }).concat([1]));
+  return '<div class="qflow">'+rows.map(function(r){
+    return '<div class="qrow" title="'+esc(r.label+' '+r.t)+'"><span class="gfx qi" aria-hidden="true">'+worldIco(r.ico)+'</span>'+
+      '<span class="gfx qb" role="img" aria-label="'+esc(r.label+' '+r.t)+'"><i style="width:'+Math.max(2, Math.round(Math.abs(r.v) / top * 100))+'%;background:'+r.c+'"></i></span>'+
+      '<span class="mono '+(r.c === 'var(--good)' ? 'good' : 'bad')+'">'+r.t+'</span></div>';
+  }).join('')+
+  '<div class="qnet '+(net >= 0 ? 'good' : 'bad')+'"><span class="gfx" aria-hidden="true">'+worldIco(net >= 0 ? 'up' : 'down')+'</span>'+
+    '<span class="tiny muted">Net</span><b class="mono">'+fmt(net)+'</b></div></div>';
+}
 /* Which building the page is showing: the current route, or '' on the
    overview. The world stands above every screen, and on a screen it is that
    screen's building the camera looks at. */
@@ -17556,9 +17696,6 @@ if(typeof window!=='undefined' && window.addEventListener){
    from one of those. */
 function viewOverview(){
   const d = S.der, m = S.mkt, p = S.p, q = S.quarter || {};
-  const nw = netWorth(), fr = freedomIndex();
-  const real = nw / Math.max(0.01, S.cumInfl);
-  const yearsLeft = Math.max(0, 65 - p.age);
   const amb = ambitionOf(), ap = ambitionPct();
   let h = '';
   /* the first quarter only, once per player: the loop and three places to start */
@@ -17575,17 +17712,13 @@ function viewOverview(){
 
   /* ---- where you stand ---- */
   h += '<div class="card"><h3>Where you stand <span class="tag">'+esc(CITY().label)+'</span></h3>';
-  h += '<div class="grid g3">';
-  h +=   bigStat('Net worth', fmt(nw), fmt(real)+' in start-of-game money');
-  h +=   bigStat('Freedom', String(fr), fr>70?'work is optional':fr>40?'not yet optional':'work pays for this',
-                 fr>70?'good':fr>40?'warn':'bad');
-  h +=   bigStat('Years to 65', String(yearsLeft), 'you are '+p.age);
-  h += '</div>';
+  /* the one big number and two rings - core's, drawn the same by the app */
+  h += standingHTML();
   h += '<div style="margin:9px 0 2px">'+sparkline()+'</div>';
   if(amb){
     h += '<div class="statline" style="margin-top:8px"><span class="lbl">'+esc(amb.name)+'</span>'+
       bar(ap,130,'var(--acc)')+'<span class="val">'+ap+'%</span></div>';
-    if(amb.blurb) h += '<div class="tiny muted" style="margin-top:3px">'+esc(amb.blurb)+'</div>';
+    if(amb.blurb) h += '<div class="tiny muted prose" style="margin-top:3px">'+esc(amb.blurb)+'</div>';
   } else {
     h += '<div class="tiny muted" style="margin-top:9px">You have not said what you are building toward. '+
       '<button class="btn xs" data-a="tab" data-t="legacy">Choose an ambition</button></div>';
@@ -17606,19 +17739,10 @@ function viewOverview(){
 
   /* ---- capability and the weather ---- */
   h += '<div class="grid g2">';
-  h += '<div class="card"><h3>Skills</h3>'+
-    ['finance','ops','hustle','network','tech'].map(function(k){
-      return '<div class="statline"><span class="lbl">'+k+'</span>'+bar(p.skills[k],100,'var(--info)')+
-        '<span class="val">'+Math.round(p.skills[k])+'</span></div>';
-    }).join('')+'</div>';
-  h += '<div class="card"><h3>The economy <span class="tag">'+dateLabel(S.turn)+'</span></h3>'+
-    '<div class="kv"><span class="muted">Inflation</span><span class="'+(m.infl>0.25?'bad':m.infl>0.12?'warn':'good')+'">'+pct(m.infl,1)+'</span></div>'+
-    '<div class="kv"><span class="muted">'+esc(CITY().fxName)+'</span><span>'+Math.round(m.usd).toLocaleString()+'</span></div>'+
-    '<div class="kv"><span class="muted">Policy rate</span><span>'+pct(m.mpr,1)+'</span></div>'+
-    '<div class="kv"><span class="muted">Demand</span><span>'+(m.demand*100).toFixed(0)+'</span></div>'+
-    '<div class="kv"><span class="muted">Grid</span><span>'+Math.round(m.power)+'%</span></div>'+
-    '<div class="kv"><span class="muted">Confidence</span><span>'+Math.round(m.sentiment)+'</span></div>'+
-    '</div>';
+  /* the five skills as one shape, and the economy as gauges - both core's,
+     drawn the same by the app */
+  h += '<div class="card"><h3>Skills</h3>'+skillsRadarHTML()+'</div>';
+  h += '<div class="card"><h3>The economy <span class="tag">'+dateLabel(S.turn)+'</span></h3>'+economyHTML()+'</div>';
   h += '</div>';
 
   if(S.vignette) h += '<div class="vignette" style="margin-top:12px">'+S.vignette+'</div>';
@@ -17634,13 +17758,10 @@ function viewPulse(){
   const inc = Math.round(q.income||0), exp = Math.round(q.expense||0);
   const net = inc - exp + (S.biz ? (S.biz.profit||0) : 0);
   let h = '<div class="card"><h3>This quarter</h3>';
-  h += '<div class="kv"><span class="muted">Income</span><span class="mono good">'+fmt(inc)+'</span></div>';
-  if(S.biz) h += '<div class="kv"><span class="muted">Business P&amp;L</span><span class="mono '+
-    ((S.biz.profit||0)>=0?'good':'bad')+'">'+fmt(S.biz.profit||0)+'</span></div>';
-  h += '<div class="kv"><span class="muted">Living + debt</span><span class="mono bad">\u2212'+fmt(exp)+'</span></div>';
-  h += '<div class="kv"><span><b>Net</b></span><span class="mono '+(net>=0?'good':'bad')+'"><b>'+fmt(net)+'</b></span></div>';
+  /* money in and out as bars against each other, and the net - core's */
+  h += quarterFlowHTML();
   if(typeof TX!=='undefined' && TX.length)
-    h += '<hr class="sep"><div class="tiny muted">'+TX.slice(0,8).map(esc).join('<br>')+'</div>';
+    h += '<hr class="sep prose"><div class="tiny muted prose">'+TX.slice(0,8).map(esc).join('<br>')+'</div>';
   h += '<hr class="sep"><div class="tiny muted">'+
     (net>=0 ? foldHTML('Why this matters', 'You are living inside your means. Keep doing that and compounding does the rest.')
             : 'You are spending more than you earn. Survivable for a while, fatal eventually.')+'</div>';
@@ -17651,14 +17772,12 @@ function viewPulse(){
 function viewPressure(){
   const p = S.p;
   let h = '<div class="card"><h3>What is at risk</h3>';
-  h += statRow('Health', p.health, p.health>60?'var(--good)':p.health>30?'var(--warn)':'var(--bad)');
-  h += statRow('Stress (lower better)', 100-p.stress, p.stress<40?'var(--good)':p.stress<70?'var(--warn)':'var(--bad)');
-  h += statRow('Happiness', p.happy, 'var(--acc)');
-  h += statRow('Family', p.family, 'var(--info)');
-  h += statRow('Reputation', p.rep, 'var(--purple)');
-  h += '<hr class="sep">';
-  h += '<div class="kv"><span class="muted">Hours left this quarter</span><span class="mono">'+
-    hoursLeft()+'h of '+hoursBudget()+'</span></div>';
+  /* the dials that end runs as rings, the HUD's own pictures, with the hours
+     you have left as the sixth */
+  h += ringsHTML([{ico:'heart', label:'Health', v:p.health}, {ico:'bolt', label:'Calm', v:100 - p.stress, note:'Stress '+Math.round(p.stress)},
+    {ico:'smile', label:'Happiness', v:p.happy}, {ico:'home', label:'Family', v:p.family},
+    {ico:'star', label:'Reputation', v:p.rep},
+    {ico:'glass', label:'Hours left', v:hoursLeft() / Math.max(1, hoursBudget()) * 100, tone:'var(--info)', text:hoursLeft()+'h of '+hoursBudget()}]);
   if(sleepDebt() > 0)
     h += '<div class="kv"><span class="muted">Sleep debt</span><span class="mono bad">'+
       Math.round(sleepDebt())+'h</span></div>';

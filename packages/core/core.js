@@ -7924,19 +7924,26 @@ function firstMovesHTML(){
   if(S.flags && S.flags.fm) return '';
   if(profileSummary().n > 0) return '';        /* not their first run: they know */
   const moves = [
-    { t:'work',  s:'business', head:'Set your price', why:'The fastest thing you control.' },
-    { t:'money', s:'position', head:'See your money', why:'What comes in, what goes out, what is left.' },
-    { t:'legacy',s:'ambition', head:'Pick an ambition', why:'What you are building toward, and how you are judged.' }
+    { t:'work',  s:'business', ico:'tag',    head:'Set your price', why:'The fastest thing you control.' },
+    { t:'money', s:'position', ico:'jar',    head:'See your money', why:'What comes in, what goes out, what is left.' },
+    { t:'legacy',s:'ambition', ico:'target', head:'Pick an ambition', why:'What you are building toward, and how you are judged.' }
   ];
+  /* the loop as a picture - a move, then the quarter turns, and round again -
+     with the sentence that says it shown alongside the explanations */
   let h = '<div class="card fmcard"><h3>First quarter <span class="tag">the loop</span></h3>'+
-    '<div class="small" style="margin-bottom:9px">Make a move, then advance the quarter. '+
-    'That is the whole game — everything else is what you spend and what you own.</div>';
+    '<div class="gfx fmloop" role="img" aria-label="Make a move, then advance the quarter">'+
+      '<span>'+worldIco('hands')+'<i>move</i></span><b>'+worldIco('up')+'</b>'+
+      '<span>'+worldIco('calendar')+'<i>quarter</i></span>'+
+      '<b class="back"><svg class="ico" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg></b></div>'+
+    '<div class="small prose" style="margin-bottom:9px">Make a move, then advance the quarter. '+
+    'That is the whole game — everything else is what you spend and what you own.</div>'+
+    '<div class="fmmoves">';
   moves.forEach(function(m){
-    h += '<button class="btn block fmrow" data-a="goto" data-t="'+m.t+'" data-s="'+m.s+'" '+
-      'style="text-align:left;margin-bottom:5px"><b>'+esc(m.head)+'</b>'+
-      '<span class="tiny muted" style="display:block">'+esc(m.why)+'</span></button>';
+    h += '<button class="btn fmrow" data-a="goto" data-t="'+m.t+'" data-s="'+m.s+'">'+
+      '<span class="gfx fmi" aria-hidden="true">'+worldIco(m.ico)+'</span><b>'+esc(m.head)+'</b>'+
+      '<span class="tiny muted prose" style="display:block">'+esc(m.why)+'</span></button>';
   });
-  h += '<div class="row wrap" style="gap:5px;margin-top:8px">'+
+  h += '</div><div class="row wrap" style="gap:5px;margin-top:8px">'+
     '<button class="btn xs primary" data-a="advance">Advance the quarter \u25b8</button>'+
     '<button class="btn xs ghost" data-a="fmdone">Got it</button></div></div>';
   return h;
@@ -10507,19 +10514,12 @@ function castTileHTML(c){
       '</div></div>' : '')+
   '</div>';
 }
-/* How home is, as four rings: the household's health in the same pictures the
-   HUD uses, the number in the ring's title and its label underneath. Stress is
-   drawn as calm, so a full ring is good on all four. */
+/* How home is, as four rings: the household's health in the HUD's own ring
+   pictures. Stress is drawn as calm, so a full ring is good on all four. */
 function lifeRingsHTML(){
   const p = S.p;
-  const ring = function(ico, label, v){
-    const tone = v >= 60 ? 'var(--good)' : v >= 35 ? 'var(--warn)' : 'var(--bad)';
-    return '<div class="lring"><span class="gfx hring" role="img" aria-label="'+label+' '+Math.round(v)+'" title="'+label+' '+Math.round(v)+'" '+
-      'style="--p:'+Math.round(Math.max(0, Math.min(100, v)))+';--c:'+tone+'"><em>'+worldIco(ico)+'</em></span>'+
-      '<span class="tiny muted">'+label+' '+Math.round(v)+'</span></div>';
-  };
-  return '<div class="lrings">'+ring('home', 'Family', p.family)+ring('smile', 'Happiness', p.happy)+
-    ring('heart', 'Health', p.health)+ring('bolt', 'Calm', 100 - p.stress)+'</div>';
+  return ringsHTML([{ico:'home', label:'Family', v:p.family}, {ico:'smile', label:'Happiness', v:p.happy},
+    {ico:'heart', label:'Health', v:p.health}, {ico:'bolt', label:'Calm', v:100 - p.stress, note:'Stress '+Math.round(p.stress)}]);
 }
 /* People drift. Fortunes change. Some of them die. */
 function stepCast(){
@@ -12865,6 +12865,105 @@ function worldHUD(){
       (UI.details ? 'Hide the explanations' : 'Show every explanation')+'">'+worldIco('info')+'</button>'+
   '</div></div>';
 }
+/* Where you stand, at a glance: what you are worth as the one big number
+   (and in start-of-game money), and freedom and the years of working life
+   left as rings. What each means is in the ring's title and, with the
+   explanations shown, under it. */
+function standingHTML(){
+  const nw = netWorth(), fr = freedomIndex(), age = S.p.age, left = Math.max(0, 65 - age);
+  const real = nw / Math.max(0.01, S.cumInfl);
+  return '<div class="stand">'+
+    '<div class="snw"><span class="gfx" aria-hidden="true">'+worldIco('trend')+'</span>'+
+      '<span class="tiny muted">Net worth</span><b class="mono">'+fmt(nw)+'</b>'+
+      '<span class="tiny muted prose">'+fmt(real)+' in start-of-game money</span></div>'+
+    ringsHTML([
+      {ico:'door', label:'Freedom', v:fr, tone: fr > 70 ? 'var(--good)' : fr > 40 ? 'var(--warn)' : 'var(--bad)',
+        note: fr > 70 ? 'work is optional' : fr > 40 ? 'not yet optional' : 'work pays for this'},
+      {ico:'glass', label:'Years to 65', v: left / 47 * 100, tone:'var(--info)', text:String(left), note:'you are '+age}])+
+  '</div>';
+}
+/* Numbers a player reads at a glance, drawn - shared by both renderers.
+
+   ringsHTML: each a ring filling 0-100, its picture in the middle, the label
+   and number underneath (or `text` in place of the number); toned by the
+   value unless a tone is given. A full ring is always good: anything where
+   less is better (stress) is passed inverted and named for its good side. */
+function ringsHTML(list){
+  return '<div class="lrings n'+list.length+'">'+list.map(function(r){
+    const v = Math.max(0, Math.min(100, r.v)), say = r.label+' '+(r.text != null ? r.text : Math.round(r.v)) + (r.note ? ' \u00b7 '+r.note : '');
+    const tone = r.tone || (v >= 60 ? 'var(--good)' : v >= 35 ? 'var(--warn)' : 'var(--bad)');
+    return '<div class="lring"><span class="gfx hring" role="img" aria-label="'+esc(say)+'" title="'+esc(say)+'" '+
+      'style="--p:'+Math.round(v)+';--c:'+tone+'"><em>'+worldIco(r.ico)+'</em></span>'+
+      '<span class="tiny muted">'+esc(r.label+' '+(r.text != null ? r.text : Math.round(r.v)))+'</span>'+
+      (r.note ? '<span class="tiny muted prose">'+esc(r.note)+'</span>' : '')+'</div>';
+  }).join('')+'</div>';
+}
+/* The economy as six gauges: an arc filling toward where the number gets
+   dangerous (or good), the indicator's picture under it, its reading and its
+   name. The thresholds are the ones the words used to be coloured by. */
+function economyHTML(){
+  const m = S.mkt, base = CITY().fxBase || m.usd || 1;
+  const tone = function(good, warn){ return good ? 'var(--good)' : warn ? 'var(--warn)' : 'var(--bad)'; };
+  const g = [
+    {ico:'trend', label:'Inflation', val:pct(m.infl, 1), f:m.infl / 0.4, c: m.infl > 0.25 ? 'var(--bad)' : m.infl > 0.12 ? 'var(--warn)' : 'var(--good)'},
+    {ico:'globe', label:CITY().fxName, val:Math.round(m.usd).toLocaleString(), f:m.usd / (base * 2.5), c: tone(m.usd <= (m.usdPrev || m.usd), m.usd < base * 1.5)},
+    {ico:'bank', label:'Policy rate', val:pct(m.mpr, 1), f:m.mpr / 0.4, c:'var(--info)'},
+    {ico:'cart', label:'Demand', val:(m.demand * 100).toFixed(0), f:m.demand / 1.6, c: tone(m.demand >= 1, m.demand >= 0.85)},
+    {ico:'plug', label:'Grid', val:Math.round(m.power)+'%', f:m.power / 100, c: tone(m.power >= 60, m.power >= 35)},
+    {ico:'smile', label:'Confidence', val:String(Math.round(m.sentiment)), f:m.sentiment / 100, c: tone(m.sentiment >= 55, m.sentiment >= 35)}];
+  const L = Math.PI * 26;
+  return '<div class="gauges">'+g.map(function(x){
+    const f = Math.max(0.03, Math.min(1, x.f));
+    return '<div class="gauge" title="'+esc(x.label+' '+x.val)+'">'+
+      '<span class="gfx gdial" role="img" aria-label="'+esc(x.label+' '+x.val)+'"><svg viewBox="0 0 64 38" aria-hidden="true">'+
+        '<path d="M6 34a26 26 0 0 1 52 0" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="6" stroke-linecap="round"/>'+
+        '<path d="M6 34a26 26 0 0 1 52 0" fill="none" stroke="'+x.c+'" stroke-width="6" stroke-linecap="round" stroke-dasharray="'+(L * f).toFixed(1)+' '+L.toFixed(1)+'"/>'+
+      '</svg><em>'+worldIco(x.ico)+'</em></span>'+
+      '<b class="mono" style="color:'+x.c+'">'+esc(x.val)+'</b><span class="tiny muted">'+esc(x.label)+'</span></div>';
+  }).join('')+'</div>';
+}
+/* Your five skills as one shape: a pentagon whose corners reach out as each
+   skill grows, so a lopsided career looks lopsided. Each corner carries the
+   skill's picture, its name and its number. */
+const SKILL_ICO = {finance:'coins', ops:'gear', hustle:'bolt', network:'people', tech:'laptop'};
+function skillsRadarHTML(){
+  const ks = ['finance','ops','hustle','network','tech'], sk = S.p.skills, cx = 120, cy = 104, R = 70;
+  const pt = function(i, f){ const a = (-90 + i * 72) * Math.PI / 180; return [cx + Math.cos(a) * R * f, cy + Math.sin(a) * R * f]; };
+  const poly = function(fs){ return fs.map(function(f, i){ const q = pt(i, f); return q[0].toFixed(1)+','+q[1].toFixed(1); }).join(' '); };
+  const grid = [1/3, 2/3, 1].map(function(f){ return '<polygon points="'+poly([f,f,f,f,f])+'" fill="none" stroke="rgba(255,255,255,'+(f === 1 ? '.2' : '.09')+'"/>'; }).join('')+
+    ks.map(function(k, i){ const q = pt(i, 1); return '<line x1="'+cx+'" y1="'+cy+'" x2="'+q[0].toFixed(1)+'" y2="'+q[1].toFixed(1)+'" stroke="rgba(255,255,255,.08)"/>'; }).join('');
+  const vals = ks.map(function(k){ return Math.max(0.04, Math.min(1, (sk[k] || 0) / 100)); });
+  const say = ks.map(function(k){ return k+' '+Math.round(sk[k] || 0); }).join(', ');
+  return '<div class="gfx radar" role="img" aria-label="Skills: '+say+'">'+
+    '<svg viewBox="0 0 240 200" aria-hidden="true">'+grid+
+      '<polygon points="'+poly(vals)+'" fill="rgba(77,163,255,.28)" stroke="var(--info)" stroke-width="2" stroke-linejoin="round"/>'+
+      vals.map(function(f, i){ const q = pt(i, f); return '<circle cx="'+q[0].toFixed(1)+'" cy="'+q[1].toFixed(1)+'" r="3.2" fill="var(--info)"/>'; }).join('')+
+    '</svg>'+
+    ks.map(function(k, i){
+      const q = pt(i, 1.36);
+      return '<span class="rlab" style="left:'+(q[0] / 2.4).toFixed(1)+'%;top:'+(q[1] / 2).toFixed(1)+'%">'+worldIco(SKILL_ICO[k])+
+        '<b>'+Math.round(sk[k] || 0)+'</b><i>'+k+'</i></span>';
+    }).join('')+
+  '</div>';
+}
+/* The quarter's money as bars against each other - what came in, what the
+   business made or lost, what living and debt took - each as long as its share
+   of the biggest, and the net under them, rising or falling. */
+function quarterFlowHTML(){
+  const q = S.quarter || {}, inc = Math.round(q.income || 0), exp = Math.round(q.expense || 0);
+  const profit = S.biz ? (S.biz.profit || 0) : 0, net = inc - exp + profit;
+  const rows = [{ico:'note', label:'Income', v:inc, c:'var(--good)', t:fmt(inc)}];
+  if(S.biz) rows.push({ico:'case', label:'Business P&L', v:profit, c: profit >= 0 ? 'var(--good)' : 'var(--bad)', t:fmt(profit)});
+  rows.push({ico:'cart', label:'Living + debt', v:exp, c:'var(--bad)', t:'−'+fmt(exp)});
+  const top = Math.max.apply(null, rows.map(function(r){ return Math.abs(r.v); }).concat([1]));
+  return '<div class="qflow">'+rows.map(function(r){
+    return '<div class="qrow" title="'+esc(r.label+' '+r.t)+'"><span class="gfx qi" aria-hidden="true">'+worldIco(r.ico)+'</span>'+
+      '<span class="gfx qb" role="img" aria-label="'+esc(r.label+' '+r.t)+'"><i style="width:'+Math.max(2, Math.round(Math.abs(r.v) / top * 100))+'%;background:'+r.c+'"></i></span>'+
+      '<span class="mono '+(r.c === 'var(--good)' ? 'good' : 'bad')+'">'+r.t+'</span></div>';
+  }).join('')+
+  '<div class="qnet '+(net >= 0 ? 'good' : 'bad')+'"><span class="gfx" aria-hidden="true">'+worldIco(net >= 0 ? 'up' : 'down')+'</span>'+
+    '<span class="tiny muted">Net</span><b class="mono">'+fmt(net)+'</b></div></div>';
+}
 /* Which building the page is showing: the current route, or '' on the
    overview. The world stands above every screen, and on a screen it is that
    screen's building the camera looks at. */
@@ -12910,7 +13009,7 @@ function worldHTML(){
 }
 
 /* -------------------------------------------------------------------------
-   Everything above, exported. 665 names: the simulation's whole surface.
+   Everything above, exported. 671 names: the simulation's whole surface.
    ------------------------------------------------------------------------- */
 export {
   ALL_EVENTS,
@@ -12990,6 +13089,7 @@ export {
   SEED_A,
   SEED_N,
   SKEY,
+  SKILL_ICO,
   STAFF_ROLES,
   START_YEAR,
   SUBS,
@@ -13156,6 +13256,7 @@ export {
   drawFromBiz,
   dropBiz,
   dueThread,
+  economyHTML,
   eduMult,
   effOf,
   effectMarksHTML,
@@ -13370,6 +13471,7 @@ export {
   qrFormat,
   qrPenalty,
   qrSVG,
+  quarterFlowHTML,
   quarterSnapshot,
   rank,
   recentGrowth,
@@ -13394,6 +13496,7 @@ export {
   resultFxHTML,
   resumeInfo,
   resumeLine,
+  ringsHTML,
   routeKey,
   routeView,
   routeViewInner,
@@ -13457,6 +13560,7 @@ export {
   simOneBiz,
   skillBand,
   skillRating,
+  skillsRadarHTML,
   sleepDebt,
   snapshot,
   sparkline,
@@ -13468,6 +13572,7 @@ export {
   staffProd,
   staffSkillAvg,
   staffSupport,
+  standingHTML,
   startAnotherBiz,
   startArc,
   startBiz,

@@ -282,14 +282,6 @@ const EDITS = [
   { marker: 'beforeinstallprompt',
     name: 'the Install button is reachable — the reveal looked up an id nothing has',
     why: 'the button renders display:none until the browser offers an install prompt, and the code meant to reveal it looked up getElementById("installBtn") — an id no element in the game has ever had, so on any browser that can install the game Settings showed an Install section with a note and no button. Both screens already render from the prompt state; the fix is to re-render when that state changes, which is also the only fix available to a screen that has no DOM node of its own to poke' },
-  /* A typo in the original file, fixed: one extra backslash meant the minus
-     sign in "Living + debt" was printed as the six characters \u2212 on the
-     Overview, for the life of the game. Fourteen other lines in the same file
-     spell the escape correctly. Declared because the ledger may not have a
-     difference it cannot explain. */
-  { marker: '<span class=\"muted\">Living + debt</span><span class=\"mono bad\">',
-    name: 'viewPulse — the minus sign in "Living + debt" is a minus sign',
-    why: 'the string carried two backslashes before u2212 instead of one, so the player was shown the literal text \\u2212 instead of −; the same escape is spelled correctly in fourteen other places in the original, and .harness/escapes.js now looks at every rendered screen for this class of mistake' },
   { marker: 'function releaseDisclosure(main)', addition: true,
     name: 'releaseDisclosure — the disclosure chrome comes off before anything draws',
     why: 'applyDisclosure() appends a chevron to every heading, wraps the card contents in a .discbody and inserts an Expand all row - and had only ever run on a container that innerHTML replaced, so it had no way to run twice. On the React path the container is re-rendered in place and the chrome stacked: four renders put four chevrons in one heading and four Expand all rows on the page. It also re-parents nodes React owns, which is the one thing a React tree cannot survive. The player\'s open/closed state is untouched: it lives in UI.collapsed, not in the DOM' },
@@ -333,7 +325,7 @@ const EDITS = [
     why: 'a boot that finds a save says so once: name, quarter, net worth, and how old the save is' },
   { marker: 'function firstMovesHTML(){', addition: true,
     name: 'firstMovesHTML — the loop and three places to start',
-    why: 'a player\u2019s first quarter is the only screen that has to teach; three buttons to real destinations, then it retires itself for good' },
+    why: 'a player\u2019s first quarter is the only screen that has to teach; three buttons to real destinations, then it retires itself for good. Drawn: the loop is a picture - a move, then the quarter, and round again - and the three places to start are picture tiles side by side, their sentences shown with the explanations' },
   { marker: 'function saveHead(){', addition: true,
     name: 'saveHead — the one line a save is described by',
     why: 'written into the save blob, so describing a save never means loading it' },
@@ -875,6 +867,33 @@ const EDITS = [
   { marker: 'function viewPeople(){',
     name: 'viewPeople — the cast is faces, home is rings',
     why: 'each person is castTileHTML(), the tile the app draws too, in place of a row of text; the household\'s four stat rows are lifeRingsHTML(). Every action, the relation, traits and memory are unchanged, and the mrow\'s broken opacity attribute (`class="mrow";opacity:.62`) is gone with it - a deceased tile fades by class' },
+  { marker: 'function ringsHTML(list)', addition: true,
+    name: 'ringsHTML — numbers as rings',
+    why: 'each a ring filling 0-100 with its picture in the middle and its label and number underneath, toned by the value; a full ring is always good, so stress is passed as calm. The household, the risk card and the hours left use it in both renderers' },
+  { marker: 'function economyHTML()', addition: true,
+    name: 'economyHTML — the economy as six gauges',
+    why: 'inflation, the exchange rate, the policy rate, demand, the grid and confidence, each an arc filling toward where it gets dangerous, toned by the thresholds the words were coloured by, with its reading and name under its picture' },
+  { marker: 'const SKILL_ICO', addition: true,
+    name: 'SKILL_ICO — each skill\'s picture',
+    why: 'finance, ops, hustle, network and tech as worldIco() drawings, for the corners of the skills shape' },
+  { marker: 'function skillsRadarHTML()', addition: true,
+    name: 'skillsRadarHTML — the five skills as one shape',
+    why: 'a pentagon whose corners reach out as each skill grows, so a lopsided career looks lopsided; each corner has the skill\'s picture, number and name; replaces five label-bar-number rows' },
+  { marker: 'function quarterFlowHTML()', addition: true,
+    name: 'quarterFlowHTML — the quarter\'s money as bars against each other',
+    why: 'income, the business\'s result and living plus debt, each as long as its share of the biggest, with the figure beside it, and the net under them rising or falling; replaces four key-value rows with the same four figures' },
+  { marker: 'function viewOverview(){',
+    name: 'viewOverview — skills as a shape, the economy as gauges',
+    why: 'skillsRadarHTML() and economyHTML(), drawn the same by the app, in place of eleven label-number rows; every figure is still on the screen' },
+  { marker: 'function viewPulse(){',
+    name: 'viewPulse — money in and out, drawn',
+    why: 'quarterFlowHTML() in place of the four key-value rows - its minus before living and debt is a real U+2212, which the original printed as the six characters \\u2212 through one extra backslash (.harness/escapes.js still looks at every screen for that); the transaction lines are prose, shown with the explanations, and the overspending warning and its fold are unchanged' },
+  { marker: 'function viewPressure(){',
+    name: 'viewPressure — what is at risk, as rings',
+    why: 'ringsHTML() for health, calm, happiness, family, reputation and the hours left, in place of five stat rows and the hours line; sleep debt, when there is any, is unchanged' },
+  { marker: 'function standingHTML()', addition: true,
+    name: 'standingHTML — where you stand, at a glance',
+    why: 'net worth as the one big number (its start-of-game value shown with the explanations), and freedom and the years to 65 as rings, their meaning in the ring\'s title; replaces three stacked boxes that took most of a phone screen' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

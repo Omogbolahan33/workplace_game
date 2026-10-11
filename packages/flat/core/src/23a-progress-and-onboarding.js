@@ -168,19 +168,26 @@ function firstMovesHTML(){
   if(S.flags && S.flags.fm) return '';
   if(profileSummary().n > 0) return '';        /* not their first run: they know */
   const moves = [
-    { t:'work',  s:'business', head:'Set your price', why:'The fastest thing you control.' },
-    { t:'money', s:'position', head:'See your money', why:'What comes in, what goes out, what is left.' },
-    { t:'legacy',s:'ambition', head:'Pick an ambition', why:'What you are building toward, and how you are judged.' }
+    { t:'work',  s:'business', ico:'tag',    head:'Set your price', why:'The fastest thing you control.' },
+    { t:'money', s:'position', ico:'jar',    head:'See your money', why:'What comes in, what goes out, what is left.' },
+    { t:'legacy',s:'ambition', ico:'target', head:'Pick an ambition', why:'What you are building toward, and how you are judged.' }
   ];
+  /* the loop as a picture - a move, then the quarter turns, and round again -
+     with the sentence that says it shown alongside the explanations */
   let h = '<div class="card fmcard"><h3>First quarter <span class="tag">the loop</span></h3>'+
-    '<div class="small" style="margin-bottom:9px">Make a move, then advance the quarter. '+
-    'That is the whole game — everything else is what you spend and what you own.</div>';
+    '<div class="gfx fmloop" role="img" aria-label="Make a move, then advance the quarter">'+
+      '<span>'+worldIco('hands')+'<i>move</i></span><b>'+worldIco('up')+'</b>'+
+      '<span>'+worldIco('calendar')+'<i>quarter</i></span>'+
+      '<b class="back"><svg class="ico" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg></b></div>'+
+    '<div class="small prose" style="margin-bottom:9px">Make a move, then advance the quarter. '+
+    'That is the whole game — everything else is what you spend and what you own.</div>'+
+    '<div class="fmmoves">';
   moves.forEach(function(m){
-    h += '<button class="btn block fmrow" data-a="goto" data-t="'+m.t+'" data-s="'+m.s+'" '+
-      'style="text-align:left;margin-bottom:5px"><b>'+esc(m.head)+'</b>'+
-      '<span class="tiny muted" style="display:block">'+esc(m.why)+'</span></button>';
+    h += '<button class="btn fmrow" data-a="goto" data-t="'+m.t+'" data-s="'+m.s+'">'+
+      '<span class="gfx fmi" aria-hidden="true">'+worldIco(m.ico)+'</span><b>'+esc(m.head)+'</b>'+
+      '<span class="tiny muted prose" style="display:block">'+esc(m.why)+'</span></button>';
   });
-  h += '<div class="row wrap" style="gap:5px;margin-top:8px">'+
+  h += '</div><div class="row wrap" style="gap:5px;margin-top:8px">'+
     '<button class="btn xs primary" data-a="advance">Advance the quarter \u25b8</button>'+
     '<button class="btn xs ghost" data-a="fmdone">Got it</button></div></div>';
   return h;

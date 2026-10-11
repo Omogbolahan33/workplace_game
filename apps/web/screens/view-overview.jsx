@@ -32,20 +32,14 @@
   and its own padding, because it is the one control a player presses every
   quarter and it should not move.
 */
-import { S, fmt, pct, esc, bar, bigStat, sparkline, threadStrip, comingBackHTML, dateLabel, CITY,
-  netWorth, freedomIndex, ambitionOf, ambitionPct, firstMovesHTML } from '@ledger/core';
+import { S, bar, sparkline, threadStrip, comingBackHTML, dateLabel, CITY,
+  ambitionOf, ambitionPct, firstMovesHTML, skillsRadarHTML, economyHTML, standingHTML } from '@ledger/core';
 import ViewAgenda, { hasAgenda } from './view-agenda.jsx';
 import ViewPulse from './view-pulse.jsx';
 import ViewPressure from './view-pressure.jsx';
 import Group from './group.jsx';
 
-const SKILLS = ['finance', 'ops', 'hustle', 'network', 'tech'];
-
 export default function ViewOverview() {
-  const m = S.mkt, p = S.p;
-  const nw = netWorth(), fr = freedomIndex();
-  const real = nw / Math.max(0.01, S.cumInfl);
-  const yearsLeft = Math.max(0, 65 - p.age);
   const amb = ambitionOf(), ap = ambitionPct();
 
   const alerts = [];
@@ -76,15 +70,7 @@ export default function ViewOverview() {
       <Group route="overview" i={0}>
       <div className="card">
         <h3>Where you stand <span className="tag">{CITY().label}</span></h3>
-        <div className="grid g3">
-          <div dangerouslySetInnerHTML={{ __html: bigStat('Net worth', fmt(nw), fmt(real) + ' in start-of-game money') }} />
-          <div dangerouslySetInnerHTML={{
-            __html: bigStat('Freedom', String(fr),
-              fr > 70 ? 'work is optional' : fr > 40 ? 'not yet optional' : 'work pays for this',
-              fr > 70 ? 'good' : fr > 40 ? 'warn' : 'bad')
-          }} />
-          <div dangerouslySetInnerHTML={{ __html: bigStat('Years to 65', String(yearsLeft), 'you are ' + p.age) }} />
-        </div>
+        <div dangerouslySetInnerHTML={{ __html: standingHTML() }} />
         <div style={{ margin: '9px 0 2px' }} dangerouslySetInnerHTML={{ __html: sparkline() }} />
 
         {amb ? (
@@ -94,7 +80,7 @@ export default function ViewOverview() {
               <span dangerouslySetInnerHTML={{ __html: bar(ap, 130, 'var(--acc)') }} />
               <span className="val">{ap}%</span>
             </div>
-            {amb.blurb ? <div className="tiny muted" style={{ marginTop: '3px' }}>{amb.blurb}</div> : null}
+            {amb.blurb ? <div className="tiny muted prose" style={{ marginTop: '3px' }}>{amb.blurb}</div> : null}
           </>
         ) : (
           <div className="tiny muted" style={{ marginTop: '9px' }}>
@@ -125,25 +111,11 @@ export default function ViewOverview() {
         <Group route="overview" i={3} tags={[dateLabel(S.turn)]}>
         <div className="card">
           <h3>Skills</h3>
-          {SKILLS.map((k) => (
-            <div className="statline" key={k}>
-              <span className="lbl">{k}</span>
-              <span dangerouslySetInnerHTML={{ __html: bar(p.skills[k], 100, 'var(--info)') }} />
-              <span className="val">{Math.round(p.skills[k])}</span>
-            </div>
-          ))}
+          <div dangerouslySetInnerHTML={{ __html: skillsRadarHTML() }} />
         </div>
         <div className="card">
           <h3>The economy <span className="tag">{dateLabel(S.turn)}</span></h3>
-          <div className="kv">
-            <span className="muted">Inflation</span>
-            <span className={m.infl > 0.25 ? 'bad' : m.infl > 0.12 ? 'warn' : 'good'}>{pct(m.infl, 1)}</span>
-          </div>
-          <div className="kv"><span className="muted">{CITY().fxName}</span><span>{Math.round(m.usd).toLocaleString()}</span></div>
-          <div className="kv"><span className="muted">Policy rate</span><span>{pct(m.mpr, 1)}</span></div>
-          <div className="kv"><span className="muted">Demand</span><span>{(m.demand * 100).toFixed(0)}</span></div>
-          <div className="kv"><span className="muted">Grid</span><span>{Math.round(m.power)}%</span></div>
-          <div className="kv"><span className="muted">Confidence</span><span>{Math.round(m.sentiment)}</span></div>
+          <div dangerouslySetInnerHTML={{ __html: economyHTML() }} />
         </div>
         </Group>
       </div>

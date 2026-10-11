@@ -11,9 +11,8 @@
   by React as children, not by `esc()`, because a value handed to React is
   escaped for you and escaping it twice is how `&amp;` reaches a player.
 */
-import { S, TX, fmt } from '@ledger/core';
+import { S, TX, quarterFlowHTML } from '@ledger/core';
 
-const MINUS = '\u2212';
 
 export default function ViewPulse() {
   const q = S.quarter || {};
@@ -26,28 +25,12 @@ export default function ViewPulse() {
   return (
     <div className="card">
       <h3>This quarter</h3>
-      <div className="kv">
-        <span className="muted">Income</span>
-        <span className="mono good">{fmt(inc)}</span>
-      </div>
-      {S.biz ? (
-        <div className="kv">
-          <span className="muted">Business P&amp;L</span>
-          <span className={'mono ' + (profit >= 0 ? 'good' : 'bad')}>{fmt(profit)}</span>
-        </div>
-      ) : null}
-      <div className="kv">
-        <span className="muted">Living + debt</span>
-        <span className="mono bad">{MINUS + fmt(exp)}</span>
-      </div>
-      <div className="kv">
-        <span><b>Net</b></span>
-        <span className={'mono ' + (net >= 0 ? 'good' : 'bad')}><b>{fmt(net)}</b></span>
-      </div>
+      {/* money in and out as bars against each other, and the net - core's */}
+      <div dangerouslySetInnerHTML={{ __html: quarterFlowHTML() }} />
       {lines.length ? (
         <>
-          <hr className="sep" />
-          <div className="tiny muted">
+          <hr className="sep prose" />
+          <div className="tiny muted prose">
             {lines.map((t, i) => (
               <span key={i}>{i ? <br /> : null}{t}</span>
             ))}

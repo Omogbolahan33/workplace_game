@@ -140,19 +140,12 @@ function castTileHTML(c){
       '</div></div>' : '')+
   '</div>';
 }
-/* How home is, as four rings: the household's health in the same pictures the
-   HUD uses, the number in the ring's title and its label underneath. Stress is
-   drawn as calm, so a full ring is good on all four. */
+/* How home is, as four rings: the household's health in the HUD's own ring
+   pictures. Stress is drawn as calm, so a full ring is good on all four. */
 function lifeRingsHTML(){
   const p = S.p;
-  const ring = function(ico, label, v){
-    const tone = v >= 60 ? 'var(--good)' : v >= 35 ? 'var(--warn)' : 'var(--bad)';
-    return '<div class="lring"><span class="gfx hring" role="img" aria-label="'+label+' '+Math.round(v)+'" title="'+label+' '+Math.round(v)+'" '+
-      'style="--p:'+Math.round(Math.max(0, Math.min(100, v)))+';--c:'+tone+'"><em>'+worldIco(ico)+'</em></span>'+
-      '<span class="tiny muted">'+label+' '+Math.round(v)+'</span></div>';
-  };
-  return '<div class="lrings">'+ring('home', 'Family', p.family)+ring('smile', 'Happiness', p.happy)+
-    ring('heart', 'Health', p.health)+ring('bolt', 'Calm', 100 - p.stress)+'</div>';
+  return ringsHTML([{ico:'home', label:'Family', v:p.family}, {ico:'smile', label:'Happiness', v:p.happy},
+    {ico:'heart', label:'Health', v:p.health}, {ico:'bolt', label:'Calm', v:100 - p.stress, note:'Stress '+Math.round(p.stress)}]);
 }
 /* People drift. Fortunes change. Some of them die. */
 function stepCast(){
