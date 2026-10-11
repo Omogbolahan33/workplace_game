@@ -378,10 +378,11 @@
  "34-your-work.js": {
   "needs": [
    "12-main.js: routeKey",
+   "01-game-state.js: S",
+   "38-the-boardroom.js: boardLook, boardSceneSVG",
    "09-resolving-decisions.js: comingBack",
    "33-your-home.js: homeLook, homeSceneSVG, sceneKit",
    "37-what-comes-back.js: arrivalsLayer",
-   "01-game-state.js: S",
    "02-derived-state-personal-finance-career.js: CITY",
    "04-bizcapacity.js: bizCapacity, bizStage",
    "03-startbizcost-one-price-for-every-picker.js: leverActive",
@@ -417,6 +418,16 @@
    "01-game-state.js: S",
    "00-cities.js: dateLabel, esc",
    "33-your-home.js: homeLook, homeSceneSVG"
+  ],
+  "externals": []
+ },
+ "38-the-boardroom.js": {
+  "needs": [
+   "33-your-home.js: homeLook, sceneKit",
+   "01-game-state.js: S",
+   "26-governance-register-board.js: dirStance, resMeta",
+   "28-votes-and-decisions.js: covenantBreaches",
+   "00-cities.js: esc"
   ],
   "externals": []
  }

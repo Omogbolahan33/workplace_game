@@ -31,9 +31,11 @@ function workSceneFor(sub){
   return '';
 }
 /* the scene for the screen you are on: your work under Work's career and
-   company screens, your home everywhere else */
+   company screens, the boardroom under Governance, your home everywhere else */
 function sceneSVG(vh){
   const k = routeKey(), mode = k.indexOf('work/') === 0 ? workSceneFor(k.slice(5)) : '';
+  /* the governance screens are the company's boardroom */
+  if(k.indexOf('governance') === 0 && S.biz) return boardSceneSVG(boardLook(), vh);
   if(mode) return workSceneSVG(workLook(mode), vh);
   /* at home, whatever you set in motion is on its way up the road to you */
   const coming = comingBack();

@@ -835,6 +835,12 @@ const EDITS = [
   { marker: 'function arrivalHTML(items)', addition: true,
     name: 'arrivalHTML — they arrive at your gate',
     why: 'your home with the people carrying what landed - money, or a letter - and you receiving it; leads the Consequences arrive card in both renderers' },
+  { marker: 'function boardLook()', addition: true,
+    name: 'boardLook — the boardroom, read from the register and the board',
+    why: 'who sits at the table and what they own, the register as slices, the open resolution and each director\'s stance on it (the same pure reading the vote uses), whether the company borrowed on covenants and whether one is breached; it never creates the register, as ensureGov() would (VISUAL.md, M7)' },
+  { marker: 'function boardSceneSVG(st, vh)', addition: true,
+    name: 'boardSceneSVG — the boardroom, drawn',
+    why: 'a long window onto the city, the register framed on the wall with your share in gold, the board at the table with chairs as big as their stakes, hands up for the open resolution and arms folded against it, the chair\'s mark, and the bank\'s man by the window with a blue folder - red when a covenant is breached' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

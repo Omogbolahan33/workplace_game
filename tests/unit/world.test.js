@@ -192,3 +192,31 @@ test('what comes back: on its way up the road, on the strip, and at your gate', 
   assert.match(arr, /At your gate: The call you were dreading/);
   assert.doesNotMatch(arr + road, /NaN|undefined/);
 });
+
+test('the boardroom: who owns what is who sits, votes are hands, the bank watches', async () => {
+  const C = await world();
+  C.S.fin.cash = 60000000;
+  C.startBiz('tech', 'Paystack 2', 6000000, null);
+  const b = C.S.biz;
+  /* looking never writes the register: ensureGov() would, and drawing must not */
+  const seq = C.S.seq, shares = JSON.stringify(b.shares || null);
+  C.UI.tab = 'governance'; C.UI.sub = 'register';
+  assert.match(C.worldHTML(), /<svg class="boardscene"/, 'governance is not the boardroom');
+  assert.equal(C.S.seq, seq, 'drawing the boardroom moved the id counter');
+  assert.equal(JSON.stringify(b.shares || null), shares, 'drawing the boardroom wrote the register');
+  C.ensureGov(b);
+  C.grantPct(b, 22, { name: 'Lekki Ventures', kind: 'vc' });
+  C.formBoard(b, {});
+  let L = C.boardLook();
+  const you = L.seats.find((s) => s.yours), them = L.seats.find((s) => !s.yours);
+  assert.ok(you && them, 'the board is not at the table');
+  assert.ok(you.pct > them.pct, 'your stake is not the larger chair: ' + you.pct + ' vs ' + them.pct);
+  assert.ok(Math.abs(L.holders.reduce((s, h) => s + h.pct, 0) - 100) < 0.01, 'the register on the wall does not add up');
+  assert.equal(L.lender, false);
+  C.addCovenant(b, 'mincash', 900000000, 'the facility');
+  L = C.boardLook();
+  assert.equal(L.lender, true, 'a covenant and no bank in the room');
+  assert.equal(L.breached, true, 'a breached minimum-cash covenant shows as kept');
+  assert.doesNotMatch(C.boardSceneSVG(L, 560), /NaN|undefined/);
+  C.UI.tab = 'overview'; C.UI.sub = '';
+});
