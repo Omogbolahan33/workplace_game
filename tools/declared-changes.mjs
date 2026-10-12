@@ -874,6 +874,12 @@ const EDITS = [
   { marker: 'function bothLayers(a, b)', addition: true,
     name: 'bothLayers — two layers as one',
     why: 'the home scene carries both what is coming back up the road and the visitor at the gate' },
+  { marker: 'const CITY_SKINS', addition: true,
+    name: 'CITY_SKINS — each city as its own place',
+    why: 'seasons by quarter (harmattan and the rains, Nairobi\'s cool months, a London winter, New York snow), the word for the lights going off (NEPA has taken light, Dumsor, Stima imepotea - none in London or New York), zinc or slate, louvres and burglar bars or sash windows, a GP tank, a polytank or a New York water tower, power poles or street lamps, the colour of the walls, and the landmark on the skyline: Aso Rock, the Black Star Gate, the KICC, the Shard, the Empire State (VISUAL.md, M10)' },
+  { marker: 'function skinOf(city)', addition: true,
+    name: 'skinOf — a city\'s skin, Lagos by default',
+    why: 'every scene asks it with the city in its look; an unknown city draws as Lagos, the city the kit was drawn for' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

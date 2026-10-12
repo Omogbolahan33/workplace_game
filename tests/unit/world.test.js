@@ -274,3 +274,23 @@ test('the people in your life: gathered as close as they feel, the rival across 
   assert.match(work, new RegExp('<title>' + C.S.rival.name + '</title>'), 'an aggressive rival is not outside');
   C.UI.tab = 'overview'; C.UI.sub = '';
 });
+
+test('every city is its own place: its seasons, its outages, its skyline', async () => {
+  const C = await world();
+  const night = (city, extra) => C.homeSceneSVG(Object.assign(C.homeLook(), { city, time: 'night', grid: 10, gen: false, solar: false }, extra || {}), 560);
+  assert.match(night('lagos'), /NEPA has taken light/);
+  assert.match(night('accra'), /Dumsor/);
+  assert.match(night('nairobi'), /Stima imepotea/);
+  assert.doesNotMatch(night('ldn'), /NEPA|Dumsor|Stima/, 'London has a blackout line');
+  assert.doesNotMatch(night('nyc'), /NEPA|Dumsor|Stima/, 'New York has a blackout line');
+  /* the season is the city's: New York snows in Q1, London is grey in Q4, Lagos has harmattan */
+  for (const [city, q, season] of [['nyc', 0, 'snow'], ['ldn', 3, 'autumn'], ['lagos', 0, 'harmattan'], ['nairobi', 2, 'cool']]) {
+    C.S.city = city; C.S.turn = q;
+    assert.equal(C.homeLook().season, season, city + ' in Q' + (q + 1) + ' is not ' + season);
+  }
+  /* everything draws everywhere */
+  for (const city of Object.keys(C.CITY_SKINS)) for (const tier of [1, 2, 3, 4]) {
+    assert.doesNotMatch(C.homeSceneSVG(Object.assign(C.homeLook(), { city, tier }), 560), /NaN|undefined/, city + ' tier ' + tier);
+  }
+  C.S.city = 'lagos'; C.S.turn = 0;
+});

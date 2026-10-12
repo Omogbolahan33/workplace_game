@@ -53,7 +53,7 @@ function workLook(mode){
   const air = homeLook(), p = S.p, b = S.biz || null;
   /* the rival, across the street: as big as their business, outside when they want a fight */
   const rv = S.rival ? {name: S.rival.name, size: S.rival.size || 0, aggro: S.rival.aggro || 0} : null;
-  const base = {time: air.time, season: air.season, era: air.era, grid: air.grid, age: p.age, rival: rv};
+  const base = {city: air.city, time: air.time, season: air.season, era: air.era, grid: air.grid, age: p.age, rival: rv};
   if(mode === 'job' || (mode !== 'biz' && !b)){
     const job = p.job, real = job ? job.monthly / Math.max(0.01, S.cumInfl || 1) / Math.max(0.1, CITY().payMult || 1) : 0;
     const floor = job ? Math.max(1, Math.min(14, Math.round(2 + 3 * Math.log2(Math.max(0.25, real / 250000))))) : 0;

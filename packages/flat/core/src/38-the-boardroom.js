@@ -12,7 +12,7 @@
    a director's stance is the same pure reading the vote uses. */
 function boardLook(){
   const air = homeLook(), b = S.biz;
-  const base = {time: air.time, season: air.season, era: air.era, grid: air.grid, seed: 61};
+  const base = {city: air.city, time: air.time, season: air.season, era: air.era, grid: air.grid, seed: 61};
   if(!b) return Object.assign(base, {none: true, label: 'No company, no boardroom'});
   const shares = b.shares || [], total = shares.reduce(function(s, h){ return s + (h.shares || 0); }, 0);
   const pctOf = function(h){ return total > 0 ? (h.shares || 0) / total * 100 : 0; };

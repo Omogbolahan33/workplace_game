@@ -8,7 +8,9 @@
    wrote. Read from the quarter's own record - the snapshot before and after,
    the journal, the digest - so nothing here is invented, and a quiet quarter
    is two quiet pictures. */
-const REEL_SEASON = {harmattan: 'Harmattan. Dust on everything, cold mornings.', rain: 'The rains. The street outside is a river again.', dry: 'Dry season. Hot nights, light that comes and goes.'};
+const REEL_SEASON = {harmattan: 'Harmattan. Dust on everything, cold mornings.', rain: 'The rains. The street outside is a river again.', dry: 'Dry season. Hot nights, light that comes and goes.',
+  cool: 'The cool months. Grey mornings, a jacket until noon.', winter: 'Winter. Dark by four, the heating on.', snow: 'Snow. The city slows, and the bills do not.',
+  spring: 'Spring. Light in the evenings again.', summer: 'Summer. Long days, and everyone is away in August.', autumn: 'Autumn. Leaves in the gutters, rain on the windows.'};
 /* what changed at home between two looks, in the order a person would say it */
 function homeChange(a, b){
   if(!a || !b) return '';

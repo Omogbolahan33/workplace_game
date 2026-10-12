@@ -69,7 +69,7 @@ function hueHex(h, s, l){
 /* the place, with the moment's people and things in front of it */
 function momentSceneSVG(m, vh){
   const home = homeLook();
-  const air = {time: home.time, season: home.season, era: home.era, grid: home.grid, age: home.age};
+  const air = {city: home.city, time: home.time, season: home.season, era: home.era, grid: home.grid, age: home.age};
   /* the people and things, as a layer in the scene's own space */
   const overlay = function(k){
     const f1 = k.f1, shade = k.shade, person = k.person, gy = k.groundY, dayK = k.dayK;

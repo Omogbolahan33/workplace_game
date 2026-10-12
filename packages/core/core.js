@@ -12921,6 +12921,19 @@ function worldHTML(){
    spouse, children and household staff, the light is the grid, the air is the
    season of the quarter, the skyline is the era, and the hour is the player's
    own clock. */
+/* Each city is its own place (VISUAL.md, M10): its seasons quarter by quarter,
+   its word for the lights going off, its roofs and windows, whether water sits
+   on the roof, power poles or street lamps, the colour of its walls, and the
+   landmark on its skyline. Lagos is the default the kit was drawn for. */
+const CITY_SKINS = {
+  lagos:  {seasons:['harmattan','rain','rain','dry'], outage:'NEPA has taken light', roof:'zinc', bars:true, tank:'gp', pole:true, paved:false, wall1:'#d8c9ab', wall2:'#e4d6b8', mark:'minaret'},
+  abuja:  {seasons:['harmattan','rain','rain','dry'], outage:'NEPA has taken light', roof:'zinc', bars:true, tank:'gp', pole:true, paved:false, wall1:'#dccdb0', wall2:'#e8dcc4', mark:'aso'},
+  accra:  {seasons:['harmattan','rain','rain','dry'], outage:'Dumsor', roof:'zinc', bars:true, tank:'poly', pole:true, paved:false, wall1:'#e2d2b6', wall2:'#ecdcc0', mark:'arch'},
+  nairobi:{seasons:['dry','rain','cool','rain'], outage:'Stima imepotea', roof:'zinc', bars:true, tank:'poly', pole:true, paved:false, wall1:'#d2c6b0', wall2:'#ddd2bd', mark:'kicc'},
+  ldn:    {seasons:['winter','spring','summer','autumn'], outage:'', roof:'slate', bars:false, tank:'', pole:false, paved:true, wall1:'#9c5a45', wall2:'#a8664c', mark:'shard'},
+  nyc:    {seasons:['snow','spring','summer','autumn'], outage:'', roof:'slate', bars:false, tank:'wood', pole:false, paved:true, wall1:'#7a4f3a', wall2:'#8a5c44', mark:'empire'}
+};
+function skinOf(city){ return CITY_SKINS[city] || CITY_SKINS.lagos; }
 const HOME_TIERS = [{max:1.8, name:'a room'}, {max:4.5, name:'a flat'}, {max:12, name:'a house in an estate'}, {max:Infinity, name:'a mansion'}];
 function homeLook(){
   const p = S.p, c = CITY(), inf = S.cumInfl || 1;
@@ -12935,7 +12948,7 @@ function homeLook(){
     job: !!p.job, age: p.age, spouse: !!p.married, kids: p.kids || 0, kidAge: Math.max(0, Math.min(15, (S.turn || 0) / 8)),
     staff: (S.house || []).map(function(h){ return h.role; }),
     grid: S.mkt ? S.mkt.power : 50, era: S.era ? S.era.id : 'calm',
-    season: q === 0 ? 'harmattan' : q === 3 ? 'dry' : 'rain',
+    city: S.city, season: skinOf(S.city).seasons[q],
     time: hr >= 6 && hr < 17 ? 'day' : hr >= 17 && hr < 19 ? 'dusk' : 'night',
     label: 'Your home: ' + HOME_TIERS[tier - 1].name + ' in ' + c.label};
 }
@@ -12953,7 +12966,9 @@ function sceneKit(st, vh, tag){
   const u = (tag || 's') + (++sceneDrawings) + '-';
   const id = (n) => u + n, url = (n) => 'url(#' + u + n + ')';
   const night = st.time === 'night', dusk = st.time === 'dusk';
-  const blackout = st.grid < 40, genOn = blackout && st.gen;
+  const skin = skinOf(st.city);
+  /* a city with no outages has no blackouts, whatever the grid reads */
+  const blackout = st.grid < 40 && !!skin.outage, genOn = blackout && st.gen;
   const lights = (night || dusk) && (!blackout || genOn || st.solar);
   const out = [], add = (s) => out.push(s);
   let seed = st.seed || 11;
@@ -12972,7 +12987,8 @@ function sceneKit(st, vh, tag){
 
   /* ---- defs ---- */
   const skyC = night ? ['#060b1d', '#142049', '#2a2c4f'] : dusk ? ['#24346a', '#c8714c', '#f2b46e']
-    : st.season === 'harmattan' ? ['#c9b48f', '#dcc6a0', '#e9d6b0'] : st.season === 'rain' ? ['#6f7d8c', '#9aa6b1', '#bcc3c7'] : ['#5d9fd8', '#b8d6ea', '#efe3c6'];
+    : st.season === 'harmattan' ? ['#c9b48f', '#dcc6a0', '#e9d6b0'] : st.season === 'rain' ? ['#6f7d8c', '#9aa6b1', '#bcc3c7']
+    : st.season === 'snow' ? ['#9aa3ad', '#c3c9cf', '#e4e7ea'] : /winter|autumn|cool/.test(st.season) ? ['#7d8794', '#a3abb5', '#c6cbd1'] : ['#5d9fd8', '#b8d6ea', '#efe3c6'];
   add('<defs>' +
     '<linearGradient id="' + id('sky') + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + skyC[0] + '"/><stop offset=".6" stop-color="' + skyC[1] + '"/><stop offset="1" stop-color="' + skyC[2] + '"/></linearGradient>' +
     '<linearGradient id="' + id('haze') + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + skyC[2] + '" stop-opacity="0"/><stop offset="1" stop-color="' + skyC[2] + '" stop-opacity="' + (st.season === 'harmattan' ? .85 : .55) + '"/></linearGradient>' +
@@ -12988,6 +13004,7 @@ function sceneKit(st, vh, tag){
     '<filter id="' + id('soft') + '" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3"/></filter>' +
     '<filter id="' + id('blur1') + '"><feGaussianBlur stdDeviation="1.2"/></filter>' +
     '<pattern id="' + id('zinc') + '" width="4" height="40" patternUnits="userSpaceOnUse" patternTransform="skewX(-30)"><rect width="4" height="40" fill="' + shade('#8a6447', dayK) + '"/><rect width="1.4" height="40" fill="#000" opacity=".22"/><rect x="2" width=".6" height="40" fill="#fff" opacity=".12"/></pattern>' +
+    '<pattern id="' + id('slate') + '" width="10" height="6" patternUnits="userSpaceOnUse" patternTransform="skewX(-30)"><rect width="10" height="6" fill="' + shade('#4b5058', dayK) + '"/><path d="M0 6h10M5 0v3M0 3h10M2 3v3" stroke="#000" stroke-opacity=".25" stroke-width=".6"/></pattern>' +
     '<pattern id="' + id('lat') + '" width="60" height="30" patternUnits="userSpaceOnUse"><rect width="60" height="30" fill="' + shade('#b26a42', dayK) + '"/>' +
       '<circle cx="12" cy="8" r="1.2" fill="#000" opacity=".12"/><circle cx="40" cy="20" r="1.6" fill="#000" opacity=".1"/><circle cx="52" cy="6" r=".9" fill="#fff" opacity=".12"/><path d="M0 24 q15 -3 30 0 t30 0" stroke="#000" stroke-opacity=".08" fill="none"/></pattern>' +
     '<pattern id="' + id('pave') + '" width="16" height="8" patternUnits="userSpaceOnUse" patternTransform="skewX(-50)"><rect width="16" height="8" fill="' + shade('#9c958a', dayK) + '"/><path d="M0 8h16M8 0v8" stroke="#000" stroke-opacity=".16"/></pattern>' +
@@ -12997,25 +13014,37 @@ function sceneKit(st, vh, tag){
   add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="' + url('sky') + '"/>');
   if (night) for (let i = 0; i < 46 + Math.round(-TOP / 6); i++) add('<circle cx="' + f1(rnd() * W) + '" cy="' + f1(TOP + rnd() * (100 - TOP)) + '" r="' + (rnd() * .8 + .25).toFixed(2) + '" fill="#fff" opacity="' + (rnd() * .6 + .25).toFixed(2) + '"/>');
   if (night) add('<circle cx="300" cy="40" r="11" fill="#f4efe0"/><circle cx="304" cy="37" r="10" fill="' + skyC[0] + '" opacity=".9"/>');
-  else if (st.season !== 'rain') add('<circle cx="' + (dusk ? 310 : 70) + '" cy="' + (dusk ? 150 : 46) + '" r="' + (dusk ? 60 : 50) + '" fill="' + url('sun') + '" opacity="' + (st.season === 'harmattan' ? .55 : .95) + '"/>');
-  if (st.season === 'rain') for (let i = 0; i < 4; i++) add('<ellipse cx="' + f1(40 + i * 100 + rnd() * 30) + '" cy="' + f1(30 + rnd() * 30) + '" rx="' + f1(60 + rnd() * 30) + '" ry="16" fill="' + (night ? '#1c2238' : '#7f8a96') + '" opacity=".7"/>');
+  else if (!/rain|winter|autumn|snow|cool/.test(st.season)) add('<circle cx="' + (dusk ? 310 : 70) + '" cy="' + (dusk ? 150 : 46) + '" r="' + (dusk ? 60 : 50) + '" fill="' + url('sun') + '" opacity="' + (st.season === 'harmattan' ? .55 : .95) + '"/>');
+  if (/rain|winter|autumn|snow|cool/.test(st.season)) for (let i = 0; i < 4; i++) add('<ellipse cx="' + f1(40 + i * 100 + rnd() * 30) + '" cy="' + f1(30 + rnd() * 30) + '" rx="' + f1(60 + rnd() * 30) + '" ry="16" fill="' + (night ? '#1c2238' : '#7f8a96') + '" opacity=".7"/>');
   const far = night ? '#151c36' : dusk ? '#6a5876' : st.season === 'harmattan' ? '#b9a688' : '#93a7b9';
   let x = -6;
   while (x < W) {
     const w = 16 + rnd() * 30, tall = !!st.towers && rnd() > 0.55, h = tall ? 60 + rnd() * 70 : 14 + rnd() * 30, base = 178;
     add('<rect x="' + f1(x) + '" y="' + f1(base - h) + '" width="' + f1(w) + '" height="' + f1(h) + '" fill="' + far + '"/>');
     if (!tall && rnd() > 0.55) add('<rect x="' + f1(x + w * .25) + '" y="' + f1(base - h - 10) + '" width="8" height="8" rx="2" fill="' + far + '"/><rect x="' + f1(x + w * .25 + 3) + '" y="' + f1(base - h - 3) + '" width="2" height="3" fill="' + far + '"/>');
-    if (!tall && rnd() > 0.93) add('<rect x="' + f1(x + w / 2) + '" y="' + f1(base - h - 34) + '" width="3" height="34" fill="' + far + '"/><circle cx="' + f1(x + w / 2 + 1.5) + '" cy="' + f1(base - h - 36) + '" r="3" fill="' + far + '"/>');   // a minaret
+    if (!tall && skin.mark === 'minaret' && rnd() > 0.93) add('<rect x="' + f1(x + w / 2) + '" y="' + f1(base - h - 34) + '" width="3" height="34" fill="' + far + '"/><circle cx="' + f1(x + w / 2 + 1.5) + '" cy="' + f1(base - h - 36) + '" r="3" fill="' + far + '"/>');   // a minaret
     if ((night || dusk) && (!blackout || rnd() > .82)) for (let k = 0; k < (tall ? 6 : 2); k++) if (rnd() > .5) add('<rect x="' + f1(x + 2 + rnd() * (w - 5)) + '" y="' + f1(base - h + 4 + rnd() * (h - 8)) + '" width="2" height="2.6" fill="' + warm + '" opacity=".8"/>');
     x += w + 1 + rnd() * 5;
   }
   if (st.era === 'boom') add('<g stroke="' + far + '" stroke-width="1.6" fill="none"><path d="M330 178V64M330 68h-62M330 68l14 8M272 68v24"/><path d="M324 178l6 -10 6 10"/></g><rect x="268" y="92" width="8" height="6" fill="' + far + '"/>');
+  /* the city's landmark, far off */
+  const mk = {
+    aso: '<path d="M-10 178 Q20 96 70 92 Q120 96 150 178Z" fill="' + far + '" opacity=".9"/><circle cx="250" cy="150" r="14" fill="' + far + '"/><rect x="236" y="150" width="28" height="28" fill="' + far + '"/><rect x="226" y="118" width="3" height="60" fill="' + far + '"/><rect x="271" y="118" width="3" height="60" fill="' + far + '"/>',
+    arch: '<path d="M236 178 V120 H300 V178 H286 V138 H250 V178Z" fill="' + far + '"/><path d="M262 116 l6 -12 l6 12z" fill="' + far + '"/>',
+    kicc: '<rect x="250" y="80" width="26" height="98" rx="4" fill="' + far + '"/><path d="M246 84 L263 62 L280 84Z" fill="' + far + '"/><path d="M-10 178 Q60 150 120 160 Q200 140 260 165 Q330 150 400 170 V178Z" fill="' + far + '" opacity=".6"/>',
+    shard: '<path d="M262 178 L282 40 L302 178Z" fill="' + far + '"/><path d="M282 40 l-2 -10 l4 0z" fill="' + far + '"/>',
+    empire: '<path d="M262 178 V100 H270 V80 H276 V62 H280 V40 L282 26 L284 40 V62 H288 V80 H294 V100 H302 V178Z" fill="' + far + '"/>'
+  }[skin.mark];
+  if (mk) add(mk);
   add('<rect y="110" width="' + W + '" height="74" fill="' + url('haze') + '"/>');
 
   /* ---- ground ---- */
   const groundY = 182;
-  add('<rect y="' + groundY + '" width="' + W + '" height="' + (H - groundY) + '" fill="' + (st.ground === 'pave' ? url('pave') : url('lat')) + '"/>');
-  if (st.ground !== 'pave') {
+  const paved = st.ground === 'pave' || skin.paved;
+  add('<rect y="' + groundY + '" width="' + W + '" height="' + (H - groundY) + '" fill="' + (paved ? url('pave') : url('lat')) + '"/>');
+  /* snow lies on the ground, under whoever stands on it */
+  if (st.season === 'snow') add('<rect y="' + (groundY - 2) + '" width="' + W + '" height="' + (H - groundY + 2) + '" fill="#eef2f5" opacity=".55"/>');
+  if (!paved) {
     add('<path d="M0 ' + (groundY + 40) + ' q120 -8 240 4 t160 -2" stroke="#000" stroke-opacity=".08" stroke-width="8" fill="none"/>');   // tyre ruts
     add('<ellipse cx="78" cy="268" rx="46" ry="7" fill="' + skyC[1] + '" opacity="' + (st.season === 'rain' ? .75 : .35) + '"/><ellipse cx="78" cy="268" rx="46" ry="7" fill="none" stroke="#000" stroke-opacity=".15"/>');
   }
@@ -13043,7 +13072,10 @@ function sceneKit(st, vh, tag){
   const win = (b, x, y, w, h, kind) => {
     const a = b.p(x, y + h, 0), c = b.p(x + w, y, 0), on = lights && (kind === 'mine' || rnd() > .35);
     let s = '<rect x="' + f1(a[0]) + '" y="' + f1(a[1]) + '" width="' + f1(c[0] - a[0]) + '" height="' + f1(c[1] - a[1]) + '" fill="' + (on ? url('glassL') : url('glassD')) + '" stroke="' + shade('#3a3027', dayK) + '" stroke-width="1.2"/>';
-    if (kind !== 'glass') {
+    if (kind !== 'glass' && !skin.bars) {
+      /* a sash: the meeting rail and the glazing bar */
+      s += '<line x1="' + f1(a[0]) + '" y1="' + f1((a[1] + c[1]) / 2) + '" x2="' + f1(c[0]) + '" y2="' + f1((a[1] + c[1]) / 2) + '" stroke="' + shade('#f2efe8', dayK) + '" stroke-width="1.6"/><line x1="' + f1((a[0] + c[0]) / 2) + '" y1="' + f1(a[1]) + '" x2="' + f1((a[0] + c[0]) / 2) + '" y2="' + f1(c[1]) + '" stroke="' + shade('#f2efe8', dayK) + '" stroke-width="1"/>';
+    } else if (kind !== 'glass') {
       for (let i = 1; i < 5; i++) s += '<line x1="' + f1(a[0]) + '" y1="' + f1(a[1] + i * (c[1] - a[1]) / 5) + '" x2="' + f1(c[0]) + '" y2="' + f1(a[1] + i * (c[1] - a[1]) / 5) + '" stroke="#000" stroke-opacity=".25" stroke-width=".7"/>';   // louvre slats
       for (let i = 1; i < Math.floor((c[0] - a[0]) / 4); i++) s += '<line x1="' + f1(a[0] + i * 4) + '" y1="' + f1(a[1]) + '" x2="' + f1(a[0] + i * 4) + '" y2="' + f1(c[1]) + '" stroke="' + shade('#2b2b2b', dayK) + '" stroke-width=".9"/>';   // burglar-proof
     } else s += '<path d="M' + f1(a[0] + 3) + ' ' + f1(c[1] - 3) + 'L' + f1(a[0] + (c[0] - a[0]) * .45) + ' ' + f1(a[1] + 3) + '" stroke="#fff" stroke-opacity=".25" stroke-width="3"/>';
@@ -13055,6 +13087,12 @@ function sceneKit(st, vh, tag){
 
   /* power lines: a concrete pole and the wires sagging across the street */
   const pole = (px) => {
+    if (!skin.pole) {
+      /* the wires are underground here: a street lamp */
+      const lc = shade('#2b3036', Math.max(.7, dayK));
+      return '<rect x="' + px + '" y="110" width="3" height="' + (groundY + 30 - 110) + '" fill="' + lc + '"/><path d="M' + (px + 1.5) + ' 112 q0 -8 -12 -8" stroke="' + lc + '" stroke-width="2.4" fill="none"/>' +
+        '<path d="M' + (px - 18) + ' 104 h12 l-2 5 h-8z" fill="' + lc + '"/>' + (night || dusk ? '<ellipse cx="' + (px - 12) + '" cy="' + (groundY + 26) + '" rx="34" ry="9" fill="' + url('spill') + '"/><circle cx="' + (px - 12) + '" cy="110" r="3" fill="' + warm + '"/>' : '');
+    }
     const top = 70, col = shade('#8d8a84', dayK);
     let s = '<rect x="' + px + '" y="' + top + '" width="4" height="' + (groundY + 30 - top) + '" fill="' + col + '"/><rect x="' + (px - 14) + '" y="' + (top + 6) + '" width="32" height="3" fill="' + col + '"/>';
     s += '<rect x="' + (px + 4) + '" y="' + (top + 40) + '" width="7" height="9" fill="' + shade('#556', dayK) + '"/>';   // transformer box
@@ -13089,13 +13127,16 @@ function sceneKit(st, vh, tag){
     /* a moment's people and things, laid over the place before the air */
     if (st.extra) add(typeof st.extra === 'function' ? st.extra(self) : st.extra);
     if (st.season === 'rain') { let r = ''; for (let i = 0; i < 120 + Math.round(-TOP / 3); i++) { const x0 = rnd() * (W + 40) - 20, y0 = TOP + rnd() * VH; r += 'M' + f1(x0) + ' ' + f1(y0) + 'l-3 9'; } add('<path d="' + r + '" stroke="#dfe7ee" stroke-opacity=".45" stroke-width=".7"/>'); }
+    if (st.season === 'snow') { let sn = ''; for (let i = 0; i < 140 + Math.round(-TOP / 3); i++) sn += '<circle cx="' + f1(rnd() * W) + '" cy="' + f1(TOP + rnd() * VH) + '" r="' + (rnd() * 1.2 + .5).toFixed(2) + '"/>'; add('<g fill="#fff" opacity=".8">' + sn + '</g>'); }
+    if (/winter|autumn|cool/.test(st.season)) add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#8a96a3" opacity=".12"/>');
+    if (st.season === 'summer') add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#ffd98a" opacity=".07"/>');
     if (st.season === 'harmattan') add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#d9c09a" opacity=".16"/>');
     if (night) add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#0a1030" opacity=".18"/>');
     add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" filter="' + url('grain') + '" opacity=".9"/>');
-    if (blackout && !st.gen && !st.solar && (night || dusk) && !st.noNepa) add('<text x="' + W / 2 + '" y="122" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="' + warm + '" opacity=".85">NEPA has taken light</text>');
+    if (blackout && !st.gen && !st.solar && (night || dusk) && !st.noNepa && skin.outage) add('<text x="' + W / 2 + '" y="122" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="' + warm + '" opacity=".85">' + esc(skin.outage) + '</text>');
     return '<svg class="' + cls + '" viewBox="0 ' + TOP + ' ' + W + ' ' + VH + '" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(label) + '">' + out.join('') + '</svg>';
   };
-  const self = {W:W, H:H, VH:VH, TOP:TOP, url:url, night:night, dusk:dusk, blackout:blackout, genOn:genOn, lights:lights,
+  const self = {skin:skin, W:W, H:H, VH:VH, TOP:TOP, url:url, night:night, dusk:dusk, blackout:blackout, genOn:genOn, lights:lights,
     add:add, rnd:rnd, f1:f1, P:P, poly:poly, shade:shade, dayK:dayK, sideK:sideK, warm:warm, skyC:skyC, groundY:groundY,
     box:box, win:win, door:door, pole:pole, car:car, person:person, finish:finish};
   return self;
@@ -13110,25 +13151,34 @@ function homeSceneSVG(st, vh){
   const me = { x: 150, y: 262 };
   if (st.tier === 1) {
     /* face-me-I-face-you: a long bungalow of single rooms; yours has the blue door */
-    const b = box([34, 214], 300, 40, 48, '#d8c9ab');
+    const skin = k.skin, b = box([34, 214], 300, 40, 48, skin.wall1);
     add(b.parts.join(''));
     const r0 = b.p(-8, 48, -6), r1 = b.p(308, 48, -6), r2 = b.p(308, 72, 22), r3 = b.p(-8, 72, 22);
     const r4 = b.p(308, 48, 46);
     add(poly([r1, r4, r2], shade('#6e4a32', sideK)));
-    add(poly([r0, r1, r2, r3], url('zinc')));
-    add('<rect x="' + f1(r0[0] + 90) + '" y="' + f1(r2[1] + 6) + '" width="46" height="10" fill="#9a4e2a" opacity=".45" transform="skewX(-30)"/>');   // a rusted sheet
+    add(poly([r0, r1, r2, r3], url(skin.roof === 'slate' ? 'slate' : 'zinc')));
+    /* a terrace has chimney pots; zinc rusts */
+    if (skin.roof === 'slate') for (let i = 0; i < 5; i++) { const c = b.p(20 + i * 64, 68, 12); add('<rect x="' + f1(c[0]) + '" y="' + f1(c[1] - 14) + '" width="10" height="14" fill="' + shade(skin.wall1, dayK * .85) + '"/><rect x="' + f1(c[0] + 1) + '" y="' + f1(c[1] - 18) + '" width="3" height="4" fill="' + shade('#a0522d', dayK) + '"/><rect x="' + f1(c[0] + 6) + '" y="' + f1(c[1] - 18) + '" width="3" height="4" fill="' + shade('#a0522d', dayK) + '"/>'); }
+    if (skin.roof !== 'slate') {
+      add('<rect x="' + f1(r0[0] + 90) + '" y="' + f1(r2[1] + 6) + '" width="46" height="10" fill="#9a4e2a" opacity=".45" transform="skewX(-30)"/>');   // a rusted sheet
+    }
     add('<path d="M' + f1(r0[0]) + ' ' + f1(r0[1]) + 'L' + f1(r1[0]) + ' ' + f1(r1[1]) + '" stroke="#3b2618" stroke-width="2"/>');
     for (let i = 0; i < 6; i++) { add(door(b, 10 + i * 49, 17, 32, i === 2 ? '#2f6f99' : '#6a4630')); add(win(b, 31 + i * 49, 14, 14, 14, i === 2 ? 'mine' : '')); }
-    add('<path d="M40 162 Q150 176 262 160" stroke="#444" stroke-width=".8" fill="none"/>' + ['#d64a3a', '#e9b93b', '#3a7fcf', '#f1efe8', '#3fa06a'].map((c, i) => '<path d="M' + (66 + i * 38) + ' ' + (166 + Math.sin(i) * 2) + 'h14l-1 17h-12z" fill="' + shade(c, dayK) + '"/>').join(''));
-    add('<g><rect x="258" y="238" width="17" height="24" rx="3" fill="' + shade('#2d6cb0', dayK) + '"/><ellipse cx="266.5" cy="238" rx="8.5" ry="3" fill="' + shade('#1f507f', dayK) + '"/>' +
-      '<rect x="279" y="244" width="14" height="18" rx="2" fill="' + shade('#d9d3c4', dayK) + '"/><ellipse cx="286" cy="244" rx="7" ry="2.4" fill="' + shade('#b9b2a2', dayK) + '"/></g>');   // drum and bucket
-    add('<g fill="' + shade('#e6e1d6', dayK) + '"><path d="M200 252h14v-10h-14z"/><path d="M200 242l-2 -10h18l-2 10"/></g>');   // a plastic chair
+    if (skin.bars) {
+      add('<path d="M40 162 Q150 176 262 160" stroke="#444" stroke-width=".8" fill="none"/>' + ['#d64a3a', '#e9b93b', '#3a7fcf', '#f1efe8', '#3fa06a'].map((c, i) => '<path d="M' + (66 + i * 38) + ' ' + (166 + Math.sin(i) * 2) + 'h14l-1 17h-12z" fill="' + shade(c, dayK) + '"/>').join(''));
+      add('<g><rect x="258" y="238" width="17" height="24" rx="3" fill="' + shade('#2d6cb0', dayK) + '"/><ellipse cx="266.5" cy="238" rx="8.5" ry="3" fill="' + shade('#1f507f', dayK) + '"/>' +
+        '<rect x="279" y="244" width="14" height="18" rx="2" fill="' + shade('#d9d3c4', dayK) + '"/><ellipse cx="286" cy="244" rx="7" ry="2.4" fill="' + shade('#b9b2a2', dayK) + '"/></g>');   // drum and bucket
+      add('<g fill="' + shade('#e6e1d6', dayK) + '"><path d="M200 252h14v-10h-14z"/><path d="M200 242l-2 -10h18l-2 10"/></g>');   // a plastic chair
+    } else {
+      /* wheelie bins by the doors, where the washing and the water drum would be */
+      for (let i = 0; i < 3; i++) add('<g><rect x="' + (252 + i * 16) + '" y="' + (236 + (i % 2) * 2) + '" width="13" height="22" rx="1.5" fill="' + shade(['#2f3d2f', '#2d4a6b', '#4a4a4a'][i], dayK) + '"/><rect x="' + (251 + i * 16) + '" y="' + (234 + (i % 2) * 2) + '" width="15" height="3" fill="' + shade('#222', dayK) + '"/></g>');
+    }
     add(pole(352));
     me.x = 150; me.y = 268;
   }
   if (st.tier === 2) {
     /* a block of flats behind a fence: balconies, louvres, the GP tank on its stand */
-    const b = box([118, 222], 170, 52, 128, '#e4d6b8', { flat: '#cdbd9c' });
+    const skin = k.skin, b = box([118, 222], 170, 52, 128, skin.wall2, { flat: '#cdbd9c' });
     add(b.parts.join(''));
     for (let f = 0; f < 3; f++) for (let c = 0; c < 4; c++) {
       add(win(b, 12 + c * 40, 14 + f * 40, 24, 20, f === 1 && c === 1 ? 'mine' : ''));
@@ -13136,19 +13186,32 @@ function homeSceneSVG(st, vh){
     }
     for (let f = 0; f < 3; f++) { const s = b.p(170, 16 + f * 40, 18), e = b.p(170, 16 + f * 40, 34); add('<path d="M' + f1(s[0]) + ' ' + f1(s[1]) + 'L' + f1(e[0]) + ' ' + f1(e[1]) + 'L' + f1(e[0]) + ' ' + f1(e[1] - 18) + 'L' + f1(s[0]) + ' ' + f1(s[1] - 18) + 'Z" fill="' + url('glassD') + '" opacity=".8"/>'); }
     const t = b.p(120, 128, 30);
-    add('<g><path d="M' + f1(t[0] - 10) + ' ' + f1(t[1]) + 'v-22M' + f1(t[0] + 10) + ' ' + f1(t[1]) + 'v-22" stroke="' + shade('#555', dayK) + '" stroke-width="2"/><rect x="' + f1(t[0] - 15) + '" y="' + f1(t[1] - 46) + '" width="30" height="26" rx="6" fill="' + shade('#1d1d1f', dayK * 1.4) + '"/><rect x="' + f1(t[0] - 15) + '" y="' + f1(t[1] - 46) + '" width="30" height="26" rx="6" fill="#000" filter="' + url('grime') + '" opacity=".6"/></g>');
+    /* the water on the roof: a black GP tank, a polytank, a New York water tower, or none */
+    if (skin.tank === 'gp' || skin.tank === 'poly') {
+      add('<g><path d="M' + f1(t[0] - 10) + ' ' + f1(t[1]) + 'v-22M' + f1(t[0] + 10) + ' ' + f1(t[1]) + 'v-22" stroke="' + shade('#555', dayK) + '" stroke-width="2"/><rect x="' + f1(t[0] - 15) + '" y="' + f1(t[1] - 46) + '" width="30" height="26" rx="6" fill="' + shade('#1d1d1f', dayK * 1.4) + '"/><rect x="' + f1(t[0] - 15) + '" y="' + f1(t[1] - 46) + '" width="30" height="26" rx="6" fill="#000" filter="' + url('grime') + '" opacity=".6"/></g>');
+    } else if (skin.tank === 'wood') {
+      add('<g><path d="M' + f1(t[0] - 12) + ' ' + f1(t[1]) + 'l3 -20M' + f1(t[0] + 12) + ' ' + f1(t[1]) + 'l-3 -20" stroke="' + shade('#3a3027', dayK) + '" stroke-width="2"/>' +
+        '<rect x="' + f1(t[0] - 13) + '" y="' + f1(t[1] - 44) + '" width="26" height="24" fill="' + shade('#8a6a46', dayK) + '"/><path d="M' + f1(t[0] - 13) + ' ' + f1(t[1] - 36) + 'h26M' + f1(t[0] - 13) + ' ' + f1(t[1] - 28) + 'h26" stroke="#2b2b2b" stroke-width="1"/>' +
+        '<path d="M' + f1(t[0] - 15) + ' ' + f1(t[1] - 44) + ' L' + f1(t[0]) + ' ' + f1(t[1] - 58) + ' L' + f1(t[0] + 15) + ' ' + f1(t[1] - 44) + 'Z" fill="' + shade('#4a3a2c', dayK) + '"/></g>');
+    }
     const dsh = b.p(30, 128, 20);
     add('<path d="M' + f1(dsh[0]) + ' ' + f1(dsh[1] - 2) + 'a9 9 0 0 1 16 -4z" fill="' + shade('#ddd', dayK) + '"/>');
-    /* the fence and gate */
-    add('<rect x="10" y="' + (groundY + 6) + '" width="370" height="30" fill="' + shade('#c9b893', dayK) + '"/><rect x="10" y="' + (groundY + 6) + '" width="370" height="30" fill="#000" filter="' + url('grime') + '" opacity=".6"/><rect x="10" y="' + (groundY + 3) + '" width="370" height="4" fill="' + shade('#a89a7c', dayK) + '"/>');
-    add('<rect x="146" y="' + (groundY + 2) + '" width="74" height="34" fill="' + shade('#262b31', dayK * 1.3) + '"/>' + Array.from({ length: 14 }, (_, i) => '<rect x="' + (149 + i * 5) + '" y="' + (groundY + 4) + '" width="2" height="30" fill="' + shade('#3b434d', dayK * 1.3) + '"/>').join(''));
+    if (skin.bars) {
+      /* the fence and gate */
+      add('<rect x="10" y="' + (groundY + 6) + '" width="370" height="30" fill="' + shade('#c9b893', dayK) + '"/><rect x="10" y="' + (groundY + 6) + '" width="370" height="30" fill="#000" filter="' + url('grime') + '" opacity=".6"/><rect x="10" y="' + (groundY + 3) + '" width="370" height="4" fill="' + shade('#a89a7c', dayK) + '"/>');
+      add('<rect x="146" y="' + (groundY + 2) + '" width="74" height="34" fill="' + shade('#262b31', dayK * 1.3) + '"/>' + Array.from({ length: 14 }, (_, i) => '<rect x="' + (149 + i * 5) + '" y="' + (groundY + 4) + '" width="2" height="30" fill="' + shade('#3b434d', dayK * 1.3) + '"/>').join(''));
+    } else {
+      /* low iron railings and the steps up to the door */
+      add('<rect x="10" y="' + (groundY + 26) + '" width="370" height="2" fill="' + shade('#1b1d20', dayK) + '"/>' + Array.from({ length: 62 }, (_, i) => '<rect x="' + (12 + i * 6) + '" y="' + (groundY + 14) + '" width="1.4" height="16" fill="' + shade('#1b1d20', dayK) + '"/>').join('') +
+        '<path d="M176 ' + (groundY + 30) + ' h34 v-6 h-30 v-6 h26" fill="' + shade('#bdb6aa', dayK) + '"/>');
+    }
     add(pole(40));
     me.x = 108; me.y = 272;
   }
   if (st.tier >= 3) {
     /* a duplex in a gated estate: render and cladding, glass, a parapet roof */
     const big = st.tier === 4;
-    const b = box([96, 214], big ? 220 : 180, 60, big ? 112 : 96, '#efeae0', { flat: '#d8d2c6', noGrime: true });
+    const skin = k.skin, b = box([96, 214], big ? 220 : 180, 60, big ? 112 : 96, '#efeae0', { flat: '#d8d2c6', noGrime: true });
     add(b.parts.join(''));
     const cl = [b.p(0, 0, 0), b.p(70, 0, 0), b.p(70, b.h, 0), b.p(0, b.h, 0)];
     add(poly(cl, shade('#5f6469', dayK)));
@@ -13161,17 +13224,27 @@ function homeSceneSVG(st, vh){
     if (st.solar) { for (let i = 0; i < 5; i++) { const a = b.p(76 + i * 18, b.h + 6, 14), c2 = b.p(92 + i * 18, b.h + 6, 14), c3 = b.p(92 + i * 18, b.h + 14, 44), c4 = b.p(76 + i * 18, b.h + 14, 44); add(poly([a, c2, c3, c4], '#1c3767', ' stroke="#8fb3e8" stroke-width=".5"')); } }
     /* AC units on the side wall */
     for (let i = 0; i < 2; i++) { const a = b.p(b.w, 30 + i * 40, 14), c2 = b.p(b.w, 40 + i * 40, 28); add('<path d="M' + f1(a[0]) + ' ' + f1(a[1]) + 'L' + f1(c2[0]) + ' ' + f1(c2[1] + 10) + 'L' + f1(c2[0]) + ' ' + f1(c2[1]) + 'L' + f1(a[0]) + ' ' + f1(a[1] - 10) + 'Z" fill="' + shade('#e9e9e9', sideK * 1.2) + '"/>'); }
-    /* the fence: rendered wall, spikes, razor wire, a sliding gate and a gatehouse */
-    add('<rect x="0" y="' + (groundY - 4) + '" width="390" height="40" fill="' + shade('#d6d0c4', dayK) + '"/><rect x="0" y="' + (groundY - 6) + '" width="390" height="4" fill="' + shade('#8f8a80', dayK) + '"/>');
-    add('<path d="M0 ' + (groundY - 10) + Array.from({ length: 49 }, (_, i) => ' l4 -5 l4 5').join('') + '" fill="none" stroke="' + shade('#666', dayK) + '" stroke-width="1.1"/>');
-    add('<path d="M0 ' + (groundY - 18) + Array.from({ length: 33 }, () => ' q6 -6 12 0').join('') + '" fill="none" stroke="' + shade('#888', dayK) + '" stroke-width=".7" opacity=".8"/>');
-    add('<rect x="150" y="' + (groundY - 2) + '" width="100" height="38" fill="' + shade('#1d2127', dayK * 1.4) + '"/>' + Array.from({ length: 10 }, (_, i) => '<rect x="' + (154 + i * 10) + '" y="' + groundY + '" width="5" height="34" fill="' + shade('#323944', dayK * 1.4) + '"/>').join(''));
-    const gh = box([20, groundY + 34], 40, 26, 40, '#e7e2d8', { flat: '#2b2e33', noGrime: true });
-    add(gh.parts.join('') + win(gh, 8, 16, 22, 14, 'glass'));
-    /* a palm by the gate */
-    add('<g><path d="M346 ' + (groundY + 30) + ' q-10 -60 4 -120" stroke="' + shade('#6a4b2c', dayK) + '" stroke-width="5" fill="none"/>' +
-      ['M350 92 q-34 -6 -52 16 q26 -8 52 -14', 'M350 92 q-14 -28 -44 -26 q28 8 44 26', 'M350 92 q6 -30 34 -32 q-20 16 -34 32', 'M350 92 q30 -8 44 8 q-26 -4 -44 -8', 'M350 92 q-4 26 -28 40 q14 -20 28 -40', 'M350 92 q20 18 26 40 q-12 -22 -26 -40']
-        .map((d) => '<path d="' + d + '" fill="' + shade('#2f6b3a', dayK) + '"/>').join('') + '</g>');
+    if (skin.bars) {
+      /* the fence: rendered wall, spikes, razor wire, a sliding gate and a gatehouse */
+      add('<rect x="0" y="' + (groundY - 4) + '" width="390" height="40" fill="' + shade('#d6d0c4', dayK) + '"/><rect x="0" y="' + (groundY - 6) + '" width="390" height="4" fill="' + shade('#8f8a80', dayK) + '"/>');
+      add('<path d="M0 ' + (groundY - 10) + Array.from({ length: 49 }, (_, i) => ' l4 -5 l4 5').join('') + '" fill="none" stroke="' + shade('#666', dayK) + '" stroke-width="1.1"/>');
+      add('<path d="M0 ' + (groundY - 18) + Array.from({ length: 33 }, () => ' q6 -6 12 0').join('') + '" fill="none" stroke="' + shade('#888', dayK) + '" stroke-width=".7" opacity=".8"/>');
+      add('<rect x="150" y="' + (groundY - 2) + '" width="100" height="38" fill="' + shade('#1d2127', dayK * 1.4) + '"/>' + Array.from({ length: 10 }, (_, i) => '<rect x="' + (154 + i * 10) + '" y="' + groundY + '" width="5" height="34" fill="' + shade('#323944', dayK * 1.4) + '"/>').join(''));
+      const gh = box([20, groundY + 34], 40, 26, 40, '#e7e2d8', { flat: '#2b2e33', noGrime: true });
+      add(gh.parts.join('') + win(gh, 8, 16, 22, 14, 'glass'));
+    } else {
+      /* a low wall and a clipped hedge: nobody here needs razor wire */
+      add('<rect x="0" y="' + (groundY + 18) + '" width="390" height="14" fill="' + shade('#d6d0c4', dayK) + '"/><path d="M0 ' + (groundY + 18) + Array.from({ length: 40 }, () => ' q5 -9 10 0').join('') + ' V' + (groundY + 18) + 'Z" fill="' + shade('#3f6b3a', dayK) + '"/>');
+    }
+    if (skin.bars) {
+      /* a palm by the gate */
+      add('<g><path d="M346 ' + (groundY + 30) + ' q-10 -60 4 -120" stroke="' + shade('#6a4b2c', dayK) + '" stroke-width="5" fill="none"/>' +
+        ['M350 92 q-34 -6 -52 16 q26 -8 52 -14', 'M350 92 q-14 -28 -44 -26 q28 8 44 26', 'M350 92 q6 -30 34 -32 q-20 16 -34 32', 'M350 92 q30 -8 44 8 q-26 -4 -44 -8', 'M350 92 q-4 26 -28 40 q14 -20 28 -40', 'M350 92 q20 18 26 40 q-12 -22 -26 -40']
+          .map((d) => '<path d="' + d + '" fill="' + shade('#2f6b3a', dayK) + '"/>').join('') + '</g>');
+    } else {
+      /* a street tree, bare in winter */
+      add('<path d="M350 ' + (groundY + 30) + ' v-80" stroke="' + shade('#5a4632', dayK) + '" stroke-width="5"/><path d="M350 ' + (groundY - 30) + ' l-18 -20 M350 ' + (groundY - 40) + ' l16 -22" stroke="' + shade('#5a4632', dayK) + '" stroke-width="2.4"/>' + (/winter|snow/.test(st.season) ? '' : '<circle cx="350" cy="' + (groundY - 72) + '" r="34" fill="' + shade(st.season === 'autumn' ? '#b5651d' : '#3f6b3a', dayK) + '"/>'));
+    }
     me.x = 300; me.y = 270;
   }
 
@@ -13255,7 +13328,7 @@ function workLook(mode){
   const air = homeLook(), p = S.p, b = S.biz || null;
   /* the rival, across the street: as big as their business, outside when they want a fight */
   const rv = S.rival ? {name: S.rival.name, size: S.rival.size || 0, aggro: S.rival.aggro || 0} : null;
-  const base = {time: air.time, season: air.season, era: air.era, grid: air.grid, age: p.age, rival: rv};
+  const base = {city: air.city, time: air.time, season: air.season, era: air.era, grid: air.grid, age: p.age, rival: rv};
   if(mode === 'job' || (mode !== 'biz' && !b)){
     const job = p.job, real = job ? job.monthly / Math.max(0.01, S.cumInfl || 1) / Math.max(0.1, CITY().payMult || 1) : 0;
     const floor = job ? Math.max(1, Math.min(14, Math.round(2 + 3 * Math.log2(Math.max(0.25, real / 250000))))) : 0;
@@ -13521,7 +13594,9 @@ function workSceneSVG(st, vh){
    wrote. Read from the quarter's own record - the snapshot before and after,
    the journal, the digest - so nothing here is invented, and a quiet quarter
    is two quiet pictures. */
-const REEL_SEASON = {harmattan: 'Harmattan. Dust on everything, cold mornings.', rain: 'The rains. The street outside is a river again.', dry: 'Dry season. Hot nights, light that comes and goes.'};
+const REEL_SEASON = {harmattan: 'Harmattan. Dust on everything, cold mornings.', rain: 'The rains. The street outside is a river again.', dry: 'Dry season. Hot nights, light that comes and goes.',
+  cool: 'The cool months. Grey mornings, a jacket until noon.', winter: 'Winter. Dark by four, the heating on.', snow: 'Snow. The city slows, and the bills do not.',
+  spring: 'Spring. Light in the evenings again.', summer: 'Summer. Long days, and everyone is away in August.', autumn: 'Autumn. Leaves in the gutters, rain on the windows.'};
 /* what changed at home between two looks, in the order a person would say it */
 function homeChange(a, b){
   if(!a || !b) return '';
@@ -13670,7 +13745,7 @@ function hueHex(h, s, l){
 /* the place, with the moment's people and things in front of it */
 function momentSceneSVG(m, vh){
   const home = homeLook();
-  const air = {time: home.time, season: home.season, era: home.era, grid: home.grid, age: home.age};
+  const air = {city: home.city, time: home.time, season: home.season, era: home.era, grid: home.grid, age: home.age};
   /* the people and things, as a layer in the scene's own space */
   const overlay = function(k){
     const f1 = k.f1, shade = k.shade, person = k.person, gy = k.groundY, dayK = k.dayK;
@@ -13901,7 +13976,7 @@ function arrivalHTML(items){
    a director's stance is the same pure reading the vote uses. */
 function boardLook(){
   const air = homeLook(), b = S.biz;
-  const base = {time: air.time, season: air.season, era: air.era, grid: air.grid, seed: 61};
+  const base = {city: air.city, time: air.time, season: air.season, era: air.era, grid: air.grid, seed: 61};
   if(!b) return Object.assign(base, {none: true, label: 'No company, no boardroom'});
   const shares = b.shares || [], total = shares.reduce(function(s, h){ return s + (h.shares || 0); }, 0);
   const pctOf = function(h){ return total > 0 ? (h.shares || 0) / total * 100 : 0; };
@@ -14146,7 +14221,7 @@ function bothLayers(a, b){
 }
 
 /* -------------------------------------------------------------------------
-   Everything above, exported. 712 names: the simulation's whole surface.
+   Everything above, exported. 714 names: the simulation's whole surface.
    ------------------------------------------------------------------------- */
 export {
   ALL_EVENTS,
@@ -14169,6 +14244,7 @@ export {
   CAST_TRAITS,
   CITIES,
   CITY,
+  CITY_SKINS,
   CLOUD_SQL,
   CONTRACT_CLIENTS,
   CONTRACT_KINDS,
@@ -14741,6 +14817,7 @@ export {
   skillBand,
   skillRating,
   skillsRadarHTML,
+  skinOf,
   sleepDebt,
   snapshot,
   sparkline,
