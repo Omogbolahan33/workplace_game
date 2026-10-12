@@ -859,6 +859,21 @@ const EDITS = [
   { marker: 'function citySceneSVG(st, vh)', addition: true,
     name: 'citySceneSVG — Lagos from above, with your footprint on it',
     why: 'the lagoon, the islands, the peninsula, the Atlantic, Third Mainland and the link bridge, the neighbourhoods named, the city\'s lights at night, and a pin for each thing you own, as big as what stands behind it' },
+  { marker: 'function peopleLook()', addition: true,
+    name: 'peopleLook — everyone in your life, read for a picture',
+    why: 'the cast who are still here, warmest first, with their colours, age, money and whether a story is open; the dead to be remembered; your household (VISUAL.md, M9)' },
+  { marker: 'function castFigure(k, p, x, y, scale, folded)', addition: true,
+    name: 'castFigure — a person of the cast, drawn',
+    why: 'their own colours, grey past 58, agbada once they have money, a stick past 70, arms folded when they are cold, a gold mark when a story is open' },
+  { marker: 'function peopleSceneSVG(st, vh)', addition: true,
+    name: 'peopleSceneSVG — everyone gathered in your compound',
+    why: 'you in the middle with your household, the cast as close as they feel, the hostile at the edge, the dead on an easel; behind the People screen' },
+  { marker: 'function storyVisitorLayer()', addition: true,
+    name: 'storyVisitorLayer — whoever a story is open with, at your gate',
+    why: 'the first open story with a person brings them to your gate in the home scene, with the story\'s gold mark' },
+  { marker: 'function bothLayers(a, b)', addition: true,
+    name: 'bothLayers — two layers as one',
+    why: 'the home scene carries both what is coming back up the road and the visitor at the gate' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

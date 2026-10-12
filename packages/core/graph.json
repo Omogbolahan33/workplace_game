@@ -381,9 +381,10 @@
    "01-game-state.js: S",
    "38-the-boardroom.js: boardLook, boardSceneSVG",
    "39-your-city.js: cityLook, citySceneSVG",
+   "40-the-people.js: bothLayers, peopleLook, peopleSceneSVG, storyVisitorLayer",
    "09-resolving-decisions.js: comingBack",
-   "33-your-home.js: homeLook, homeSceneSVG, sceneKit",
    "37-what-comes-back.js: arrivalsLayer",
+   "33-your-home.js: homeLook, homeSceneSVG, sceneKit",
    "02-derived-state-personal-finance-career.js: CITY",
    "04-bizcapacity.js: bizCapacity, bizStage",
    "03-startbizcost-one-price-for-every-picker.js: leverActive",
@@ -438,6 +439,16 @@
    "01-game-state.js: S",
    "03-startbizcost-one-price-for-every-picker.js: bizList",
    "04-bizcapacity.js: bizStage",
+   "00-cities.js: esc"
+  ],
+  "externals": []
+ },
+ "40-the-people.js": {
+  "needs": [
+   "33-your-home.js: homeLook, homeSceneSVG",
+   "01-game-state.js: S",
+   "29-the-cast-who-remembers.js: castLook, relationWord",
+   "36-moments.js: hueHex",
    "00-cities.js: esc"
   ],
   "externals": []

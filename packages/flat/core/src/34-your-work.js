@@ -42,13 +42,18 @@ function sceneSVG(vh){
      drawn; the other cities get their maps with their skins (VISUAL.md, M10) */
   if(k.indexOf('money') === 0 && !/budget|property/.test(k) && S.city === 'lagos') return citySceneSVG(cityLook(), vh);
   if(mode) return workSceneSVG(workLook(mode), vh);
-  /* at home, whatever you set in motion is on its way up the road to you */
-  const coming = comingBack();
-  return homeSceneSVG(coming.length ? Object.assign({}, homeLook(), {extra: arrivalsLayer(coming)}) : homeLook(), vh);
+  /* the People screen is everyone gathered in your compound */
+  if(k === 'legacy/people') return peopleSceneSVG(peopleLook(), vh);
+  /* at home, whatever you set in motion is on its way up the road to you, and
+     whoever a story is open with is at your gate */
+  const coming = comingBack(), extra = bothLayers(coming.length ? arrivalsLayer(coming) : null, storyVisitorLayer());
+  return homeSceneSVG(extra ? Object.assign({}, homeLook(), {extra: extra}) : homeLook(), vh);
 }
 function workLook(mode){
   const air = homeLook(), p = S.p, b = S.biz || null;
-  const base = {time: air.time, season: air.season, era: air.era, grid: air.grid, age: p.age};
+  /* the rival, across the street: as big as their business, outside when they want a fight */
+  const rv = S.rival ? {name: S.rival.name, size: S.rival.size || 0, aggro: S.rival.aggro || 0} : null;
+  const base = {time: air.time, season: air.season, era: air.era, grid: air.grid, age: p.age, rival: rv};
   if(mode === 'job' || (mode !== 'biz' && !b)){
     const job = p.job, real = job ? job.monthly / Math.max(0.01, S.cumInfl || 1) / Math.max(0.1, CITY().payMult || 1) : 0;
     const floor = job ? Math.max(1, Math.min(14, Math.round(2 + 3 * Math.log2(Math.max(0.25, real / 250000))))) : 0;
@@ -109,6 +114,15 @@ function workSceneSVG(st, vh){
   /* branches: the same sign, further down the street */
   const branches = () => { for (let i = 0; i < (st.branches || 0); i++) { const bx = box([6 + i * 52, groundY - 2], 40, 14, 30 + (i % 2) * 8, '#e3d8c2', {flat: '#cdbd9c'}); add(bx.parts.join('') + sign(bx, 3, 20, 34, 7, st.name, brand) + door(bx, 14, 12, 18, '#2a2f36')); } };
   let me = {x: 300, y: 270};
+  /* the rival's place, across the street at the back: its height is the size of
+     their business, its sign theirs, and they are outside it when they are
+     spoiling for a fight */
+  if (st.rival && st.kind !== 'tower' && st.kind !== 'tolet') {
+    const rh = 22 + Math.min(140, st.rival.size) * .36, rb = box([318, groundY - 6], 62, 16, rh, '#d9d0bf', {flat: '#bdb2a0'});
+    add(rb.parts.join('') + sign(rb, 4, rh - 12, 54, 8, st.rival.name, '#8c1d1d') + door(rb, 22, 14, 18, '#2a2f36'));
+    if (st.rival.aggro > 60) add('<g><title>' + esc(st.rival.name) + '</title>' + person(352, groundY + 18, {shirt: '#8c1d1d', tie: true, skin: '#4a3020', scale: .95}) +
+      '<path d="M346.5 ' + (groundY - 3) + ' h11" stroke="#111" stroke-width="2.4" stroke-linecap="round" opacity=".6"/></g>');
+  }
   /* a company's premises are smaller than a tower: everything in front of the
      skyline is drawn larger, anchored at the horizon so it grows upward */
   const close = st.kind !== 'tower';

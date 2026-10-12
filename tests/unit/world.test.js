@@ -248,3 +248,29 @@ test('your city: everything you own, where it stands, as big as it is', async ()
   assert.match(C.worldHTML(), /<svg class="homescene"/);
   C.UI.tab = 'overview'; C.UI.sub = '';
 });
+
+test('the people in your life: gathered as close as they feel, the rival across the street', async () => {
+  const C = await world();
+  const c = C.S.cast;
+  c[0].relation = 90; c[2].relation = -60; c[3].alive = false;
+  C.UI.tab = 'legacy'; C.UI.sub = 'people';
+  assert.match(C.worldHTML(), /<svg class="homescene"[^>]*aria-label="The people in your life/, 'the People screen is not the gathering');
+  const L = C.peopleLook();
+  assert.equal(L.people[0].relation, Math.max(...L.people.map((p) => p.relation)), 'the warmest is not first');
+  assert.ok(!L.people.some((p) => p.id === c[3].id), 'someone who died is standing in the compound');
+  assert.ok(L.gone.includes(c[3].name), 'someone who died is not remembered');
+  assert.doesNotMatch(C.peopleSceneSVG(L, 560), /NaN|undefined/);
+  /* a story open with someone brings them to your gate */
+  C.S.threads = [{ id: 't1', arc: 'thecousin', stage: 0, next: C.S.turn + 1, castId: c[1].id, data: {} }];
+  C.UI.tab = 'overview'; C.UI.sub = '';
+  assert.match(C.worldHTML(), new RegExp(c[1].name + ' · [a-z]+ · a story is open'), 'the person a story is with is not at the gate');
+  /* the rival: across the street at work, outside when spoiling for a fight */
+  C.S.fin.cash = 40000000;
+  C.startBiz('retail', 'Tunde Ventures', 4000000, null);
+  C.S.rival.aggro = 80;
+  C.UI.tab = 'work'; C.UI.sub = 'rival';
+  const work = C.worldHTML();
+  assert.match(work, new RegExp(C.S.rival.name.toUpperCase()), 'the rival\'s sign is not across the street');
+  assert.match(work, new RegExp('<title>' + C.S.rival.name + '</title>'), 'an aggressive rival is not outside');
+  C.UI.tab = 'overview'; C.UI.sub = '';
+});
