@@ -31,11 +31,16 @@ function workSceneFor(sub){
   return '';
 }
 /* the scene for the screen you are on: your work under Work's career and
-   company screens, the boardroom under Governance, your home everywhere else */
+   company screens, the boardroom under Governance, your city under the money
+   screens, your home everywhere else */
 function sceneSVG(vh){
   const k = routeKey(), mode = k.indexOf('work/') === 0 ? workSceneFor(k.slice(5)) : '';
   /* the governance screens are the company's boardroom */
   if(k.indexOf('governance') === 0 && S.biz) return boardSceneSVG(boardLook(), vh);
+  /* the money screens are your city, from above: everything you own where it
+     stands; the budget and your things are the household's, at home. Lagos is
+     drawn; the other cities get their maps with their skins (VISUAL.md, M10) */
+  if(k.indexOf('money') === 0 && !/budget|property/.test(k) && S.city === 'lagos') return citySceneSVG(cityLook(), vh);
   if(mode) return workSceneSVG(workLook(mode), vh);
   /* at home, whatever you set in motion is on its way up the road to you */
   const coming = comingBack();

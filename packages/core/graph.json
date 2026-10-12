@@ -380,6 +380,7 @@
    "12-main.js: routeKey",
    "01-game-state.js: S",
    "38-the-boardroom.js: boardLook, boardSceneSVG",
+   "39-your-city.js: cityLook, citySceneSVG",
    "09-resolving-decisions.js: comingBack",
    "33-your-home.js: homeLook, homeSceneSVG, sceneKit",
    "37-what-comes-back.js: arrivalsLayer",
@@ -427,6 +428,16 @@
    "01-game-state.js: S",
    "26-governance-register-board.js: dirStance, resMeta",
    "28-votes-and-decisions.js: covenantBreaches",
+   "00-cities.js: esc"
+  ],
+  "externals": []
+ },
+ "39-your-city.js": {
+  "needs": [
+   "33-your-home.js: homeLook",
+   "01-game-state.js: S",
+   "03-startbizcost-one-price-for-every-picker.js: bizList",
+   "04-bizcapacity.js: bizStage",
    "00-cities.js: esc"
   ],
   "externals": []

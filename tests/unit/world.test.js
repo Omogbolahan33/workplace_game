@@ -220,3 +220,31 @@ test('the boardroom: who owns what is who sits, votes are hands, the bank watche
   assert.doesNotMatch(C.boardSceneSVG(L, 560), /NaN|undefined/);
   C.UI.tab = 'overview'; C.UI.sub = '';
 });
+
+test('your city: everything you own, where it stands, as big as it is', async () => {
+  const C = await world();
+  C.UI.tab = 'money';
+  C.UI.sub = 'markets';
+  assert.match(C.worldHTML(), /<svg class="cityscene"/, 'the money screens in Lagos are not the city');
+  C.UI.sub = 'budget';
+  assert.match(C.worldHTML(), /<svg class="homescene"/, 'the budget is the household\'s, at home');
+  C.UI.sub = 'markets';
+  /* a company, a branch, land, a rental: each a pin where it lives */
+  C.S.fin.cash = 300000000;
+  C.startBiz('logi', 'Swift Dispatch', 6000000, null);
+  C.openOutlet(C.S.biz, {});
+  C.S.assets.push({ id: 'land', value: 25000000 }, { id: 'rental', value: 60000000 });
+  let L = C.cityLook();
+  const kinds = L.pins.map((p) => p.kind + '@' + p.area);
+  assert.ok(kinds.includes('company@Apapa'), 'a logistics company is not in Apapa: ' + kinds.join(', '));
+  assert.ok(kinds.includes('land@Ibeju-Lekki') && kinds.includes('rental@Ogba'), 'property is not on the map: ' + kinds.join(', '));
+  assert.ok(L.pins.some((p) => p.kind === 'branch' || p.kind === 'site'), 'the branch is not on the map');
+  assert.equal(JSON.stringify(C.cityLook().pins.map((p) => p.area)), JSON.stringify(L.pins.map((p) => p.area)), 'a branch moved between two looks');
+  const biggest = L.pins.reduce((a, p) => (p.value > a.value ? p : a));
+  assert.equal(biggest.size, Math.max(...L.pins.map((p) => p.size)), 'the biggest holding is not the biggest pin');
+  assert.doesNotMatch(C.citySceneSVG(L, 560), /NaN|undefined/);
+  /* another city keeps its home until it has its own map */
+  C.S.city = 'abuja';
+  assert.match(C.worldHTML(), /<svg class="homescene"/);
+  C.UI.tab = 'overview'; C.UI.sub = '';
+});
