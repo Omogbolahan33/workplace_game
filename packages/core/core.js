@@ -13126,6 +13126,8 @@ function sceneKit(st, vh, tag){
   const finish = (cls, label) => {
     /* a moment's people and things, laid over the place before the air */
     if (st.extra) add(typeof st.extra === 'function' ? st.extra(self) : st.extra);
+    /* the air is something you look through, never something you tap */
+    add('<g pointer-events="none">');
     if (st.season === 'rain') { let r = ''; for (let i = 0; i < 120 + Math.round(-TOP / 3); i++) { const x0 = rnd() * (W + 40) - 20, y0 = TOP + rnd() * VH; r += 'M' + f1(x0) + ' ' + f1(y0) + 'l-3 9'; } add('<path d="' + r + '" stroke="#dfe7ee" stroke-opacity=".45" stroke-width=".7"/>'); }
     if (st.season === 'snow') { let sn = ''; for (let i = 0; i < 140 + Math.round(-TOP / 3); i++) sn += '<circle cx="' + f1(rnd() * W) + '" cy="' + f1(TOP + rnd() * VH) + '" r="' + (rnd() * 1.2 + .5).toFixed(2) + '"/>'; add('<g fill="#fff" opacity=".8">' + sn + '</g>'); }
     if (/winter|autumn|cool/.test(st.season)) add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#8a96a3" opacity=".12"/>');
@@ -13134,6 +13136,9 @@ function sceneKit(st, vh, tag){
     if (night) add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#0a1030" opacity=".18"/>');
     add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" filter="' + url('grain') + '" opacity=".9"/>');
     if (blackout && !st.gen && !st.solar && (night || dusk) && !st.noNepa && skin.outage) add('<text x="' + W / 2 + '" y="122" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="' + warm + '" opacity=".85">' + esc(skin.outage) + '</text>');
+    add('</g>');
+    /* the places you can tap, over everything (VISUAL.md, M11) */
+    if (st.hot) add(typeof st.hot === 'function' ? st.hot(self) : st.hot);
     return '<svg class="' + cls + '" viewBox="0 ' + TOP + ' ' + W + ' ' + VH + '" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(label) + '">' + out.join('') + '</svg>';
   };
   const self = {skin:skin, W:W, H:H, VH:VH, TOP:TOP, url:url, night:night, dusk:dusk, blackout:blackout, genOn:genOn, lights:lights,
@@ -13311,17 +13316,18 @@ function workSceneFor(sub){
 function sceneSVG(vh){
   const k = routeKey(), mode = k.indexOf('work/') === 0 ? workSceneFor(k.slice(5)) : '';
   /* the governance screens are the company's boardroom */
-  if(k.indexOf('governance') === 0 && S.biz) return boardSceneSVG(boardLook(), vh);
+  if(k.indexOf('governance') === 0 && S.biz){ const B = boardLook(); return boardSceneSVG(Object.assign(B, {hot: boardTaps(B)}), vh); }
   /* the money screens are your city, from above: everything you own where it
      stands; the budget and your things are the household's, at home */
   if(k.indexOf('money') === 0 && !/budget|property/.test(k)) return citySceneSVG(cityLook(), vh);
-  if(mode) return workSceneSVG(workLook(mode), vh);
+  if(mode){ const L = workLook(mode); return workSceneSVG(Object.assign(L, {hot: workTaps(L)}), vh); }
   /* the People screen is everyone gathered in your compound */
   if(k === 'legacy/people') return peopleSceneSVG(peopleLook(), vh);
   /* at home, whatever you set in motion is on its way up the road to you, and
      whoever a story is open with is at your gate */
   const coming = comingBack(), extra = bothLayers(coming.length ? arrivalsLayer(coming) : null, storyVisitorLayer());
-  return homeSceneSVG(extra ? Object.assign({}, homeLook(), {extra: extra}) : homeLook(), vh);
+  const look = homeLook(), visitor = storyVisitor();
+  return homeSceneSVG(Object.assign({}, look, {extra: extra || undefined, hot: homeTaps(look, visitor ? visitor.id : '')}), vh);
 }
 function workLook(mode){
   const air = homeLook(), p = S.p, b = S.biz || null;
@@ -14204,7 +14210,9 @@ function citySceneSVG(st, vh){
     const n = used[p.area] = (used[p.area] || 0) + 1, dx = (n - 1) * (p.size * 1.6) * (n % 2 ? 1 : -1);
     const x = base[0] + dx, y = base[1] - p.size * .2, r = p.size;
     const col = p.kind === 'home' ? '#f5b301' : p.kind === 'money' ? '#2fd47a' : p.kind === 'land' || p.kind === 'rental' ? '#5aa9ff' : p.decline ? '#ff9f43' : '#f2f4f7';
-    out.push('<g><title>' + esc(p.label + ' · ' + p.area) + '</title>' +
+    /* a pin is a control: it opens what it stands for */
+    const to = p.kind === 'home' ? ['money', 'budget'] : p.kind === 'company' || p.kind === 'branch' || p.kind === 'site' ? ['work', 'business'] : ['money', 'markets'];
+    out.push('<g class="hot" data-a="goto" data-t="' + to[0] + '" data-s="' + to[1] + '" role="button" tabindex="0" aria-label="' + esc(p.label + ', ' + p.area) + '"><title>' + esc(p.label + ' · ' + p.area) + '</title>' +
       '<ellipse cx="' + x.toFixed(1) + '" cy="' + (y + r * .9).toFixed(1) + '" rx="' + (r * .7).toFixed(1) + '" ry="' + (r * .22).toFixed(1) + '" fill="#000" opacity=".25"/>' +
       '<path d="M' + x.toFixed(1) + ' ' + (y + r * .9).toFixed(1) + ' l' + (-r * .45).toFixed(1) + ' ' + (-r * .7).toFixed(1) + ' a' + (r * .62).toFixed(1) + ' ' + (r * .62).toFixed(1) + ' 0 1 1 ' + (r * .9).toFixed(1) + ' 0z" fill="' + col + '" stroke="#0b1017" stroke-width="1"/>' +
       '<g transform="translate(' + x.toFixed(1) + ' ' + (y - r * .25).toFixed(1) + ')">' + glyph(p.kind, r) + '</g></g>');
@@ -14246,7 +14254,10 @@ function castFigure(k, p, x, y, scale, folded){
   if(p.age >= 70) s += '<path d="M' + (x + 9 * scale).toFixed(1) + ' ' + (y - 16 * scale).toFixed(1) + ' l2 ' + (16 * scale).toFixed(1) + '" stroke="#6a4b2c" stroke-width="' + (1.4 * scale).toFixed(1) + '" stroke-linecap="round"/>';
   if(folded) s += '<path d="M' + (x - 6 * scale).toFixed(1) + ' ' + (y - 22 * scale).toFixed(1) + ' h' + (12 * scale).toFixed(1) + '" stroke="#111" stroke-width="' + (2.6 * scale).toFixed(1) + '" stroke-linecap="round" opacity=".6"/>';
   if(p.story) s += '<circle cx="' + x.toFixed(1) + '" cy="' + (y - 52 * scale).toFixed(1) + '" r="' + (3.4 * scale).toFixed(1) + '" fill="#f5b301" stroke="#0b1017" stroke-width="1"/>';
-  return '<g><title>' + esc(p.name + ' · ' + relationWord(p.relation) + (p.story ? ' · a story is open' : '')) + '</title>' + s + '</g>';
+  const said = p.name + ' · ' + relationWord(p.relation) + (p.story ? ' · a story is open' : '');
+  /* in the gathering a person is a control: tapping them opens their card */
+  const tap = p.tap ? ' class="hot" data-a="hot" data-k="person" data-c="' + esc(p.id) + '" role="button" tabindex="0" aria-label="' + esc(said) + '"' : '';
+  return '<g' + tap + '><title>' + esc(said) + '</title>' + s + '</g>';
 }
 /* the gathering: you in the middle, your household beside you, the cast as
    close as they feel, the dead remembered */
@@ -14267,20 +14278,23 @@ function peopleSceneSVG(st, vh){
       const dist = hostile ? 175 : 46 + rank * 30 + Math.max(0, 70 - p.relation) * .55;
       const x = Math.max(16, Math.min(374, 195 + side * dist)), y = gy + 96 - Math.min(rank, 5) * 4;
       const scale = hostile ? 1.35 : Math.max(1.15, 1.75 - rank * .12);
-      out.push(castFigure(k, p, x, y, scale, hostile || p.relation < 5));
+      out.push(castFigure(k, Object.assign({tap: true}, p), x, y, scale, hostile || p.relation < 5));
     });
     /* your household, with you */
     if(st.spouse) out.push(person(222, gy + 112, {shirt: '#b8275f', dress: true, gele: '#d4a017', skin: '#5a3b27', scale: 1.85}));
     for(let i = 0; i < Math.min(4, st.kids || 0); i++) out.push(person(168 - i * 20, gy + 116, {shirt: ['#e7b931', '#2fae6a', '#4a8fe0', '#e05a4a'][i], skin: '#7d573b', scale: 1.05 + Math.min(.6, (st.kidAge || 0) * .05)}));
-    out.push(person(195, gy + 114, {shirt: S.p && S.p.job ? '#ece7dc' : '#3c79c4', legs: '#20242c', tie: !!(S.p && S.p.job), scale: 2, grey: st.age >= 50}));
+    out.push('<g class="hot" data-a="hot" data-k="you" role="button" tabindex="0" aria-label="You"><title>You</title>' + person(195, gy + 114, {shirt: S.p && S.p.job ? '#ece7dc' : '#3c79c4', legs: '#20242c', tie: !!(S.p && S.p.job), scale: 2, grey: st.age >= 50}) + '</g>');
     return out.join('');
   };
   return homeSceneSVG(Object.assign({}, st, {extra: layer, label: st.label}), vh);
 }
 /* at home, whoever a story is open with is at your gate */
-function storyVisitorLayer(){
+function storyVisitor(){
   const th = (S.threads || []).filter(function(t){ return t.castId; })[0];
-  const c = th ? (S.cast || []).find(function(x){ return x.id === th.castId && x.alive; }) : null;
+  return th ? (S.cast || []).find(function(x){ return x.id === th.castId && x.alive; }) || null : null;
+}
+function storyVisitorLayer(){
+  const c = storyVisitor();
   if(!c) return null;
   const L = castLook(c), p = {name: c.name, relation: c.relation, age: c.age, rich: (c.wealth || 0) > 65, story: true, shirt: hueHex(L.hue, .5, .58), skin: L.skin};
   return function(k){ return castFigure(k, p, 334, k.groundY + 96, 1.4, c.relation < 5); };
@@ -14290,9 +14304,84 @@ function bothLayers(a, b){
   if(!a) return b; if(!b) return a;
   return function(k){ return a(k) + b(k); };
 }
+/* =========================================================================
+   Tap the scene (VISUAL.md, M11)
+   ========================================================================= */
+/* The scene behind every screen is a place you can touch. Your house opens
+   the budget; the generator, the car and the solar open what you own; you
+   open a card about your own life; a person - in the gathering, or at your
+   gate - opens their card; your premises open the business and the rival's
+   place opens the rival; in the boardroom the register, the table and the
+   bank's man open their screens; on the map each pin opens what it stands for.
+   Every zone is an ordinary control: `goto` to a screen the tabs already
+   reach, or `hot` for a card whose buttons are the game's own buttons - the
+   same actions through the same dispatcher, refused for the same reasons.
+   Nothing here is a new way to change the run. */
+function hotZone(x, y, w, h, label, attrs){
+  const data = Object.keys(attrs).map(function(k){ return ' data-' + k + '="' + esc(attrs[k]) + '"'; }).join('');
+  return '<rect class="hotzone" x="' + Math.round(x) + '" y="' + Math.round(y) + '" width="' + Math.round(w) + '" height="' + Math.round(h) + '" rx="10"' +
+    ' fill="#fff" fill-opacity="0" role="button" tabindex="0" aria-label="' + esc(label) + '"' + data + '><title>' + esc(label) + '</title></rect>';
+}
+function goZone(x, y, w, h, label, tab, sub){ return hotZone(x, y, w, h, label, {a: 'goto', t: tab, s: sub}); }
+/* the three things you can do for your household, in one place: the People
+   screen, in both renderers, and the card you open by tapping yourself */
+function householdButtonsHTML(){
+  return '<button class="btn xs" data-a="spend" data-k="family">Help family ('+fmt(Math.round(150000*S.cumInfl))+')</button>'+
+    '<button class="btn xs" data-a="spend" data-k="health">Private care ('+fmt(Math.round(220000*S.cumInfl))+')</button>'+
+    '<button class="btn xs" data-a="spend" data-k="social">Be seen ('+fmt(Math.round(120000*S.cumInfl))+')</button>';
+}
+/* at home: the house, what you own, you, and whoever is at the gate */
+function homeTaps(st, visitorId){
+  return function(k){
+    const gy = k.groundY, out = [];
+    const house = st.tier === 1 ? [20, 136, 340, 82] : st.tier === 2 ? [110, 30, 215, 195] : [90, 56, 250, 160];
+    out.push(goZone(house[0], house[1], house[2], house[3], 'Your home: the budget', 'money', 'budget'));
+    if(st.gen){ const g = st.tier >= 3 ? [66, gy + 14, 50, 40] : st.tier === 2 ? [34, gy + 26, 34, 30] : [294, gy + 20, 34, 26]; out.push(goZone(g[0], g[1], g[2], g[3], 'Your generator: what you own', 'money', 'property')); }
+    if(st.solar && st.tier >= 3) out.push(goZone(200, 40, 110, 30, 'Your solar: what you own', 'money', 'property'));
+    if(st.car){
+      const cars = st.tier >= 3 ? [[214, gy + 42], [120, gy + 54]] : st.tier === 2 ? [[236, gy + 44]] : [[196, gy + 44]];
+      cars.slice(0, Math.max(1, st.car)).forEach(function(c){ out.push(goZone(c[0], c[1], 84, 38, 'Your car: what you own', 'money', 'property')); });
+    }
+    const me = st.tier >= 3 ? [300, 270] : st.tier === 2 ? [108, 272] : [150, 268];
+    out.push(hotZone(me[0] - 14, me[1] - 60, 28, 62, 'You: your health, your family, your standing', {a: 'hot', k: 'you'}));
+    if(visitorId) out.push(hotZone(320, gy + 32, 30, 66, 'At your gate', {a: 'hot', k: 'person', c: visitorId}));
+    return out.join('');
+  };
+}
+/* at work: the premises or the tower, and the rival's place across the street */
+function workTaps(st){
+  return function(k){
+    const gy = k.groundY, out = [];
+    if(st.kind === 'tower') out.push(goZone(110, -30, 214, 250, st.employed ? 'Your job' : 'Looking for work', 'work', 'career'));
+    else out.push(goZone(54, gy - 134, 293, 183, st.kind === 'tolet' ? 'Start a company' : (st.name || 'Your company'), 'work', 'business'));
+    if(st.rival && st.kind !== 'tower' && st.kind !== 'tolet') out.push(goZone(316, gy - 80, 74, 104, 'Your rival: ' + st.rival.name, 'work', 'rival'));
+    return out.join('');
+  };
+}
+/* in the boardroom: the register on the wall, the table, the bank's man */
+function boardTaps(st){
+  return function(k){
+    const gy = k.groundY, out = [];
+    out.push(goZone(36, gy - 66, 250, 170, 'The board', 'governance', 'board'));
+    out.push(goZone(280, gy - 138, 84, 98, 'The register: who owns what', 'governance', 'register'));
+    if(st.lender) out.push(goZone(284, gy - 40, 36, 92, 'The bank: covenants', 'governance', 'pack'));
+    return out.join('');
+  };
+}
+/* the card a tap opens: a person, or you */
+function hotModal(M){
+  if(M.kind === 'person'){
+    const c = (S.cast || []).find(function(x){ return x.id === M.id; });
+    if(!c) return modalHTML('<h2>Not here</h2>', '<div class="tiny muted">They are not in your life any more.</div>', '<button class="btn primary" data-a="close">Close</button>');
+    return modalHTML('<h2>' + esc(c.name) + '</h2>', '<div class="ctiles one">' + castTileHTML(c) + '</div>',
+      '<button class="btn" data-a="goto" data-t="legacy" data-s="people">Everyone</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:420px"');
+  }
+  return modalHTML('<h2>You</h2>', lifeRingsHTML() + '<div class="row wrap" style="margin-top:12px;gap:6px">' + householdButtonsHTML() + '</div>',
+    '<button class="btn" data-a="goto" data-t="legacy" data-s="record">Your record</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
+}
 
 /* -------------------------------------------------------------------------
-   Everything above, exported. 711 names: the simulation's whole surface.
+   Everything above, exported. 719 names: the simulation's whole surface.
    ------------------------------------------------------------------------- */
 export {
   ALL_EVENTS,
@@ -14458,6 +14547,7 @@ export {
   boardProposes,
   boardSceneSVG,
   boardSkill,
+  boardTaps,
   bothLayers,
   budgetJarHTML,
   budgetMarkHTML,
@@ -14617,6 +14707,7 @@ export {
   giveRaise,
   gmCoverQ,
   gmul,
+  goZone,
   goodPrice,
   goodTileHTML,
   goodsResale,
@@ -14645,8 +14736,11 @@ export {
   homeChange,
   homeLook,
   homeSceneSVG,
+  homeTaps,
   host,
   hostCalls,
+  hotModal,
+  hotZone,
   hoursBudget,
   hoursLeft,
   hoursSpent,
@@ -14666,6 +14760,7 @@ export {
   houseTimeBoost,
   houseToggleDeclare,
   houseTrain,
+  householdButtonsHTML,
   hueHex,
   importProfile,
   importStr,
@@ -14924,6 +15019,7 @@ export {
   stepQuality,
   stepRamp,
   stepRival,
+  storyVisitor,
   storyVisitorLayer,
   subLabel,
   submitBid,
@@ -14998,6 +15094,7 @@ export {
   workLook,
   workSceneFor,
   workSceneSVG,
+  workTaps,
   worldGlyph,
   worldHTML,
   worldHUD,

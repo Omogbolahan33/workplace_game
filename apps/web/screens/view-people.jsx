@@ -15,7 +15,7 @@
      health is `lifeRingsHTML()`. One converted screen does not get to have its
      own opinion about what a person looks like.
 */
-import { S, fmt, castTileHTML, lifeRingsHTML } from '@ledger/core';
+import { S, castTileHTML, lifeRingsHTML, householdButtonsHTML } from '@ledger/core';
 import { RivalCard } from './view-rival.jsx';
 import Group from './group.jsx';
 
@@ -73,11 +73,8 @@ export default function ViewPeople() {
           <div className="tiny muted">
             {household}{p.kids > 0 ? ' · ' + p.kids + ' child' + (p.kids === 1 ? '' : 'ren') : ''}
           </div>
-          <div className="row wrap" style={{ marginTop: '9px' }}>
-            <button className="btn xs" data-a="spend" data-k="family">Help family ({fmt(Math.round(150000 * S.cumInfl))})</button>
-            <button className="btn xs" data-a="spend" data-k="health">Private care ({fmt(Math.round(220000 * S.cumInfl))})</button>
-            <button className="btn xs" data-a="spend" data-k="social">Be seen ({fmt(Math.round(120000 * S.cumInfl))})</button>
-          </div>
+          {/* the household's three, core's - the card you open by tapping yourself has the same */}
+          <div className="row wrap" style={{ marginTop: '9px' }} dangerouslySetInnerHTML={{ __html: householdButtonsHTML() }} />
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 
-import { D, PRINCIPLES, S, UI, advanceModal, anotherBizModal, archOf, arrivalHTML, bizAccounts, bizById, clamp, dateLabel, deedOf, endModal, esc, evBody, evText, fmt, govVoteModal, helpModal, modalHTML, momentHTML, negFmt, negoModal, negoTacticButtons, optHint, optLabel, pct, profileModal, resultFxHTML, runInfoModal, seasonModal, settingsModal, startModal, yearModal } from '@ledger/core';
+import { D, PRINCIPLES, S, UI, advanceModal, anotherBizModal, archOf, arrivalHTML, bizAccounts, bizById, clamp, dateLabel, deedOf, endModal, esc, evBody, evText, fmt, govVoteModal, helpModal, hotModal, modalHTML, momentHTML, negFmt, negoModal, negoTacticButtons, optHint, optLabel, pct, profileModal, resultFxHTML, runInfoModal, seasonModal, settingsModal, startModal, yearModal } from '@ledger/core';
 import { Q } from './00-q.js';
 import { render, shellDraw } from './03-render.js';
 
@@ -17,6 +17,7 @@ export function renderModal(){
   if(M.type==='profile'){ host.innerHTML = profileModal(); return; }
   if(M.type==='runinfo'){ host.innerHTML = runInfoModal(M.id); return; }
   if(M.type==='advance'){ host.innerHTML = advanceModal(M); return; }
+  if(M.type==='hot'){ host.innerHTML = hotModal(M); return; }
   if(M.type==='event'){
     const ev = M.ev;
     /* An event can go stale while it is still open. The common case is a

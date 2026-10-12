@@ -303,3 +303,29 @@ test('every city is its own place: its seasons, its outages, its skyline', async
   }
   C.S.city = 'lagos'; C.S.turn = 0;
 });
+
+test('the scene is a place you can tap: every place is an ordinary control', async () => {
+  const C = await world();
+  const controls = (html) => [...html.matchAll(/<(?:rect|g) class="(?:hotzone|hot)"[^>]*>/g)].map((m) => m[0]);
+  const attr = (tag, k) => (tag.match(new RegExp('data-' + k + '="([^"]*)"')) || [])[1];
+  /* at home: the house opens the budget, you open your card */
+  C.UI.tab = 'overview'; C.UI.sub = '';
+  let cs = controls(C.worldHTML());
+  assert.ok(cs.some((t) => attr(t, 'a') === 'goto' && attr(t, 's') === 'budget'), 'the house does not open the budget');
+  assert.ok(cs.some((t) => attr(t, 'a') === 'hot' && attr(t, 'k') === 'you'), 'you are not a control at home');
+  for (const t of cs) {
+    assert.match(t, /role="button"/); assert.match(t, /tabindex="0"/); assert.match(t, /aria-label="[^"]+"/);
+    /* the scene fires only the tabs' own goto and the card it opens (ACT is the ui's; the audit gate holds both exist) */
+    assert.ok(['goto', 'hot'].includes(attr(t, 'a')), 'a place in the scene fires an action it should not: ' + attr(t, 'a'));
+  }
+  /* in the gathering every living person opens their card, and the card is their tile */
+  C.UI.tab = 'legacy'; C.UI.sub = 'people';
+  cs = controls(C.worldHTML()).filter((t) => attr(t, 'k') === 'person');
+  assert.equal(cs.length, C.peopleLook().people.length, 'not everyone in the gathering can be tapped');
+  const id = attr(cs[0], 'c');
+  assert.match(C.hotModal({ type: 'hot', kind: 'person', id: id }), /class="ctile/);
+  assert.match(C.hotModal({ type: 'hot', kind: 'you' }), /data-a="spend" data-k="family"/);
+  /* the air never catches a tap meant for the scene */
+  assert.match(C.worldHTML(), /<g pointer-events="none">/);
+  C.UI.tab = 'overview'; C.UI.sub = '';
+});

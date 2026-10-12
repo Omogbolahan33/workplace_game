@@ -336,6 +336,8 @@ const ACT = {
   /* every explanation the game has, shown or folded away: the world-first
      screen keeps the prose one tap off, never deleted */
   details:   e=>{ UI.details = !UI.details; render(); },
+  /* a tap on the scene: the card for a person, or for you (VISUAL.md, M11) */
+  hot:       e=>{ UI.modal = {type:'hot', kind:e.dataset.k || 'you', id:e.dataset.c || ''}; render(); },
   /* the deal is the date's, so pressing it twice deals the same life twice */
   dealtoday: e=>{ _cfg.dealt = todaysLife(); UI.modal = {type:'start'}; render(); },
   undeal:    e=>{ _cfg.dealt = null; UI.modal = {type:'start'}; render(); },
@@ -1475,6 +1477,12 @@ document.addEventListener('click', function(e){
   }
 });
 document.addEventListener('keydown', function(e){
+  /* a place in the scene is a control without being a <button>: Enter and
+     Space press it, as they press a button */
+  const kt = /** @type {Element} */ (e.target);
+  if((e.key==='Enter' || e.key===' ') && kt && kt.getAttribute && kt.getAttribute('role')==='button' && kt.getAttribute('data-a') && kt.tagName!=='BUTTON'){
+    e.preventDefault(); kt.dispatchEvent(new window.MouseEvent('click', {bubbles:true})); return;
+  }
   if(e.key==='Escape' && UI.modal){
     if(UI.modal.type==='advance'){ if(UI._anim && UI._anim.finish) UI._anim.finish(); else { UI.modal=null; render(); } return; }
     if(UI.modal.type!=='start' && UI.modal.type!=='nego'){ UI.modal=null; render(); }

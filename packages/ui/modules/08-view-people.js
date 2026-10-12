@@ -1,5 +1,5 @@
 
-import { BIZ, NEXT_DEST, S, agendaItems, castTileHTML, esc, fmt, lifeRingsHTML, nextBtn, statRow, subLabel } from '@ledger/core';
+import { BIZ, NEXT_DEST, S, agendaItems, castTileHTML, esc, householdButtonsHTML, lifeRingsHTML, nextBtn, statRow, subLabel } from '@ledger/core';
 
 /* Generated from src/08-view-people.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export function viewPeople(){
@@ -40,9 +40,7 @@ export function viewPeople(){
     '<div class="tiny muted">'+esc((S.p.married?'Married to '+(S.p.spouseName||'your spouse'):(S.p.kids>0?'Not married, with children':'Not married'))+
     (S.p.kids>0? ' · '+S.p.kids+' child'+(S.p.kids===1?'':'ren'):''))+'</div>'+
     '<div class="row wrap" style="margin-top:9px">'+
-    '<button class="btn xs" data-a="spend" data-k="family">Help family ('+fmt(Math.round(150000*S.cumInfl))+')</button>'+
-    '<button class="btn xs" data-a="spend" data-k="health">Private care ('+fmt(Math.round(220000*S.cumInfl))+')</button>'+
-    '<button class="btn xs" data-a="spend" data-k="social">Be seen ('+fmt(Math.round(120000*S.cumInfl))+')</button>'+
+    householdButtonsHTML()+
     '</div></div>';
   h += '<div class="card" style="margin-top:12px"><h3>Your rival</h3>';
   if(S.rival){

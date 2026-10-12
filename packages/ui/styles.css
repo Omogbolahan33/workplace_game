@@ -629,6 +629,15 @@ body.terse .prose{display:none}
 /* the road ahead: each thing coming back at its quarter */
 .roadwrap{margin:0 0 10px;padding:8px 10px 4px;border-radius:14px;background:var(--panel2);border:1px solid var(--line)}
 .road{width:100%;display:block}
+/* the places you can tap in the scene: invisible until you reach for them, and
+   outlined once, softly, when the scene first appears so they can be found */
+.hotzone,.hot{cursor:pointer;outline:none}
+.hotzone{animation:hotfind 2.6s ease-out 1}
+.hotzone:hover,.hotzone:focus-visible{fill-opacity:.07;stroke:#f5b301;stroke-width:1.6;stroke-dasharray:5 4}
+.hot:hover,.hot:focus-visible{filter:drop-shadow(0 0 5px rgba(245,179,1,.9))}
+@keyframes hotfind{0%{stroke:#f5b301;stroke-width:1.4;stroke-dasharray:5 4;stroke-opacity:.9}100%{stroke-opacity:0}}
+@media (prefers-reduced-motion:reduce){.hotzone{animation:none}}
+.ctiles.one{grid-template-columns:1fr}
 /* the shop as a shelf */
 .gtile .bico{position:relative}
 .gtile .gown{position:absolute;right:0;top:0;font-size:11px;font-weight:700;color:#1a1405;background:var(--acc);border-radius:10px;padding:1px 6px;line-height:1.4}

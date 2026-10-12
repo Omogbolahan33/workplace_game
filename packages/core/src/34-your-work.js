@@ -36,17 +36,18 @@ function workSceneFor(sub){
 function sceneSVG(vh){
   const k = routeKey(), mode = k.indexOf('work/') === 0 ? workSceneFor(k.slice(5)) : '';
   /* the governance screens are the company's boardroom */
-  if(k.indexOf('governance') === 0 && S.biz) return boardSceneSVG(boardLook(), vh);
+  if(k.indexOf('governance') === 0 && S.biz){ const B = boardLook(); return boardSceneSVG(Object.assign(B, {hot: boardTaps(B)}), vh); }
   /* the money screens are your city, from above: everything you own where it
      stands; the budget and your things are the household's, at home */
   if(k.indexOf('money') === 0 && !/budget|property/.test(k)) return citySceneSVG(cityLook(), vh);
-  if(mode) return workSceneSVG(workLook(mode), vh);
+  if(mode){ const L = workLook(mode); return workSceneSVG(Object.assign(L, {hot: workTaps(L)}), vh); }
   /* the People screen is everyone gathered in your compound */
   if(k === 'legacy/people') return peopleSceneSVG(peopleLook(), vh);
   /* at home, whatever you set in motion is on its way up the road to you, and
      whoever a story is open with is at your gate */
   const coming = comingBack(), extra = bothLayers(coming.length ? arrivalsLayer(coming) : null, storyVisitorLayer());
-  return homeSceneSVG(extra ? Object.assign({}, homeLook(), {extra: extra}) : homeLook(), vh);
+  const look = homeLook(), visitor = storyVisitor();
+  return homeSceneSVG(Object.assign({}, look, {extra: extra || undefined, hot: homeTaps(look, visitor ? visitor.id : '')}), vh);
 }
 function workLook(mode){
   const air = homeLook(), p = S.p, b = S.biz || null;

@@ -349,7 +349,7 @@ Six sub-tabs (`GOV_SUBS`): pack, register, board, votes, deed, bids.
 
 ---
 
-## 15. Complete action index — all 174 entries in `ACT`
+## 15. Complete action index — all 175 entries in `ACT`
 
 Every one of these must still be reachable after the rebuild, or explicitly
 marked for removal here.
@@ -530,6 +530,7 @@ marked for removal here.
 | 15.172 | `undeal` | [x] added with F4 — put today's life back and choose who you are instead |
 | 15.173 | ~~`worldfocus`~~ | [x] REMOVED with the city's districts (VISUAL.md, M1) — the scene behind every screen is your home, and the tabs are the way between screens |
 | 15.174 | `details` | [x] added with the world-first screen — the HUD's (i): shows or folds away every explanation (folds, coaching notes, the vignette, the screen hint) |
+| 15.175 | `hot` | [x] added with the scene you can tap (VISUAL.md, M11) — a tap on a person in the scene opens their card (the cast tile: favour, send money, let it lapse), and a tap on yourself opens yours (your rings and the household's three: help family, private care, be seen). Every other place in the scene is a plain `goto` |
 ---
 
 ## 16. Game state shape (the spine)

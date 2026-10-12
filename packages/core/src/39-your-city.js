@@ -159,7 +159,9 @@ function citySceneSVG(st, vh){
     const n = used[p.area] = (used[p.area] || 0) + 1, dx = (n - 1) * (p.size * 1.6) * (n % 2 ? 1 : -1);
     const x = base[0] + dx, y = base[1] - p.size * .2, r = p.size;
     const col = p.kind === 'home' ? '#f5b301' : p.kind === 'money' ? '#2fd47a' : p.kind === 'land' || p.kind === 'rental' ? '#5aa9ff' : p.decline ? '#ff9f43' : '#f2f4f7';
-    out.push('<g><title>' + esc(p.label + ' · ' + p.area) + '</title>' +
+    /* a pin is a control: it opens what it stands for */
+    const to = p.kind === 'home' ? ['money', 'budget'] : p.kind === 'company' || p.kind === 'branch' || p.kind === 'site' ? ['work', 'business'] : ['money', 'markets'];
+    out.push('<g class="hot" data-a="goto" data-t="' + to[0] + '" data-s="' + to[1] + '" role="button" tabindex="0" aria-label="' + esc(p.label + ', ' + p.area) + '"><title>' + esc(p.label + ' · ' + p.area) + '</title>' +
       '<ellipse cx="' + x.toFixed(1) + '" cy="' + (y + r * .9).toFixed(1) + '" rx="' + (r * .7).toFixed(1) + '" ry="' + (r * .22).toFixed(1) + '" fill="#000" opacity=".25"/>' +
       '<path d="M' + x.toFixed(1) + ' ' + (y + r * .9).toFixed(1) + ' l' + (-r * .45).toFixed(1) + ' ' + (-r * .7).toFixed(1) + ' a' + (r * .62).toFixed(1) + ' ' + (r * .62).toFixed(1) + ' 0 1 1 ' + (r * .9).toFixed(1) + ' 0z" fill="' + col + '" stroke="#0b1017" stroke-width="1"/>' +
       '<g transform="translate(' + x.toFixed(1) + ' ' + (y - r * .25).toFixed(1) + ')">' + glyph(p.kind, r) + '</g></g>');

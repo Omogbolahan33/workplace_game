@@ -32,7 +32,10 @@ function castFigure(k, p, x, y, scale, folded){
   if(p.age >= 70) s += '<path d="M' + (x + 9 * scale).toFixed(1) + ' ' + (y - 16 * scale).toFixed(1) + ' l2 ' + (16 * scale).toFixed(1) + '" stroke="#6a4b2c" stroke-width="' + (1.4 * scale).toFixed(1) + '" stroke-linecap="round"/>';
   if(folded) s += '<path d="M' + (x - 6 * scale).toFixed(1) + ' ' + (y - 22 * scale).toFixed(1) + ' h' + (12 * scale).toFixed(1) + '" stroke="#111" stroke-width="' + (2.6 * scale).toFixed(1) + '" stroke-linecap="round" opacity=".6"/>';
   if(p.story) s += '<circle cx="' + x.toFixed(1) + '" cy="' + (y - 52 * scale).toFixed(1) + '" r="' + (3.4 * scale).toFixed(1) + '" fill="#f5b301" stroke="#0b1017" stroke-width="1"/>';
-  return '<g><title>' + esc(p.name + ' · ' + relationWord(p.relation) + (p.story ? ' · a story is open' : '')) + '</title>' + s + '</g>';
+  const said = p.name + ' · ' + relationWord(p.relation) + (p.story ? ' · a story is open' : '');
+  /* in the gathering a person is a control: tapping them opens their card */
+  const tap = p.tap ? ' class="hot" data-a="hot" data-k="person" data-c="' + esc(p.id) + '" role="button" tabindex="0" aria-label="' + esc(said) + '"' : '';
+  return '<g' + tap + '><title>' + esc(said) + '</title>' + s + '</g>';
 }
 /* the gathering: you in the middle, your household beside you, the cast as
    close as they feel, the dead remembered */
@@ -53,20 +56,23 @@ function peopleSceneSVG(st, vh){
       const dist = hostile ? 175 : 46 + rank * 30 + Math.max(0, 70 - p.relation) * .55;
       const x = Math.max(16, Math.min(374, 195 + side * dist)), y = gy + 96 - Math.min(rank, 5) * 4;
       const scale = hostile ? 1.35 : Math.max(1.15, 1.75 - rank * .12);
-      out.push(castFigure(k, p, x, y, scale, hostile || p.relation < 5));
+      out.push(castFigure(k, Object.assign({tap: true}, p), x, y, scale, hostile || p.relation < 5));
     });
     /* your household, with you */
     if(st.spouse) out.push(person(222, gy + 112, {shirt: '#b8275f', dress: true, gele: '#d4a017', skin: '#5a3b27', scale: 1.85}));
     for(let i = 0; i < Math.min(4, st.kids || 0); i++) out.push(person(168 - i * 20, gy + 116, {shirt: ['#e7b931', '#2fae6a', '#4a8fe0', '#e05a4a'][i], skin: '#7d573b', scale: 1.05 + Math.min(.6, (st.kidAge || 0) * .05)}));
-    out.push(person(195, gy + 114, {shirt: S.p && S.p.job ? '#ece7dc' : '#3c79c4', legs: '#20242c', tie: !!(S.p && S.p.job), scale: 2, grey: st.age >= 50}));
+    out.push('<g class="hot" data-a="hot" data-k="you" role="button" tabindex="0" aria-label="You"><title>You</title>' + person(195, gy + 114, {shirt: S.p && S.p.job ? '#ece7dc' : '#3c79c4', legs: '#20242c', tie: !!(S.p && S.p.job), scale: 2, grey: st.age >= 50}) + '</g>');
     return out.join('');
   };
   return homeSceneSVG(Object.assign({}, st, {extra: layer, label: st.label}), vh);
 }
 /* at home, whoever a story is open with is at your gate */
-function storyVisitorLayer(){
+function storyVisitor(){
   const th = (S.threads || []).filter(function(t){ return t.castId; })[0];
-  const c = th ? (S.cast || []).find(function(x){ return x.id === th.castId && x.alive; }) : null;
+  return th ? (S.cast || []).find(function(x){ return x.id === th.castId && x.alive; }) || null : null;
+}
+function storyVisitorLayer(){
+  const c = storyVisitor();
   if(!c) return null;
   const L = castLook(c), p = {name: c.name, relation: c.relation, age: c.age, rich: (c.wealth || 0) > 65, story: true, shirt: hueHex(L.hue, .5, .58), skin: L.skin};
   return function(k){ return castFigure(k, p, 334, k.groundY + 96, 1.4, c.relation < 5); };

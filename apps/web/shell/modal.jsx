@@ -43,7 +43,7 @@
 import { useEffect } from 'react';
 import {
   S, UI, D, esc, fmt, pct, clamp, dateLabel, PRINCIPLES,
-  momentHTML, arrivalHTML,
+  momentHTML, arrivalHTML, hotModal,
   optLabel, optHint, evText, evBody, negFmt, archOf, bizById, deedOf, bizAccounts,
   startModal, profileModal, runInfoModal, advanceModal, anotherBizModal,
   yearModal, endModal, helpModal, seasonModal, settingsModal, negoModal,
@@ -109,6 +109,7 @@ const WHOLE = {
   settings: settingsModal,
   nego: negoModal,
   advance: (M) => advanceModal(M),
+  hot: (M) => hotModal(M),
   runinfo: (M) => runInfoModal(M.id)
 };
 

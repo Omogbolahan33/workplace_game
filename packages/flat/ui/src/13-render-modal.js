@@ -12,6 +12,7 @@ function renderModal(){
   if(M.type==='profile'){ host.innerHTML = profileModal(); return; }
   if(M.type==='runinfo'){ host.innerHTML = runInfoModal(M.id); return; }
   if(M.type==='advance'){ host.innerHTML = advanceModal(M); return; }
+  if(M.type==='hot'){ host.innerHTML = hotModal(M); return; }
   if(M.type==='event'){
     const ev = M.ev;
     /* An event can go stale while it is still open. The common case is a

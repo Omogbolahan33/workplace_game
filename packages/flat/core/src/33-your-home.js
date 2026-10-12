@@ -213,6 +213,8 @@ function sceneKit(st, vh, tag){
   const finish = (cls, label) => {
     /* a moment's people and things, laid over the place before the air */
     if (st.extra) add(typeof st.extra === 'function' ? st.extra(self) : st.extra);
+    /* the air is something you look through, never something you tap */
+    add('<g pointer-events="none">');
     if (st.season === 'rain') { let r = ''; for (let i = 0; i < 120 + Math.round(-TOP / 3); i++) { const x0 = rnd() * (W + 40) - 20, y0 = TOP + rnd() * VH; r += 'M' + f1(x0) + ' ' + f1(y0) + 'l-3 9'; } add('<path d="' + r + '" stroke="#dfe7ee" stroke-opacity=".45" stroke-width=".7"/>'); }
     if (st.season === 'snow') { let sn = ''; for (let i = 0; i < 140 + Math.round(-TOP / 3); i++) sn += '<circle cx="' + f1(rnd() * W) + '" cy="' + f1(TOP + rnd() * VH) + '" r="' + (rnd() * 1.2 + .5).toFixed(2) + '"/>'; add('<g fill="#fff" opacity=".8">' + sn + '</g>'); }
     if (/winter|autumn|cool/.test(st.season)) add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#8a96a3" opacity=".12"/>');
@@ -221,6 +223,9 @@ function sceneKit(st, vh, tag){
     if (night) add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" fill="#0a1030" opacity=".18"/>');
     add('<rect y="' + TOP + '" width="' + W + '" height="' + VH + '" filter="' + url('grain') + '" opacity=".9"/>');
     if (blackout && !st.gen && !st.solar && (night || dusk) && !st.noNepa && skin.outage) add('<text x="' + W / 2 + '" y="122" font-family="sans-serif" font-size="11" font-weight="700" text-anchor="middle" fill="' + warm + '" opacity=".85">' + esc(skin.outage) + '</text>');
+    add('</g>');
+    /* the places you can tap, over everything (VISUAL.md, M11) */
+    if (st.hot) add(typeof st.hot === 'function' ? st.hot(self) : st.hot);
     return '<svg class="' + cls + '" viewBox="0 ' + TOP + ' ' + W + ' ' + VH + '" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="' + esc(label) + '">' + out.join('') + '</svg>';
   };
   const self = {skin:skin, W:W, H:H, VH:VH, TOP:TOP, url:url, night:night, dusk:dusk, blackout:blackout, genOn:genOn, lights:lights,
