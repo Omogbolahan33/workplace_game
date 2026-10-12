@@ -38,9 +38,8 @@ function sceneSVG(vh){
   /* the governance screens are the company's boardroom */
   if(k.indexOf('governance') === 0 && S.biz) return boardSceneSVG(boardLook(), vh);
   /* the money screens are your city, from above: everything you own where it
-     stands; the budget and your things are the household's, at home. Lagos is
-     drawn; the other cities get their maps with their skins (VISUAL.md, M10) */
-  if(k.indexOf('money') === 0 && !/budget|property/.test(k) && S.city === 'lagos') return citySceneSVG(cityLook(), vh);
+     stands; the budget and your things are the household's, at home */
+  if(k.indexOf('money') === 0 && !/budget|property/.test(k)) return citySceneSVG(cityLook(), vh);
   if(mode) return workSceneSVG(workLook(mode), vh);
   /* the People screen is everyone gathered in your compound */
   if(k === 'legacy/people') return peopleSceneSVG(peopleLook(), vh);

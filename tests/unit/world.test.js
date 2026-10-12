@@ -243,9 +243,18 @@ test('your city: everything you own, where it stands, as big as it is', async ()
   const biggest = L.pins.reduce((a, p) => (p.value > a.value ? p : a));
   assert.equal(biggest.size, Math.max(...L.pins.map((p) => p.size)), 'the biggest holding is not the biggest pin');
   assert.doesNotMatch(C.citySceneSVG(L, 560), /NaN|undefined/);
-  /* another city keeps its home until it has its own map */
+  /* every city has its own map: Abuja's has Jabi Lake, and its trades in its own neighbourhoods */
   C.S.city = 'abuja';
-  assert.match(C.worldHTML(), /<svg class="homescene"/);
+  const abuja = C.worldHTML();
+  assert.match(abuja, /<svg class="cityscene"/);
+  assert.match(abuja, /Jabi Lake/);
+  assert.ok(C.cityLook().pins.some((p) => p.kind === 'company' && p.area === 'Lugbe'), 'a logistics company in Abuja is not at Lugbe');
+  for (const city of Object.keys(C.CITY_MAPS)) {
+    C.S.city = city;
+    const L = C.cityLook();
+    assert.ok(L.pins.every((p) => C.CITY_MAPS[city].areas[p.area]), city + ': a pin stands in a neighbourhood the map does not have');
+    assert.doesNotMatch(C.citySceneSVG(L, 560), /NaN|undefined/, city);
+  }
   C.UI.tab = 'overview'; C.UI.sub = '';
 });
 

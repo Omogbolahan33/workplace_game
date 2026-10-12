@@ -24,9 +24,10 @@ place on Q1 and on Q90 is two different lives.
 ## The rules
 
 1. **Drawn from state, never random.** Every layer is a reading of the run.
-2. **Lagos first, real detail.** Zinc and louvres, burglar-proof bars, the GP
-   tank on its stand, the generator and its smoke, power lines, harmattan dust,
-   rain, NEPA taking light. Other cities get their own skins later (M10).
+2. **Each city as itself, real detail.** Zinc and louvres, burglar-proof bars,
+   the GP tank on its stand, the generator and its smoke, power lines,
+   harmattan dust, rain, NEPA taking light in Lagos; slate, sash windows,
+   street lamps and snow where those are the truth. `CITY_SKINS` holds it.
 3. **Pictures replace dashboards, not decisions.** Words appear at the moment
    of choice: a decision card with what it costs, the hours, the effect, the
    odds, and *when it comes back*.
@@ -52,7 +53,7 @@ Each milestone ships on its own, is measured, and is pushed and deployed. ✓ ma
 | **M7** ✓ | The boardroom | behind every Governance screen: the board at the table with chairs as big as their stakes, the register framed on the wall with your share in gold, hands up for the open resolution and arms folded against it, the chair's mark, and the bank's man by the window with his folder - red, and a warning, when a covenant is breached | the register, the board, open resolutions and each director's stance, covenants |
 | **M8** ✓ | Your city | behind Money's position, markets, deals and group screens, Lagos from above - the lagoon, the islands, the peninsula, the Atlantic, Third Mainland and the link bridge - with a pin for everything you own where it stands: your home in a neighbourhood that fits it, each company where its trade lives, every branch, land, a rental, money on Marina; each pin as big as what stands behind it. Budget and property stay at home | `cityLook()`: home tier, companies and outlets, assets, cash |
 | **M9** ✓ | People | the People screen is everyone gathered in your compound - you and your household in the middle, the cast as close as they feel, the cold with arms folded, the hostile at the edge, the dead on an easel - each in their own colours, grey with age, in agbada once they have money, with a stick past seventy; at home, whoever a story is open with is at your gate; at work, the rival's place is across the street, as big as their business, with them outside when they want a fight | `S.cast`, `S.threads`, `S.rival` |
-| M10 | Other cities | Abuja, Accra, Nairobi, London, New York skins for every scene | `S.city` |
+| **M10** ✓ | Other cities | each city has its own skin in every scene - seasons (harmattan and the rains, Nairobi's cool months, a London winter, New York snow), its word for the lights going off (or none), zinc or slate, louvres and bars or sash windows, the water on the roof, poles or street lamps, its landmark - and its own map behind the money screens: the lagoon and the Atlantic, Jabi Lake and Aso Rock, the Gulf of Guinea, Nairobi National Park, the Thames, the Hudson and the East River, with homes and trades in their own neighbourhoods | `CITY_SKINS`, `CITY_MAPS`, `S.city` |
 | M11 | Screens become places | the remaining cards turn into taps on the scene and decision cards | every route |
 
 Progress is measured with `tools/visual.mjs` (graphic against interface over the
