@@ -358,8 +358,12 @@ test('the household staff in your compound each open their card, with the Househ
   assert.deepEqual(ids.sort(), ['hh0', 'hh1', 'hh2'], 'not every member of the household can be tapped');
   const card = C.hotModal({ type: 'hot', kind: 'house', id: 'hh2' });
   for (const a of ['housetrain', 'houseraise', 'housereview', 'housefire']) assert.match(card, new RegExp('data-a="' + a + '" data-i="hh2"'), a + ' is not on the card');
-  /* the screen and the card read the same four */
-  assert.equal(C.houseButtonsHTML(C.S.house[2]), card.match(/<div class="row wrap"[^>]*>(.*?)<\/div>/)[1]);
+  /* the screen and the card read the same controls: role, payer, terms, the four */
+  assert.ok(card.includes(C.houseControlsHTML(C.S.house[2])), 'the card does not carry the Household row\'s controls');
+  for (const k of ['data-hrole="hh2"', 'data-hpayer="hh2"', 'data-a="houseperk" data-i="hh2"']) assert.ok(card.includes(k), k + ' is not on the card');
+  /* paid by a company, the declaration comes with it */
+  C.S.house[2].payer = 'biz-x';
+  assert.match(C.hotModal({ type: 'hot', kind: 'house', id: 'hh2' }), /data-a="housedeclare" data-i="hh2"/);
 });
 
 test('each director at the table opens their card, with the Board screen\'s seven', async () => {
@@ -376,6 +380,13 @@ test('each director at the table opens their card, with the Board screen\'s seve
   assert.match(html, /data-k="you"/, 'your own seat is not a control');
   const card = C.hotModal({ type: 'hot', kind: 'director', id: ids[0] });
   for (const m of ['brief', 'concede', 'pay', 'equity', 'pressure', 'favour']) assert.match(card, new RegExp('data-a="lobby" data-d="' + ids[0] + '" data-m="' + m + '"'));
+  /* the card has the facts the Board row has */
+  const d = b.board.find((x) => x.id === ids[0]);
+  assert.ok(card.includes(C.directorFactsHTML(b, d)), 'the card does not carry the Board row\'s facts');
+  assert.match(card, /voted with you/);
+  /* your own seat opens a card too, with no buttons to lobby yourself */
+  const mine = b.board.find((x) => x.yours);
+  if (mine) assert.doesNotMatch(C.hotModal({ type: 'hot', kind: 'director', id: mine.id }), /data-a="lobby"/);
   assert.match(card, new RegExp('data-a="removedir" data-d="' + ids[0] + '"'));
   C.UI.tab = 'overview'; C.UI.sub = '';
 });

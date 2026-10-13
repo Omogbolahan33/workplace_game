@@ -36,7 +36,10 @@ function viewBoard(b){
   let h = '<div class="card"><h3>The board <span class="tag">'+(seatEntitlement(b)-boardOf(b).filter(function(d){return !d.departing;}).length)+' empty seat(s)</span></h3>';
   const bd = boardOf(b).filter(function(d){ return !d.departing; });
   if(!bd.length) h += '<div class="tiny muted">There is no board. There is only you, which is a decision as well.</div>';
-  bd.forEach(function(d){
+  /* world-first: each director is a face; the face opens their card, which has
+     everything the row below has. (i) brings the rows back. */
+  if(sceneFirst() && bd.length) h += '<div class="facerow">'+boardFacesHTML(bd)+'</div><div class="tiny muted prose" style="margin-bottom:9px">Tap anyone, here or at the table in the picture, for what they want, how they vote and how to move them.</div>';
+  else bd.forEach(function(d){
     const A = archOf(d.arc);
     const loy = d.loyalty||50, pat = d.patience||50;
     const col = loy>66?'var(--good)':loy>38?'var(--warn)':'var(--bad)';
@@ -47,17 +50,8 @@ function viewBoard(b){
       (d.fee? ' · '+fmt(d.fee)+'/yr':'')+'</div>';
     h += '<div class="statline"><span class="lbl">Loyalty</span>'+bar(loy,100,col)+'<span class="val">'+Math.round(loy)+'</span></div>';
     h += '<div class="statline"><span class="lbl">Patience</span>'+bar(pat,100,pcol)+'<span class="val">'+Math.round(pat)+'</span></div>';
-    h += '<div class="row wrap" style="gap:5px;margin:6px 0">'+
-      (d.agenda||[]).map(function(a){ return '<span class="chip '+(a==='sell'||a==='buyout'?'r':'')+'">'+esc((RES_KINDS[a]||{label:a}).label)+'</span>'; }).join('')+
-      '<span class="chip b">'+esc(A.skill)+' '+Math.round(d.skill[A.skill]||0)+'</span>'+
-      (d.grudges&&d.grudges.length?'<span class="chip r">'+d.grudges.length+' grievance'+(d.grudges.length>1?'s':'')+'</span>':'')+
-      (d.briefed>=S.turn-1?'<span class="chip g">briefed</span>':'')+
-      '</div>';
-    if(d.grudges && d.grudges.length) h += '<div class="tiny muted" style="margin-bottom:6px">Remembers: '+esc(d.grudges.slice(-2).join('; '))+'.</div>';
-    const dv = Math.round(dirVotes(b,d));
-    h += '<div class="tiny muted">'+(dv>0 ? 'Controls '+dv.toLocaleString()+' shares' : 'Carries no shares, one seat')+
-      ' / voted with you '+(d.votesFor||0)+' / against '+(d.votesAgainst||0)+' / abstained '+(d.abstained||0)+
-      ((d.consulting||0)>0 ? ' / '+fmt(d.consulting)+' in fee arrangements' : '')+'</div>';
+    /* what they push for, hold against you and how they vote - core's, the card has the same */
+    h += directorFactsHTML(b, d);
     if(!d.yours){
       h += '<div class="row wrap" style="gap:5px;margin-top:7px">'+directorButtonsHTML(d)+'</div>';
       h += '<div class="tiny muted" style="margin-top:5px">Wants: '+esc(A.likes)+'. Cannot stand: '+esc(A.hates)+'.</div>';

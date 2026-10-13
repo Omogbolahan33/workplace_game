@@ -104,12 +104,72 @@ function boardTaps(st){
    layout is the fallback, never gone. */
 function sceneFirst(){ return !UI.details; }
 /* a member of staff, small: morale as the ring, their initials inside */
-function staffBadgeSVG(s){
-  const m = Math.max(0, Math.min(100, s.morale || 0)), C = 2 * Math.PI * 19, col = m > 60 ? '#2fd47a' : m > 35 ? '#ff9f43' : '#ff5f6d';
-  const ini = String(s.name || '?').split(' ').map(function(w){ return w[0] || ''; }).join('').slice(0, 2).toUpperCase();
+function staffBadgeSVG(s){ return faceBadgeSVG(s.name, s.morale || 0, '#1f6fb2'); }
+/* anyone, small: a reading as the ring, their initials inside, the colour of
+   what they are to you */
+function faceBadgeSVG(name, v, fill){
+  const m = Math.max(0, Math.min(100, v)), C = 2 * Math.PI * 19, col = m > 60 ? '#2fd47a' : m > 35 ? '#ff9f43' : '#ff5f6d';
+  const ini = String(name || '?').split(' ').map(function(w){ return w[0] || ''; }).join('').slice(0, 2).toUpperCase();
   return '<svg class="gfx" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="3"/>' +
     '<circle cx="22" cy="22" r="19" fill="none" stroke="' + col + '" stroke-width="3" stroke-dasharray="' + (C * m / 100).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 22 22)"/>' +
-    '<circle cx="22" cy="22" r="15" fill="#1f6fb2"/><text x="22" y="26.5" font-family="sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#fff">' + esc(ini) + '</text></svg>';
+    '<circle cx="22" cy="22" r="15" fill="' + fill + '"/><text x="22" y="26.5" font-family="sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#fff">' + esc(ini) + '</text></svg>';
+}
+/* a member of the household, in full: who they are, who pays them, their
+   terms, and the four - the Household screen's row and the card you open by
+   tapping them, the same controls through the same handlers */
+function houseControlsHTML(st){
+  const onBiz = (st.payer || 'you') !== 'you';
+  return '<div class="row wrap" style="gap:6px;margin:7px 0">' +
+    '<select data-hrole="' + esc(st.id) + '" style="font-size:11px;padding:3px">' +
+      Object.keys(HOUSE_ROLES).filter(function(k){ return houseRoleAvail(k) || k === st.role; })
+        .map(function(k){ return '<option value="' + k + '"' + (k === st.role ? ' selected' : '') + '>' + esc(HOUSE_ROLES[k].label) + '</option>'; }).join('') +
+    '</select>' +
+    '<select data-hpayer="' + esc(st.id) + '" style="font-size:11px;padding:3px">' +
+      '<option value="you"' + (!onBiz ? ' selected' : '') + '>You pay</option>' +
+      bizList().map(function(b){ return '<option value="' + b.id + '"' + (st.payer === b.id ? ' selected' : '') + '>' + esc(b.name) + ' pays</option>'; }).join('') +
+    '</select></div>' +
+    '<div class="tiny muted" style="margin-bottom:5px">Terms: ' +
+    Object.keys(HOUSE_PERKS).map(function(k){
+      const on = st.perks && st.perks[k];
+      return '<button class="btn xs' + (on ? ' primary' : '') + '" data-a="houseperk" data-i="' + esc(st.id) + '" data-k="' + k +
+        '" title="' + esc(HOUSE_PERKS[k].note) + '">' + esc(HOUSE_PERKS[k].label) + '</button>';
+    }).join(' ') + '</div>' +
+    (onBiz ? '<div class="tiny ' + (st.declared ? 'good' : 'bad') + '" style="margin-bottom:6px">On the company payroll as a benefit in kind: ' +
+      (st.declared ? 'declared and grossed up for tax.' : '<b>undeclared</b> — that is a tax exposure with your name on it.') +
+      ' <button class="btn xs" data-a="housedeclare" data-i="' + esc(st.id) + '">' + (st.declared ? 'Stop declaring it' : 'Declare it') + '</button></div>' : '') +
+    '<div class="row wrap" style="gap:5px">' + houseButtonsHTML(st) + '</div>';
+}
+/* the household as faces: morale as the ring; each opens their card */
+function houseFacesHTML(list){
+  return list.map(function(st){
+    const R0 = HOUSE_ROLES[st.role] || HOUSE_ROLES.cleaner;
+    return '<button class="facebtn" data-a="hot" data-k="house" data-c="' + esc(st.id) + '" aria-label="' + esc(st.name + ', ' + R0.label) + '">' +
+      faceBadgeSVG(st.name, st.morale === undefined ? 60 : st.morale, '#2f7d5a') + '<span>' + esc(String(st.name).split(' ')[0]) + '</span><small>' + esc(R0.label) + '</small></button>';
+  }).join('');
+}
+/* a director, the facts: what they push for, what they are good at, what they
+   hold against you, how they have voted, what they want - the Board screen's
+   row and the card you open by tapping them at the table */
+function directorFactsHTML(b, d){
+  const A = archOf(d.arc), dv = Math.round(dirVotes(b, d));
+  return '<div class="row wrap" style="gap:5px;margin:6px 0">' +
+      (d.agenda || []).map(function(a){ return '<span class="chip ' + (a === 'sell' || a === 'buyout' ? 'r' : '') + '">' + esc((RES_KINDS[a] || {label: a}).label) + '</span>'; }).join('') +
+      '<span class="chip b">' + esc(A.skill) + ' ' + Math.round((d.skill || {})[A.skill] || 0) + '</span>' +
+      (d.grudges && d.grudges.length ? '<span class="chip r">' + d.grudges.length + ' grievance' + (d.grudges.length > 1 ? 's' : '') + '</span>' : '') +
+      (d.briefed >= S.turn - 1 ? '<span class="chip g">briefed</span>' : '') +
+    '</div>' +
+    (d.grudges && d.grudges.length ? '<div class="tiny muted" style="margin-bottom:6px">Remembers: ' + esc(d.grudges.slice(-2).join('; ')) + '.</div>' : '') +
+    '<div class="tiny muted">' + (dv > 0 ? 'Controls ' + dv.toLocaleString() + ' shares' : 'Carries no shares, one seat') +
+      ' / voted with you ' + (d.votesFor || 0) + ' / against ' + (d.votesAgainst || 0) + ' / abstained ' + (d.abstained || 0) +
+      ((d.consulting || 0) > 0 ? ' / ' + fmt(d.consulting) + ' in fee arrangements' : '') + '</div>';
+}
+/* the board as faces: loyalty as the ring, the chair in purple, you in gold */
+function boardFacesHTML(bd){
+  return bd.map(function(d){
+    const A = archOf(d.arc), what = d.role === 'chair' ? 'Chair' : d.yours ? 'You' : (d.label || A.label || 'Director');
+    return '<button class="facebtn" data-a="hot" data-k="director" data-c="' + esc(d.id) + '" aria-label="' + esc(d.name + ', ' + what) + '">' +
+      faceBadgeSVG(d.name, d.loyalty || 50, d.role === 'chair' ? '#6b4fbf' : d.yours ? '#a87a00' : '#3a4a5e') + '<span>' + esc(String(d.name).split(' ')[0]) + '</span><small>' + esc(what) + '</small></button>';
+  }).join('');
 }
 function staffStripBody(b){
   const n = (b.staff || []).length;
@@ -152,20 +212,24 @@ function hotModal(M){
   if(M.kind === 'house'){
     const h = (S.house || []).find(function(x){ return x.id === M.id; });
     if(!h) return modalHTML('<h2>Not here</h2>', '<div class="tiny muted">They no longer work for you.</div>', '<button class="btn primary" data-a="close">Close</button>');
-    return modalHTML('<h2>' + esc(h.name) + '</h2><div class="tiny muted">' + esc((HOUSE_ROLES[h.role] || {label: 'Household'}).label) + ' \u00b7 ' + fmt(h.salary || 0) + '/month</div>',
-      ringsHTML([{ico: 'star', label: 'Skill', v: (h.skill || 0) * 10, text: (h.skill || 0) + '/10', tone: 'var(--info)'}, {ico: 'smile', label: 'Morale', v: h.morale || 0}, {ico: 'hands', label: 'Loyalty', v: h.loyalty || 0}]) +
-      '<div class="row wrap" style="margin-top:12px;gap:6px">' + houseButtonsHTML(h) + '</div>',
+    const tr = traitOf(h.trait), fair = houseSalaryFor(h.role, h.skill);
+    return modalHTML('<h2>' + esc(h.name) + '</h2><div class="tiny muted">' + esc((HOUSE_ROLES[h.role] || {label: 'Household'}).label) + (tr && tr.name ? ' \u00b7 ' + esc(tr.name) : '') + ' \u00b7 ' + fmt(h.salary || 0) + '/month' +
+        ((h.salary || 0) < fair * 0.9 ? ' <span class="bad">below the going rate</span>' : '') + ' \u00b7 ' + (h.quarters || 0) + (h.quarters === 1 ? ' quarter' : ' quarters') + ' with you</div>',
+      ringsHTML([{ico: 'star', label: 'Skill', v: (h.skill || 0) * 10, text: (h.skill || 0) + '/10' + (h.trained ? ' +' + h.trained : ''), tone: 'var(--info)'}, {ico: 'smile', label: 'Morale', v: h.morale === undefined ? 60 : h.morale},
+        {ico: 'hands', label: 'Loyalty', v: h.loyalty === undefined ? 50 : h.loyalty}, {ico: 'bolt', label: 'Output', v: h.perf === undefined ? 60 : h.perf, tone: 'var(--acc)'}]) +
+      '<div style="margin-top:10px">' + houseControlsHTML(h) + '</div>',
       '<button class="btn" data-a="goto" data-t="work" data-s="household">The household</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:440px"');
   }
   if(M.kind === 'director'){
     const b = S.biz, d = b ? (b.board || []).find(function(x){ return x.id === M.id; }) : null;
     if(!d) return modalHTML('<h2>Not here</h2>', '<div class="tiny muted">They are no longer on the board.</div>', '<button class="btn primary" data-a="close">Close</button>');
     const A = archOf(d.arc);
-    return modalHTML('<h2>' + esc(d.name) + '</h2><div class="tiny muted">' + esc(d.role === 'chair' ? 'Chair' : d.label || A.label || 'Director') + (d.holderName ? ' \u00b7 nominated by ' + esc(d.holderName) : '') + '</div>',
-      ringsHTML([{ico: 'hands', label: 'Loyalty', v: d.loyalty || 0}, {ico: 'glass', label: 'Patience', v: d.patience || 0}]) +
-      '<div class="row wrap" style="gap:5px;margin:10px 0 4px">' + (d.agenda || []).map(function(a){ return '<span class="chip ' + (a === 'sell' || a === 'buyout' ? 'r' : '') + '">' + esc((RES_KINDS[a] || {label: a}).label) + '</span>'; }).join('') + '</div>' +
-      '<div class="tiny muted">Wants: ' + esc(A.likes || '') + '. Cannot stand: ' + esc(A.hates || '') + '.</div>' +
-      '<div class="row wrap" style="margin-top:12px;gap:5px">' + directorButtonsHTML(d) + '</div>',
+    return modalHTML('<h2>' + esc(d.name) + '</h2><div class="tiny muted">' + esc(d.role === 'chair' ? 'Chair' : d.yours ? 'You' : d.label || A.label || 'Director') + (d.holderName ? ' \u00b7 nominated by ' + esc(d.holderName) : '') + (d.fee ? ' \u00b7 ' + fmt(d.fee) + '/yr' : '') + '</div>' +
+        '<div class="tiny muted">' + esc(A.blurb || '') + '</div>',
+      ringsHTML([{ico: 'hands', label: 'Loyalty', v: d.loyalty || 50}, {ico: 'glass', label: 'Patience', v: d.patience || 50}]) +
+      '<div style="margin-top:10px">' + directorFactsHTML(b, d) + '</div>' +
+      (d.yours ? '' : '<div class="tiny muted" style="margin-top:6px">Wants: ' + esc(A.likes || '') + '. Cannot stand: ' + esc(A.hates || '') + '.</div>' +
+        '<div class="row wrap" style="margin-top:12px;gap:5px">' + directorButtonsHTML(d) + '</div>'),
       '<button class="btn" data-a="goto" data-t="governance" data-s="board">The board</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
   }
   if(M.kind === 'customers'){

@@ -34,7 +34,7 @@
 import {
   S, fmt, pct, bar, statRow, houseMonthly, housePayrollSummary, houseTimeBoost,
   ownerTime, ownerTimeEff, houseRoleAvail, houseSalaryFor, refreshHouseCands,
-  bizList, HOUSE_ROLES, HOUSE_PERKS, TRAITS, houseButtonsHTML
+  bizList, HOUSE_ROLES, HOUSE_PERKS, TRAITS, houseButtonsHTML, UI, houseFacesHTML
 } from '@ledger/core';
 
 function Terms({ st }) {
@@ -160,7 +160,13 @@ function RosterCard({ list }) {
         ) : null}
         <div dangerouslySetInnerHTML={{ __html: housePayrollSummary() }} />
         <hr className="sep" />
-        {list.map((st) => <StaffBox key={st.id} st={st} />)}
+        {/* world-first: each of them is a face that opens their card; (i) brings the rows back */}
+        {!UI.details ? (
+          <>
+            <div className="facerow" dangerouslySetInnerHTML={{ __html: houseFacesHTML(list) }} />
+            <div className="tiny muted prose">Tap anyone, here or at home in the picture, for their pay, their terms and what you can do.</div>
+          </>
+        ) : list.map((st) => <StaffBox key={st.id} st={st} />)}
       </>
     );
   }

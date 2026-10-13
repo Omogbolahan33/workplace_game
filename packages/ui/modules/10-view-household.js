@@ -3,7 +3,7 @@
    five times over — once per person and once per candidate — which is the
    opposite of what "say a thing once" asks for. They are also the sentences that
    tell you what a hire does to your house, so they are one tap away, not gone. */
-import { DIFFS, HOUSE_PERKS, HOUSE_ROLES, MAX_RUNS, S, SEASON_AXES, TRAITS, bar, bigStat, bizList, challengeLabel, cloudReady, ensureProfile, esc, fmt, foldHTML, houseButtonsHTML, houseMonthly, housePayrollSummary, houseRoleAvail, houseSalaryFor, houseTimeBoost, ownerTime, ownerTimeEff, pct, profileHeadHTML, profileSummary, refreshHouseCands, scoreRun, seasonRefreshLeaderboard, seasonStatus, seedName, statRow } from '@ledger/core';
+import { DIFFS, HOUSE_ROLES, MAX_RUNS, S, SEASON_AXES, TRAITS, bar, bigStat, bizList, challengeLabel, cloudReady, ensureProfile, esc, fmt, foldHTML, houseControlsHTML, houseFacesHTML, houseMonthly, housePayrollSummary, houseSalaryFor, houseTimeBoost, ownerTime, ownerTimeEff, pct, profileHeadHTML, profileSummary, refreshHouseCands, sceneFirst, scoreRun, seasonRefreshLeaderboard, seasonStatus, seedName, statRow } from '@ledger/core';
 
 /* Generated from src/10-view-household.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export function traitsGlossaryHTML(){
@@ -53,11 +53,13 @@ export function viewHousehold(){
     }
     h += housePayrollSummary();
     h += '<hr class="sep">';
-    list.forEach(function(st){
+    /* world-first: each of them is a face; the face opens their card, which
+       has everything the row below has. (i) brings the rows back. */
+    if(sceneFirst()) h += '<div class="facerow">'+houseFacesHTML(list)+'</div><div class="tiny muted prose">Tap anyone, here or at home in the picture, for their pay, their terms and what you can do.</div>';
+    else list.forEach(function(st){
       const R0 = HOUSE_ROLES[st.role] || HOUSE_ROLES.cleaner;
       const tr = TRAITS.find(function(x){ return x.id===st.trait; })||{name:'',d:''};
       const fair = houseSalaryFor(st.role, st.skill);
-      const onBiz = (st.payer||'you')!=='you';
       h += '<div style="border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:9px">';
       h += '<div class="between"><b>'+esc(st.name)+'</b><span class="row wrap" style="gap:4px;justify-content:flex-end">'+
         '<span class="chip '+((st.perf===undefined?60:st.perf)>=70?'g':(st.perf===undefined?60:st.perf)<40?'r':'')+'">'+esc(R0.label)+'</span>'+
@@ -69,27 +71,8 @@ export function viewHousehold(){
       h += statRow('Morale',  st.morale===undefined?60:st.morale, (st.morale||0)>60?'var(--good)':(st.morale||0)>35?'var(--warn)':'var(--bad)');
       h += statRow('Loyalty', st.loyalty===undefined?50:st.loyalty, (st.loyalty||0)>60?'var(--good)':(st.loyalty||0)>35?'var(--warn)':'var(--bad)');
       h += statRow('Output',  st.perf===undefined?60:st.perf, 'var(--acc)');
-      h += '<div class="row wrap" style="gap:6px;margin:7px 0">'+
-        '<select data-hrole="'+st.id+'" style="font-size:11px;padding:3px">'+
-          Object.keys(HOUSE_ROLES).filter(function(k){ return houseRoleAvail(k)||k===st.role; })
-            .map(function(k){ return '<option value="'+k+'"'+(k===st.role?' selected':'')+'>'+esc(HOUSE_ROLES[k].label)+'</option>'; }).join('')+
-        '</select>'+
-        '<select data-hpayer="'+st.id+'" style="font-size:11px;padding:3px">'+
-          '<option value="you"'+(!onBiz?' selected':'')+'>You pay</option>'+
-          bizList().map(function(b){ return '<option value="'+b.id+'"'+(st.payer===b.id?' selected':'')+'>'+esc(b.name)+' pays</option>'; }).join('')+
-        '</select></div>';
-      h += '<div class="tiny muted" style="margin-bottom:5px">Terms: '+
-        Object.keys(HOUSE_PERKS).map(function(k){
-          const on = st.perks && st.perks[k];
-          return '<button class="btn xs'+(on?' primary':'')+'" data-a="houseperk" data-i="'+st.id+'" data-k="'+k+
-            '" title="'+esc(HOUSE_PERKS[k].note)+'">'+esc(HOUSE_PERKS[k].label)+'</button>';
-        }).join(' ')+'</div>';
-      if(onBiz){
-        h += '<div class="tiny '+(st.declared?'good':'bad')+'" style="margin-bottom:6px">On the company payroll as a benefit in kind: '+
-          (st.declared ? 'declared and grossed up for tax.' : '<b>undeclared</b> — that is a tax exposure with your name on it.')+
-          ' <button class="btn xs" data-a="housedeclare" data-i="'+st.id+'">'+(st.declared?'Stop declaring it':'Declare it')+'</button></div>';
-      }
-      h += '<div class="row wrap" style="gap:5px">'+houseButtonsHTML(st)+'</div>';
+      /* who they are, who pays, their terms and the four - core's, the card has the same */
+      h += houseControlsHTML(st);
       h += '</div>';
     });
   }

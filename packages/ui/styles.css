@@ -646,6 +646,7 @@ body.terse .prose{display:none}
 .facebtn .cface .cbadge,.facebtn .cface .cfelt,.facebtn .cface .cstory{width:20px;height:20px;font-size:12px}
 .facebtn>svg{width:50px;height:50px}
 .facebtn span{max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.facebtn small{max-width:70px;margin-top:-3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--dim)}
 .covrow{padding:8px 0;border-bottom:1px solid var(--line)}
 .covbar{position:relative;display:block;height:10px;border-radius:5px;background:rgba(255,255,255,.08);margin:7px 0 4px}
 .covbar i{display:block;height:100%;border-radius:5px}
