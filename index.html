@@ -13979,13 +13979,18 @@ function sceneSVG(vh){
   /* the money screens are your city, from above: everything you own where it
      stands; the budget and your things are the household's, at home */
   if(k.indexOf('money') === 0 && !/budget|property/.test(k)) return citySceneSVG(cityLook(), vh);
-  if(mode){ const L = workLook(mode); return workSceneSVG(Object.assign(L, {hot: workTaps(L)}), vh); }
+  if(mode){
+    /* this quarter's applicants queue outside a company's premises */
+    const W = workLook(mode), L = Object.assign(W, {queue: W.kind !== 'tower' && W.kind !== 'tolet' ? doorQueue(S.candidates, 'applicant') : []});
+    return workSceneSVG(Object.assign(L, {extra: doorQueueLayer(L.queue) || undefined, hot: workTaps(L)}), vh);
+  }
   /* the People screen is everyone gathered in your compound */
   if(k === 'legacy/people') return peopleSceneSVG(peopleLook(), vh);
   /* at home, whatever you set in motion is on its way up the road to you, and
      whoever a story is open with is at your gate */
-  const coming = comingBack(), extra = bothLayers(coming.length ? arrivalsLayer(coming) : null, storyVisitorLayer());
-  const look = homeLook(), visitor = storyVisitor();
+  /* and whoever is looking for work in the house is waiting there too */
+  const coming = comingBack(), look = Object.assign(homeLook(), {queue: doorQueue(S.houseCands, 'seeker')}), visitor = storyVisitor();
+  const extra = bothLayers(bothLayers(coming.length ? arrivalsLayer(coming) : null, storyVisitorLayer()), doorQueueLayer(look.queue));
   return homeSceneSVG(Object.assign({}, look, {extra: extra || undefined, hot: homeTaps(look, visitor ? visitor.id : '')}), vh);
 }
 function workLook(mode){
@@ -15036,6 +15041,8 @@ function homeTaps(st, visitorId){
     Object.keys(at).forEach(function(role){ const p = at[role]; if(p && ids[role]) out.push(hotZone(p[0] - 11, p[1] - 52, 22, 54, 'Your ' + ((HOUSE_ROLES[role] || {}).label || role).toLowerCase(), {a: 'hot', k: 'house', c: ids[role]})); });
     out.push(hotZone(me[0] - 14, me[1] - 60, 28, 62, 'You: your health, your family, your standing', {a: 'hot', k: 'you'}));
     if(visitorId) out.push(hotZone(320, gy + 32, 30, 66, 'At your gate', {a: 'hot', k: 'person', c: visitorId}));
+    /* whoever is waiting at your gate for work in the house */
+    out.push(doorQueueTaps(st.queue || [], k));
     /* whoever is walking up the road to you: what they are bringing, and when */
     comingBack().slice(0, 3).forEach(function(it, i){
       const q = Math.max(0, it.turn - S.turn), x = 96 - Math.min(q, ROAD_QUARTERS - 1) * 12 - i * 6, y = gy + 104 - Math.min(q, ROAD_QUARTERS - 1) * 1.4 + i * 4;
@@ -15055,6 +15062,8 @@ function workTaps(st){
     (st.cspots || []).forEach(function(c){ out.push(hotZone(c.x, c.y, Math.max(16, c.w), Math.max(30, c.h), 'Your customers: price, marketing, quality', {a: 'hot', k: 'customers'})); });
     /* your staff, at their stations, over the premises: each opens their card */
     (st.spots || []).forEach(function(sp){ out.push(hotZone(sp.x, sp.y, Math.max(16, sp.w), Math.max(30, sp.h), 'Your staff', {a: 'hot', k: 'staff', c: sp.id})); });
+    /* the applicants queuing outside */
+    out.push(doorQueueTaps(st.queue || [], k));
     return out.join('');
   };
 }
@@ -15168,6 +15177,42 @@ function castStripBody(cast){
     '<details class="fold"><summary>Why they remember</summary><div>These people get older, richer, poorer and dead whether you are paying attention or not. What they remember is what you did.</div></details>';
 }
 function castStripHTML(cast){ return '<div class="card">' + castStripBody(cast) + '</div>'; }
+/* Looking for work, at your door: this quarter's applicants queue outside
+   your premises, the household's at your gate, each with their CV - a gold
+   star on it for the strongest. A tap on one opens their card, with the
+   offer and the take of the sheet. Read from the candidates the quarter
+   already drew; the scene never draws new ones. */
+const DOOR_QUEUES = {applicant: [[14, 50], [31, 53], [48, 56], [65, 59]], seeker: [[355, 82], [373, 85]]};
+function doorQueue(list, kind){
+  return (list || []).slice(0, DOOR_QUEUES[kind].length).map(function(c){ return {id: c.id, name: c.name, skill: c.skill || 0, kind: kind}; });
+}
+function doorQueueLayer(q){
+  if(!q.length) return null;
+  return function(k){
+    return q.map(function(c, i){
+      const at = DOOR_QUEUES[c.kind][i], x = at[0], y = k.groundY + at[1], s = 1.15;
+      let h = 0; for(let j = 0; j < String(c.id).length; j++) h = (h * 31 + String(c.id).charCodeAt(j)) % 997;
+      return '<g>' + k.person(x, y, {shirt: ['#8a8f99', '#6f7c5e', '#9a7b5a', '#5e6f8a', '#a0606a'][h % 5], skin: ['#5a3b27', '#7d573b', '#4a3020', '#6b4a32'][h % 4], dress: h % 3 === 1, scale: s}) +
+        '<g transform="translate(' + x + ' ' + y + ') scale(' + s + ')"><rect x="5.5" y="-27" width="7.5" height="10" rx=".6" fill="#f4f1e6" transform="rotate(10 9 -22)"/>' +
+        '<path d="M7 -24.5h4.5M7 -22.5h4.5M7 -20.5h3" stroke="#8a8a8a" stroke-width=".6" transform="rotate(10 9 -22)"/>' +
+        (c.skill >= 8 ? '<circle cx="12.5" cy="-27.5" r="2.2" fill="#f5b301"/>' : '') + '</g></g>';
+    }).join('');
+  };
+}
+function doorQueueTaps(q, k){
+  return q.map(function(c, i){
+    const at = DOOR_QUEUES[c.kind][i], s = 1.15;
+    return hotZone(at[0] - 11 * s, k.groundY + at[1] - 46 * s, 22 * s, 48 * s, 'Looking for work: ' + c.name + ', skill ' + c.skill + '/10', {a: 'hot', k: c.kind, c: c.id});
+  }).join('');
+}
+/* the applicants as faces on the sheet: skill as the ring */
+function applicantFacesHTML(list, kind){
+  return (list || []).map(function(c){
+    const what = kind === 'seeker' ? ((HOUSE_ROLES[c.role] || {label: 'Household'}).label) : 'skill ' + c.skill + '/10';
+    return '<button class="facebtn" data-a="hot" data-k="' + kind + '" data-c="' + esc(c.id) + '" aria-label="' + esc(c.name + ', ' + what) + '">' +
+      faceBadgeSVG(c.name, (c.skill || 0) * 10, '#5b6b7d') + '<span>' + esc(String(c.name).split(' ')[0]) + '</span><small>' + esc(what) + '</small></button>';
+  }).join('');
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){
@@ -15240,6 +15285,33 @@ function hotModal(M){
     return modalHTML('<h2>The bank</h2><div class="tiny muted">The conditions on the loan, tested every quarter</div>',
       (rows || '<div class="tiny muted">No covenants.</div>') + '<div class="tiny muted" style="margin-top:8px">A breach is a conversation, and the bank sets its price.</div>',
       '<button class="btn" data-a="goto" data-t="governance" data-s="pack">The covenants</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
+  }
+  if(M.kind === 'applicant'){
+    const c = (S.candidates || []).find(function(x){ return x.id === M.id; });
+    if(!c) return modalHTML('<h2>Gone</h2>', '<div class="tiny muted">They found work somewhere else.</div>', '<button class="btn primary" data-a="close">Close</button>');
+    const tr = traitOf(c.trait), ask = c.ask || c.salary;
+    return modalHTML('<h2>' + esc(c.name) + '</h2><div class="tiny muted">Looking for work · ' + fmt(c.salary) + '/mo · asking ' + fmt(ask) + '</div>',
+      ringsHTML([{ico: 'star', label: 'Skill', v: (c.skill || 0) * 10, text: (c.skill || 0) + '/10'}]) +
+      (tr && tr.name ? '<div class="tiny muted" style="margin-top:8px"><b>' + esc(tr.name) + '</b> — ' + esc(tr.d || '') + '</div>' : '') +
+      '<div class="row wrap" style="margin-top:12px;gap:6px"><button class="btn sm primary" data-a="hirenego" data-i="' + esc(c.id) + '">Make an offer</button>' +
+      '<button class="btn sm" data-a="hireask" data-i="' + esc(c.id) + '">Take them at ' + fmt(ask) + '/mo</button></div>' +
+      '<div class="tiny muted" style="margin-top:8px">Hiring costs half a month of salary upfront in recruitment.</div>',
+      '<button class="btn" data-a="goto" data-t="work" data-s="business">The business</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:440px"');
+  }
+  if(M.kind === 'seeker'){
+    const c = (S.houseCands || []).find(function(x){ return x.id === M.id; });
+    if(!c) return modalHTML('<h2>Gone</h2>', '<div class="tiny muted">They found work somewhere else.</div>', '<button class="btn primary" data-a="close">Close</button>');
+    const tr = traitOf(c.trait), R0 = HOUSE_ROLES[c.role] || {label: 'Household'}, ask = c.ask || c.salary;
+    return modalHTML('<h2>' + esc(c.name) + '</h2><div class="tiny muted">' + esc(R0.label) + ' · going rate ' + fmt(houseSalaryFor(c.role, c.skill)) + '/mo' + (c.ref ? ' · via ' + esc(c.ref) : '') + '</div>',
+      ringsHTML([{ico: 'star', label: 'Skill', v: (c.skill || 0) * 10, text: (c.skill || 0) + '/10'}]) +
+      (tr && tr.name ? '<div class="tiny muted" style="margin-top:8px"><b>' + esc(tr.name) + '</b> — ' + esc(tr.d || '') + '</div>' : '') +
+      '<div class="row wrap" style="margin-top:12px;gap:6px"><button class="btn sm primary" data-a="housenego" data-i="' + esc(c.id) + '">Make an offer</button>' +
+      '<button class="btn sm" data-a="houseask" data-i="' + esc(c.id) + '">Take at ' + fmt(ask) + '/mo</button></div>' +
+      '<div class="tiny muted" style="margin-top:8px">Paid by: <select data-hpayerc="' + esc(c.id) + '" style="font-size:11px;padding:2px">' +
+        '<option value="you"' + ((c.payer || 'you') === 'you' ? ' selected' : '') + '>You</option>' +
+        bizList().map(function(b){ return '<option value="' + b.id + '"' + (c.payer === b.id ? ' selected' : '') + '>' + esc(b.name) + '</option>'; }).join('') +
+      '</select></div>',
+      '<button class="btn" data-a="goto" data-t="work" data-s="household">The household</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:440px"');
   }
   if(M.kind === 'coming'){
     const items = comingBack(), it = items[+M.id || 0];
@@ -16520,6 +16592,10 @@ function viewBiz(){
   h += '<div class="card"><h3>Candidates this quarter</h3>';
   if(!S.candidates || !S.candidates.length){
     h += '<div class="small muted">No one is waiting. Check back next quarter.</div>';
+  } else if(sceneFirst()){
+    /* world-first: they are queuing outside in the picture; here each is a
+       face that opens the same card, with the offer and the take */
+    h += '<div class="facerow">'+applicantFacesHTML(S.candidates,'applicant')+'</div><div class="tiny muted prose">Tap anyone, here or in the queue outside, for what they ask and what you can do.</div>';
   } else {
     S.candidates.forEach(function(c){
       const tr = TRAITS.find(x=>x.id===c.trait)||{name:'—',d:''};
@@ -17174,7 +17250,10 @@ function viewHousehold(){
   if(!cands.length){
     h += '<div class="small muted">Nobody is available right now. Check again next quarter.</div>';
   } else {
-    cands.forEach(function(c){
+    /* world-first: they are waiting at your gate in the picture; here each is
+       a face that opens the same card, with the offer, the take and the payer */
+    if(sceneFirst()) h += '<div class="facerow">'+applicantFacesHTML(cands,'seeker')+'</div><div class="tiny muted prose">Tap anyone, here or at your gate in the picture, for what they ask and what you can do.</div>';
+    else cands.forEach(function(c){
       const R0 = HOUSE_ROLES[c.role]; if(!R0) return;
       const tr = TRAITS.find(function(x){ return x.id===c.trait; })||{name:'',d:''};
       const fair = houseSalaryFor(c.role, c.skill);
