@@ -13401,8 +13401,13 @@ function workSceneSVG(st, vh){
     const z = st.kind === 'tower' ? 1 : 1.22, at = zoomed(q[0], q[1]), sc = (q[2] || 1) * z;
     if ((st.staffIds || [])[i]) st.spots.push({id: st.staffIds[i], x: at[0] - 10 * sc, y: at[1] - 46 * sc, w: 20 * sc, h: 48 * sc});
   });
-  const customersAt = (pts) => pts.slice(0, Math.min(pts.length, st.decline ? Math.min(1, st.customers) : st.customers || 0)).forEach((q, i) =>
-    add(person(q[0], q[1], {shirt: ['#e7b931', '#3a7fcf', '#d64a3a', '#2fae6a', '#8e5bd1', '#f08a24'][i % 6], dress: i % 3 === 1, gele: i % 3 === 1 ? '#d4a017' : null, skin: ['#5a3b27', '#7d573b', '#4a3020'][i % 3], scale: q[2] || 1})));
+  st.cspots = [];
+  const customersAt = (pts) => pts.slice(0, Math.min(pts.length, st.decline ? Math.min(1, st.customers) : st.customers || 0)).forEach((q, i) => {
+    add(person(q[0], q[1], {shirt: ['#e7b931', '#3a7fcf', '#d64a3a', '#2fae6a', '#8e5bd1', '#f08a24'][i % 6], dress: i % 3 === 1, gele: i % 3 === 1 ? '#d4a017' : null, skin: ['#5a3b27', '#7d573b', '#4a3020'][i % 3], scale: q[2] || 1}));
+    /* where they stand, for the tap that opens what brings them in */
+    const at = zoomed(q[0], q[1]), sc = (q[2] || 1) * (st.kind === 'tower' ? 1 : 1.22);
+    st.cspots.push({x: at[0] - 10 * sc, y: at[1] - 46 * sc, w: 20 * sc, h: 48 * sc});
+  });
   /* branches: the same sign, further down the street */
   const branches = () => { for (let i = 0; i < (st.branches || 0); i++) { const bx = box([6 + i * 52, groundY - 2], 40, 14, 30 + (i % 2) * 8, '#e3d8c2', {flat: '#cdbd9c'}); add(bx.parts.join('') + sign(bx, 3, 20, 34, 7, st.name, brand) + door(bx, 14, 12, 18, '#2a2f36')); } };
   let me = {x: 300, y: 270};
@@ -14376,6 +14381,11 @@ function homeTaps(st, visitorId){
     Object.keys(at).forEach(function(role){ const p = at[role]; if(p && ids[role]) out.push(hotZone(p[0] - 11, p[1] - 52, 22, 54, 'Your ' + ((HOUSE_ROLES[role] || {}).label || role).toLowerCase(), {a: 'hot', k: 'house', c: ids[role]})); });
     out.push(hotZone(me[0] - 14, me[1] - 60, 28, 62, 'You: your health, your family, your standing', {a: 'hot', k: 'you'}));
     if(visitorId) out.push(hotZone(320, gy + 32, 30, 66, 'At your gate', {a: 'hot', k: 'person', c: visitorId}));
+    /* whoever is walking up the road to you: what they are bringing, and when */
+    comingBack().slice(0, 3).forEach(function(it, i){
+      const q = Math.max(0, it.turn - S.turn), x = 96 - Math.min(q, ROAD_QUARTERS - 1) * 12 - i * 6, y = gy + 104 - Math.min(q, ROAD_QUARTERS - 1) * 1.4 + i * 4;
+      out.push(hotZone(x - 10, y - 66, 22, 68, 'On its way: ' + it.title, {a: 'hot', k: 'coming', c: String(i)}));
+    });
     return out.join('');
   };
 }
@@ -14386,6 +14396,8 @@ function workTaps(st){
     if(st.kind === 'tower') out.push(goZone(110, -30, 214, 250, st.employed ? 'Your job' : 'Looking for work', 'work', 'career'));
     else out.push(goZone(54, gy - 134, 293, 183, st.kind === 'tolet' ? 'Start a company' : (st.name || 'Your company'), 'work', 'business'));
     if(st.rival && st.kind !== 'tower' && st.kind !== 'tolet') out.push(goZone(316, gy - 80, 74, 104, 'Your rival: ' + st.rival.name, 'work', 'rival'));
+    /* the customers at the door: what brings them in */
+    (st.cspots || []).forEach(function(c){ out.push(hotZone(c.x, c.y, Math.max(16, c.w), Math.max(30, c.h), 'Your customers: price, marketing, quality', {a: 'hot', k: 'customers'})); });
     /* your staff, at their stations, over the premises: each opens their card */
     (st.spots || []).forEach(function(sp){ out.push(hotZone(sp.x, sp.y, Math.max(16, sp.w), Math.max(30, sp.h), 'Your staff', {a: 'hot', k: 'staff', c: sp.id})); });
     return out.join('');
@@ -14397,7 +14409,7 @@ function boardTaps(st){
     const gy = k.groundY, out = [];
     out.push(goZone(36, gy - 66, 250, 170, 'The board', 'governance', 'board'));
     out.push(goZone(280, gy - 138, 84, 98, 'The register: who owns what', 'governance', 'register'));
-    if(st.lender) out.push(goZone(284, gy - 40, 36, 92, 'The bank: covenants', 'governance', 'pack'));
+    if(st.lender) out.push(hotZone(284, gy - 40, 36, 92, 'The bank\'s man: the covenants', {a: 'hot', k: 'bank'}));
     /* each director at the table opens their card; your own seat opens yours */
     const seats = st.seats || [], n = seats.length;
     seats.forEach(function(s, i){
@@ -14445,6 +14457,45 @@ function hotModal(M){
       '<div class="tiny muted">Wants: ' + esc(A.likes || '') + '. Cannot stand: ' + esc(A.hates || '') + '.</div>' +
       '<div class="row wrap" style="margin-top:12px;gap:5px">' + directorButtonsHTML(d) + '</div>',
       '<button class="btn" data-a="goto" data-t="governance" data-s="board">The board</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
+  }
+  if(M.kind === 'customers'){
+    const b = S.biz;
+    if(!b) return modalHTML('<h2>No company</h2>', '', '<button class="btn primary" data-a="close">Close</button>');
+    const kept = Math.round((1 - (b.churnQ || 0)) * 100);
+    return modalHTML('<h2>Your customers</h2><div class="tiny muted">' + Math.round(b.custBase || 0).toLocaleString() + ' customers \u00b7 each new one costs about ' + fmt(b.cacQ || 0) + '</div>',
+      ringsHTML([{ico: 'people', label: 'Kept a quarter', v: kept, text: kept + '%'}, {ico: 'star', label: 'Quality', v: b.quality || 0}, {ico: 'target', label: 'Positioning', v: b.positioning === undefined ? 45 : b.positioning, tone: 'var(--info)'}]) +
+      /* the Business screen's own three dials: the same inputs, through the same handler */
+      '<div style="margin-top:12px">' +
+      '<div class="slider"><span>Price</span><input type="range" data-inp="bizprice" min="60" max="160" step="2" value="' + Math.round((b.priceIdx || 1) * 100) + '"><span class="mono" style="text-align:right">' + ((b.priceIdx || 1) * 100).toFixed(0) + '%</span></div>' +
+      '<div class="slider"><span>Marketing</span><input type="range" data-inp="bizmark" min="0" max="2000000" step="25000" value="' + (b.marketing || 0) + '"><span class="mono" style="text-align:right">' + fmt(b.marketing || 0) + '</span></div>' +
+      '<div class="slider"><span>Quality</span><input type="range" data-inp="bizqual" min="0" max="600000" step="10000" value="' + (b.qualitySpendMonthly || 0) + '"><span class="mono" style="text-align:right">' + fmt(b.qualitySpendMonthly || 0) + '/mo</span></div>' +
+      '</div>',
+      '<button class="btn" data-a="goto" data-t="work" data-s="business">The business</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
+  }
+  if(M.kind === 'bank'){
+    const b = S.biz, covs = b && b.covenants || [];
+    const rows = covs.map(function(c){
+      const st = covenantState(c, b), K = COVENANT_KINDS[c.kind] || {label: c.kind, desc: ''};
+      const top = Math.max(Math.abs(st.actual) || 0, Math.abs(c.limit) || 0, 1) * 1.3;
+      const tone = st.ok ? (st.tight ? 'var(--warn)' : 'var(--good)') : 'var(--bad)';
+      const fv = function(v){ return c.kind === 'mincash' || c.kind === 'capex' ? fmt(Math.round(v)) : c.kind === 'conc' ? Math.round(v) + '%' : (+v).toFixed(2) + 'x'; };
+      /* where you stand against the line: the fill is you, the mark is the limit */
+      return '<div class="covrow"><div class="between"><b>' + esc(K.label) + '</b><span class="chip ' + (st.ok ? (st.tight ? 'y' : 'g') : 'r') + '">' + (st.ok ? (st.tight ? 'tight' : 'kept') : 'BREACHED') + '</span></div>' +
+        (c.kind === 'keyman' ? '<div class="tiny muted">' + (b.founderOusted ? 'You were removed as managing director.' : 'You are still managing director.') + '</div>'
+          : '<span class="gfx covbar" role="img" aria-label="' + esc(K.label + ': ' + fv(st.actual) + ' against ' + fv(c.limit)) + '"><i style="width:' + Math.max(2, Math.min(100, Math.abs(st.actual) / top * 100)).toFixed(1) + '%;background:' + tone + '"></i>' +
+            '<b style="left:' + Math.min(100, Math.abs(c.limit) / top * 100).toFixed(1) + '%"></b></span><div class="tiny muted">' + fv(st.actual) + ' against a limit of ' + fv(c.limit) + '</div>') + '</div>';
+    }).join('');
+    return modalHTML('<h2>The bank</h2><div class="tiny muted">The conditions on the loan, tested every quarter</div>',
+      (rows || '<div class="tiny muted">No covenants.</div>') + '<div class="tiny muted" style="margin-top:8px">A breach is a conversation, and the bank sets its price.</div>',
+      '<button class="btn" data-a="goto" data-t="governance" data-s="pack">The covenants</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
+  }
+  if(M.kind === 'coming'){
+    const items = comingBack(), it = items[+M.id || 0];
+    if(!it) return modalHTML('<h2>Arrived</h2>', '<div class="tiny muted">It has already landed.</div>', '<button class="btn primary" data-a="close">Close</button>');
+    const q = it.turn - S.turn;
+    return modalHTML('<h2>' + esc(it.title) + '</h2><div class="tiny muted">' + esc(dateLabel(it.turn)) + ' \u00b7 ' + (q <= 0 ? 'this quarter' : 'in ' + q + ' quarter' + (q === 1 ? '' : 's')) + (it.from ? ' \u00b7 from ' + esc(it.from) : '') + '</div>',
+      '<div class="roadwrap">' + roadAheadSVG(items) + '</div><div class="tiny muted">' + (it.kind === 'good' ? 'Good news is on its way.' : it.kind === 'bad' ? 'This one will cost you.' : 'What it brings is not yet clear.') + '</div>',
+      '<button class="btn" data-a="goto" data-t="overview">Everything coming back</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
   }
   return modalHTML('<h2>You</h2>', lifeRingsHTML() + '<div class="row wrap" style="margin-top:12px;gap:6px">' + householdButtonsHTML() + '</div>',
     '<button class="btn" data-a="goto" data-t="legacy" data-s="record">Your record</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');

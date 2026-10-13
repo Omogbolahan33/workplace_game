@@ -638,6 +638,10 @@ body.terse .prose{display:none}
 @keyframes hotfind{0%{stroke:#f5b301;stroke-width:1.4;stroke-dasharray:5 4;stroke-opacity:.9}100%{stroke-opacity:0}}
 @media (prefers-reduced-motion:reduce){.hotzone{animation:none}}
 .ctiles.one{grid-template-columns:1fr}
+.covrow{padding:8px 0;border-bottom:1px solid var(--line)}
+.covbar{position:relative;display:block;height:10px;border-radius:5px;background:rgba(255,255,255,.08);margin:7px 0 4px}
+.covbar i{display:block;height:100%;border-radius:5px}
+.covbar b{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:#e8eef5}
 .taphint{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(var(--band-bot,0px) + 120px);z-index:3;pointer-events:none;
   padding:6px 12px;border-radius:999px;background:rgba(9,14,21,.82);border:1px solid rgba(245,179,1,.55);color:#f5d67a;font-size:12px;font-weight:650;
   animation:taphint 2.4s ease-in-out infinite}

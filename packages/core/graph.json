@@ -457,13 +457,16 @@
  },
  "41-tap-the-scene.js": {
   "needs": [
-   "00-cities.js: esc, fmt",
+   "00-cities.js: dateLabel, esc, fmt",
    "01-game-state.js: S",
+   "09-resolving-decisions.js: comingBack",
+   "37-what-comes-back.js: ROAD_QUARTERS, roadAheadSVG",
    "22-everyday-life-vignette.js: modalHTML",
    "29-the-cast-who-remembers.js: castTileHTML, lifeRingsHTML",
    "03-startbizcost-one-price-for-every-picker.js: bizList, traitOf",
    "32-the-world.js: ringsHTML",
-   "26-governance-register-board.js: archOf"
+   "26-governance-register-board.js: archOf",
+   "28-votes-and-decisions.js: covenantState"
   ],
   "externals": []
  }

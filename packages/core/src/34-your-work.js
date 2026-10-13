@@ -117,8 +117,13 @@ function workSceneSVG(st, vh){
     const z = st.kind === 'tower' ? 1 : 1.22, at = zoomed(q[0], q[1]), sc = (q[2] || 1) * z;
     if ((st.staffIds || [])[i]) st.spots.push({id: st.staffIds[i], x: at[0] - 10 * sc, y: at[1] - 46 * sc, w: 20 * sc, h: 48 * sc});
   });
-  const customersAt = (pts) => pts.slice(0, Math.min(pts.length, st.decline ? Math.min(1, st.customers) : st.customers || 0)).forEach((q, i) =>
-    add(person(q[0], q[1], {shirt: ['#e7b931', '#3a7fcf', '#d64a3a', '#2fae6a', '#8e5bd1', '#f08a24'][i % 6], dress: i % 3 === 1, gele: i % 3 === 1 ? '#d4a017' : null, skin: ['#5a3b27', '#7d573b', '#4a3020'][i % 3], scale: q[2] || 1})));
+  st.cspots = [];
+  const customersAt = (pts) => pts.slice(0, Math.min(pts.length, st.decline ? Math.min(1, st.customers) : st.customers || 0)).forEach((q, i) => {
+    add(person(q[0], q[1], {shirt: ['#e7b931', '#3a7fcf', '#d64a3a', '#2fae6a', '#8e5bd1', '#f08a24'][i % 6], dress: i % 3 === 1, gele: i % 3 === 1 ? '#d4a017' : null, skin: ['#5a3b27', '#7d573b', '#4a3020'][i % 3], scale: q[2] || 1}));
+    /* where they stand, for the tap that opens what brings them in */
+    const at = zoomed(q[0], q[1]), sc = (q[2] || 1) * (st.kind === 'tower' ? 1 : 1.22);
+    st.cspots.push({x: at[0] - 10 * sc, y: at[1] - 46 * sc, w: 20 * sc, h: 48 * sc});
+  });
   /* branches: the same sign, further down the street */
   const branches = () => { for (let i = 0; i < (st.branches || 0); i++) { const bx = box([6 + i * 52, groundY - 2], 40, 14, 30 + (i % 2) * 8, '#e3d8c2', {flat: '#cdbd9c'}); add(bx.parts.join('') + sign(bx, 3, 20, 34, 7, st.name, brand) + door(bx, 14, 12, 18, '#2a2f36')); } };
   let me = {x: 300, y: 270};

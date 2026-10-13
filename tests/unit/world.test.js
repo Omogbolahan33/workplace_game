@@ -379,3 +379,27 @@ test('each director at the table opens their card, with the Board screen\'s seve
   assert.match(card, new RegExp('data-a="removedir" data-d="' + ids[0] + '"'));
   C.UI.tab = 'overview'; C.UI.sub = '';
 });
+
+test('customers, the bank\'s man and what is on its way each open their card', async () => {
+  const C = await world();
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  C.S.biz.units = 100; C.S.biz.capacity = 100;
+  C.UI.tab = 'work'; C.UI.sub = 'business';
+  assert.match(C.worldHTML(), /data-k="customers"/, 'a busy company\'s customers cannot be tapped');
+  const cust = C.hotModal({ type: 'hot', kind: 'customers' });
+  for (const k of ['bizprice', 'bizmark', 'bizqual']) assert.match(cust, new RegExp('data-inp="' + k + '"'), k + ' is not on the customers card');
+  /* the bank's man opens his card, with a gauge per covenant */
+  const b = C.S.biz;
+  C.ensureGov(b); C.addCovenant(b, 'mincash', 900000000, 'the facility'); C.addCovenant(b, 'leverage', 3, 'the facility');
+  C.UI.tab = 'governance'; C.UI.sub = 'pack';
+  assert.match(C.worldHTML(), /data-k="bank"/);
+  const bank = C.hotModal({ type: 'hot', kind: 'bank' });
+  assert.equal((bank.match(/class="covrow"/g) || []).length, 2);
+  assert.match(bank, /BREACHED/); assert.match(bank, /kept/);
+  /* each walker up the road opens what they are bringing */
+  C.S.pending.push({ turn: C.S.turn + 2, title: 'The loan comes due', text: 'x', kind: 'good', eff: {} });
+  C.UI.tab = 'overview'; C.UI.sub = '';
+  assert.match(C.worldHTML(), /data-k="coming" data-c="0"/);
+  assert.match(C.hotModal({ type: 'hot', kind: 'coming', id: '0' }), /The loan comes due/);
+});
