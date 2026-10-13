@@ -22,7 +22,7 @@
     it is embedded, per the rule that a converted screen does not get its own
     opinion about what a bar looks like.
 */
-import { S, UI, fmt, bar, BIZ_STAGES, machineTilesHTML } from '@ledger/core';
+import { S, UI, fmt, bar, BIZ_STAGES, machineTilesHTML, positionInner } from '@ledger/core';
 
 /* The four cards are exported separately as well as together.
 
@@ -163,6 +163,15 @@ export function LeversCard() {
 export function PositionCard() {
   const b = S.biz;
   if (!b) return null;
+  /* world-first: what it owns against what it owes, and the quarter as a waterfall */
+  if (!UI.details) {
+    return (
+      <div className="card" style={{ marginTop: '12px' }}>
+        <h3>Position</h3>
+        <div className="pospic" dangerouslySetInnerHTML={{ __html: positionInner(b) }} />
+      </div>
+    );
+  }
   const rev = Math.max(1, b.revenue || 0);
   const equip = Math.max(0, b.capex || 0);
   const assets = Math.max(0, b.cash || 0) + (b.recv || 0) + (b.inventory || 0) + equip;

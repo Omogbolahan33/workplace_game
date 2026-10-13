@@ -1,5 +1,5 @@
 
-import { BIZ, BIZ_STAGES, CITIES, CITY, S, STAFF_ROLES, TRAITS, bar, contractBidOptions, coverButtonsHTML, dateLabel, dealTilesHTML, esc, fmt, foldHTML, hasGM, leverColCommit, leverColNego, leverColReact, leverColSet, leverSliderHTML, machineTilesHTML, offerFacesHTML, outletCount, outletRent, outletStaff, portfolioBar, sceneFirst, staffMonthly, startBizCost } from '@ledger/core';
+import { BIZ, BIZ_STAGES, CITIES, CITY, S, STAFF_ROLES, TRAITS, bar, contractBidOptions, coverButtonsHTML, dateLabel, dealTilesHTML, esc, fmt, foldHTML, hasGM, leverColCommit, leverColNego, leverColReact, leverColSet, leverSliderHTML, machineTilesHTML, offerFacesHTML, outletCount, outletRent, outletStaff, portfolioBar, positionInner, sceneFirst, staffMonthly, startBizCost } from '@ledger/core';
 import { viewBiz, viewCareer, viewLife } from './07-view-money-position.js';
 import { viewAgenda } from './08-view-people.js';
 import { viewHousehold } from './10-view-household.js';
@@ -188,26 +188,30 @@ export function viewEngine(){
   const equip = Math.max(0, b.capex||0);
   const assets = Math.max(0,b.cash||0) + (b.recv||0) + (b.inventory||0) + equip;
   const liabs = (b.payable||0) + (b.arrears||0);
-  h += '<div class="card" style="margin-top:12px"><h3>Position</h3>'+
-    '<div class="tiny muted" style="margin-bottom:8px">Balance sheet, roughly. The gap between the top half and the bottom half is what you actually own.</div>'+
-    '<div class="kv"><span class="muted">Cash</span><span class="'+(b.cash<0?'bad':'')+'">'+fmt(Math.round(b.cash||0))+'</span></div>'+
-    '<div class="kv"><span class="muted">Owed by customers</span><span>'+fmt(Math.round(b.recv||0))+'</span></div>'+
-    '<div class="kv"><span class="muted">Stock on hand</span><span>'+fmt(Math.round(b.inventory||0))+'</span></div>'+
-    '<div class="kv"><span class="muted">Equipment &amp; fit-out</span><span>'+fmt(equip)+'</span></div>'+
-    '<div class="kv"><b>Total</b><b>'+fmt(Math.round(assets-liabs))+'</b></div>'+
-    '<hr class="sep">'+
-    '<div class="kv"><span class="muted">Owed to suppliers</span><span class="'+((b.payable||0)>rev*0.8?'bad':'')+'">'+fmt(Math.round(b.payable||0))+'</span></div>'+
-    '<div class="kv"><span class="muted">Wages in arrears</span><span class="'+((b.arrears||0)>0?'bad':'')+'">'+fmt(Math.round(b.arrears||0))+'</span></div>'+
-    '<hr class="sep">'+
-    '<div class="kv"><span class="muted">Revenue</span><span>'+fmt(b.revenue)+'</span></div>'+
-    '<div class="kv"><span class="muted">Cost of goods</span><span>'+fmt(b.cogs)+'</span></div>'+
-    '<div class="kv"><span class="muted">Overheads</span><span>'+fmt(b.opex)+'</span></div>'+
-    '<div class="kv"><b>Profit</b><b class="'+(b.profit>=0?'good':'bad')+'">'+fmt(b.profit)+'</b></div>'+
-    '<div class="tiny muted" style="margin-top:8px">Written off as bad debt this quarter: '+fmt(b.badDebtQ||0)+
-    '. Lost to shrinkage and spoilage: '+fmt(b.shrinkQ||0)+'.</div>';
-  const cashRun = (b.cash||0)>0 ? ((b.cash||0)/Math.max(1,(b.opex||0))).toFixed(1) : '0';
-  h += '<div class="tiny muted" style="margin-top:5px">At current overheads the company has <b>'+cashRun+'</b> quarters of cash.</div>';
-  h += '</div>';
+  /* world-first: what it owns against what it owes, and the quarter as a waterfall */
+  if(sceneFirst()) h += '<div class="card" style="margin-top:12px"><h3>Position</h3><div class="pospic">'+positionInner(b)+'</div></div>';
+  else {
+    h += '<div class="card" style="margin-top:12px"><h3>Position</h3>'+
+      '<div class="tiny muted" style="margin-bottom:8px">Balance sheet, roughly. The gap between the top half and the bottom half is what you actually own.</div>'+
+      '<div class="kv"><span class="muted">Cash</span><span class="'+(b.cash<0?'bad':'')+'">'+fmt(Math.round(b.cash||0))+'</span></div>'+
+      '<div class="kv"><span class="muted">Owed by customers</span><span>'+fmt(Math.round(b.recv||0))+'</span></div>'+
+      '<div class="kv"><span class="muted">Stock on hand</span><span>'+fmt(Math.round(b.inventory||0))+'</span></div>'+
+      '<div class="kv"><span class="muted">Equipment &amp; fit-out</span><span>'+fmt(equip)+'</span></div>'+
+      '<div class="kv"><b>Total</b><b>'+fmt(Math.round(assets-liabs))+'</b></div>'+
+      '<hr class="sep">'+
+      '<div class="kv"><span class="muted">Owed to suppliers</span><span class="'+((b.payable||0)>rev*0.8?'bad':'')+'">'+fmt(Math.round(b.payable||0))+'</span></div>'+
+      '<div class="kv"><span class="muted">Wages in arrears</span><span class="'+((b.arrears||0)>0?'bad':'')+'">'+fmt(Math.round(b.arrears||0))+'</span></div>'+
+      '<hr class="sep">'+
+      '<div class="kv"><span class="muted">Revenue</span><span>'+fmt(b.revenue)+'</span></div>'+
+      '<div class="kv"><span class="muted">Cost of goods</span><span>'+fmt(b.cogs)+'</span></div>'+
+      '<div class="kv"><span class="muted">Overheads</span><span>'+fmt(b.opex)+'</span></div>'+
+      '<div class="kv"><b>Profit</b><b class="'+(b.profit>=0?'good':'bad')+'">'+fmt(b.profit)+'</b></div>'+
+      '<div class="tiny muted" style="margin-top:8px">Written off as bad debt this quarter: '+fmt(b.badDebtQ||0)+
+      '. Lost to shrinkage and spoilage: '+fmt(b.shrinkQ||0)+'.</div>';
+    const cashRun = (b.cash||0)>0 ? ((b.cash||0)/Math.max(1,(b.opex||0))).toFixed(1) : '0';
+    h += '<div class="tiny muted" style="margin-top:5px">At current overheads the company has <b>'+cashRun+'</b> quarters of cash.</div>';
+    h += '</div>';
+  }
 
   /* ---- conditions ---- */
   /* world-first: every line of it is on a card the tiles open */

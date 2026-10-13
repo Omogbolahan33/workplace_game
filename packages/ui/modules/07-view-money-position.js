@@ -1,6 +1,6 @@
 
 
-import { ASSETS, BIZ, CAREER, CITY, D, PRINCIPLES, S, TRAITS, applicantFacesHTML, bar, bizTypeTileHTML, bizValue, buyoutExternal, clamp, dateLabel, esc, expandCost, fmt, foldHTML, hoursBudget, hoursLeft, marketSalary, needs, ownerTime, pct, positionStrip, priceBand, sceneFirst, sleepDebt, staffMonthly, staffStripHTML, startBizCost, statRow, weeklyFreeHours } from '@ledger/core';
+import { ASSETS, BIZ, CAREER, CITY, D, PRINCIPLES, S, TRAITS, applicantFacesHTML, bar, bizTypeTileHTML, bizValue, buyoutExternal, clamp, companyMeterInner, dateLabel, esc, expandCost, fmt, foldHTML, hoursBudget, hoursLeft, marketSalary, needs, ownerTime, pct, positionStrip, priceBand, sceneFirst, sleepDebt, staffMonthly, staffStripHTML, startBizCost, statRow, weeklyFreeHours } from '@ledger/core';
 import { viewMoneyBudget, viewMoneyProperty } from './06-view-money-budget.js';
 
 /* Generated from src/07-view-money-position.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
@@ -214,7 +214,9 @@ export function viewBiz(){
     '<div><div class="tiny muted">Cash in co.</div><div class="mid '+(b.cash>=0?'':'bad')+'">'+fmt(b.cash)+'</div></div>'+
     '<div><div class="tiny muted">Valuation</div><div class="mid">'+fmt(bizValue())+'</div></div>'+
     '</div>';
-  h += '<div class="kv"><span class="muted">Units sold</span><span>'+Math.round(b.units)+'</span></div>'+
+  /* world-first: sold, can make and wanted on one meter; the standing as gauges */
+  if(sceneFirst()) h += '<div class="cpic">'+companyMeterInner(b)+'</div>';
+  else h += '<div class="kv"><span class="muted">Units sold</span><span>'+Math.round(b.units)+'</span></div>'+
     '<div class="kv"><span class="muted">Capacity</span><span>'+Math.round(b.capacity)+'</span></div>'+
     '<div class="kv"><span class="muted">Demand at current price</span><span>'+Math.round(b.demand)+'</span></div>'+
     '<div class="kv"><span class="muted">Locations</span><span>'+b.locations+'</span></div>'+

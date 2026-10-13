@@ -31,7 +31,7 @@
 */
 import {
   S, fmt, esc, pct, bar, BIZ, TRAITS, bizValue, startBizCost, priceBand,
-  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML, UI, staffStripBody, applicantFacesHTML
+  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML, UI, staffStripBody, applicantFacesHTML, companyMeterInner
 } from '@ledger/core';
 
 /* --------------------------------------------------------------------------
@@ -93,12 +93,17 @@ export function CompanyCard() {
         <div><div className="tiny muted">Cash in co.</div><div className={'mid ' + (b.cash >= 0 ? '' : 'bad')}>{fmt(b.cash)}</div></div>
         <div><div className="tiny muted">Valuation</div><div className="mid">{fmt(bizValue())}</div></div>
       </div>
-      <div className="kv"><span className="muted">Units sold</span><span>{Math.round(b.units)}</span></div>
-      <div className="kv"><span className="muted">Capacity</span><span>{Math.round(b.capacity)}</span></div>
-      <div className="kv"><span className="muted">Demand at current price</span><span>{Math.round(b.demand)}</span></div>
-      <div className="kv"><span className="muted">Locations</span><span>{b.locations}</span></div>
-      <div className="kv"><span className="muted">Reputation</span><span>{Math.round(b.rep)}/100</span></div>
-      <div className="kv"><span className="muted">Your equity</span><span>{b.equity}%</span></div>
+      {/* world-first: sold, can make and wanted on one meter; the standing as gauges */}
+      {!UI.details ? <div className="cpic" dangerouslySetInnerHTML={{ __html: companyMeterInner(b) }} /> : (
+        <>
+          <div className="kv"><span className="muted">Units sold</span><span>{Math.round(b.units)}</span></div>
+          <div className="kv"><span className="muted">Capacity</span><span>{Math.round(b.capacity)}</span></div>
+          <div className="kv"><span className="muted">Demand at current price</span><span>{Math.round(b.demand)}</span></div>
+          <div className="kv"><span className="muted">Locations</span><span>{b.locations}</span></div>
+          <div className="kv"><span className="muted">Reputation</span><span>{Math.round(b.rep)}/100</span></div>
+          <div className="kv"><span className="muted">Your equity</span><span>{b.equity}%</span></div>
+        </>
+      )}
       {b.cash < 0 ? (
         <div className="tutorial bad" style={{ borderColor: 'rgba(255,95,109,.4)', color: '#ffb3b8', background: 'rgba(255,95,109,.08)' }}>
           The company is cash-negative. It cannot buy stock, it turns customers away, and its reputation is

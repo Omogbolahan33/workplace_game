@@ -96,6 +96,10 @@ function applyDisclosure(){
     const h3 = card.querySelector('h3');
     if(!h3) return;
     if(card.querySelector('[data-a],input,select,button')) return;   // never hide controls
+    /* ...nor a picture: folding is for text in the way, and a card that is a
+       drawing - a waterfall, the cash cycle, what it owns and owes, the demand
+       meter, the register, a life - is the thing the screen is for */
+    if(card.querySelector('.wfchart,.wccycle,.posbars,.dmeter,.regpic,.lifeline')) return;
     const label = (h3.textContent||'').trim().slice(0,40);
     const ck = tab+'|'+n+'|'+label;
     /* first two stay open - or, with the explanations folded away (the

@@ -462,7 +462,7 @@
    "01-game-state.js: S, UI",
    "09-resolving-decisions.js: comingBack",
    "37-what-comes-back.js: ROAD_QUARTERS, roadAheadSVG",
-   "04-bizcapacity.js: houseRoleAvail, houseSalaryFor",
+   "04-bizcapacity.js: cccOf, houseRoleAvail, houseSalaryFor",
    "03-startbizcost-one-price-for-every-picker.js: bizList, commitBreak, commitDropCost, leverOf, marketSalary, staffMonthly, traitOf",
    "26-governance-register-board.js: archOf, boardOf, canShotgun, chairIsYours, chairOf, deedOf, dirVotes, extHolders, liquidationWaterfall, seatEntitlement, yourPct",
    "29-the-cast-who-remembers.js: castFaceHTML, castTileHTML, lifeRingsHTML, relationWord",

@@ -606,3 +606,19 @@ test('the board pack draws the quarter and the cash as waterfalls', async () => 
   const pic = C.accountsPictureHTML(a) + C.cashPictureHTML(a) + C.kpisPictureHTML(a, C.S.biz);
   assert.match(pic, /Trailing twelve months: revenue/); assert.match(pic, /Cash cycle/); assert.match(pic, /Capacity used/);
 });
+
+test('the business draws its cash cycle, its position and its demand', async () => {
+  const C = await world();
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  for (let i = 0; i < 4; i++) playQuarter(C);
+  const b = C.S.biz, before = JSON.stringify(C.S), c = C.cccOf(b);
+  const wc = C.wcCycleInner(b);
+  assert.match(wc, new RegExp('cash cycle ' + c.ccc + ' days'));
+  assert.match(wc, new RegExp('stock sits ' + c.dio + 'd'));
+  const pos = C.positionInner(b);
+  assert.match(pos, /What you actually own/); assert.match(pos, /class="gfx wfchart"/); assert.match(pos, /quarters of cash/);
+  const meter = C.companyMeterInner(b);
+  assert.match(meter, new RegExp('sold ' + Math.round(b.units))); assert.match(meter, new RegExp('can make ' + Math.round(b.capacity))); assert.match(meter, new RegExp('wanted ' + Math.round(b.demand)));
+  assert.equal(JSON.stringify(C.S), before, 'drawing the business changed the run');
+});

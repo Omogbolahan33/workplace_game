@@ -210,7 +210,9 @@ function viewBiz(){
     '<div><div class="tiny muted">Cash in co.</div><div class="mid '+(b.cash>=0?'':'bad')+'">'+fmt(b.cash)+'</div></div>'+
     '<div><div class="tiny muted">Valuation</div><div class="mid">'+fmt(bizValue())+'</div></div>'+
     '</div>';
-  h += '<div class="kv"><span class="muted">Units sold</span><span>'+Math.round(b.units)+'</span></div>'+
+  /* world-first: sold, can make and wanted on one meter; the standing as gauges */
+  if(sceneFirst()) h += '<div class="cpic">'+companyMeterInner(b)+'</div>';
+  else h += '<div class="kv"><span class="muted">Units sold</span><span>'+Math.round(b.units)+'</span></div>'+
     '<div class="kv"><span class="muted">Capacity</span><span>'+Math.round(b.capacity)+'</span></div>'+
     '<div class="kv"><span class="muted">Demand at current price</span><span>'+Math.round(b.demand)+'</span></div>'+
     '<div class="kv"><span class="muted">Locations</span><span>'+b.locations+'</span></div>'+

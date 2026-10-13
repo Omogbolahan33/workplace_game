@@ -13,7 +13,7 @@
   below 90% funded. Both thresholds are core's readings; neither is restated
   here as a different number.
 */
-import { S, fmt, cccOf, recentGrowth, growthBill } from '@ledger/core';
+import { S, UI, fmt, cccOf, recentGrowth, growthBill, wcCycleInner } from '@ledger/core';
 
 export default function ViewWorkingCapital() {
   const b = S.biz;
@@ -28,23 +28,27 @@ export default function ViewWorkingCapital() {
   return (
     <div className="card">
       <h3>Working capital <span className="tag">CCC {c.ccc} days</span></h3>
-      <div className="tiny muted" style={{ marginBottom: '10px' }}>
-        Every naira of new revenue has to be financed first — as stock before it sells, as a receivable after
-        it does. That cash leaves quarters before the profit arrives, and it does not appear on the P&amp;L.
-      </div>
-      <div className="kv">
-        <span className="muted">Owed by customers · DSO</span>
-        <span className="mono">{fmt(Math.round(b.recv || 0))} · {c.dso}d</span>
-      </div>
-      <div className="kv">
-        <span className="muted">Sitting in stock · DIO</span>
-        <span className="mono">{fmt(Math.round(b.inventory || 0))} · {c.dio}d</span>
-      </div>
-      <div className="kv">
-        <span className="muted">Owed to suppliers · DPO</span>
-        <span className="mono good">−{fmt(Math.round(b.payable || 0))} · {c.dpo}d</span>
-      </div>
-      <hr className="sep" />
+      {/* world-first: the cycle drawn as time; the rows with the explanations shown */}
+      {!UI.details ? <div className="wcpic" dangerouslySetInnerHTML={{ __html: wcCycleInner(b) }} /> : null}
+      {!UI.details ? null : <>
+        <div className="tiny muted" style={{ marginBottom: '10px' }}>
+          Every naira of new revenue has to be financed first — as stock before it sells, as a receivable after
+          it does. That cash leaves quarters before the profit arrives, and it does not appear on the P&amp;L.
+        </div>
+        <div className="kv">
+          <span className="muted">Owed by customers · DSO</span>
+          <span className="mono">{fmt(Math.round(b.recv || 0))} · {c.dso}d</span>
+        </div>
+        <div className="kv">
+          <span className="muted">Sitting in stock · DIO</span>
+          <span className="mono">{fmt(Math.round(b.inventory || 0))} · {c.dio}d</span>
+        </div>
+        <div className="kv">
+          <span className="muted">Owed to suppliers · DPO</span>
+          <span className="mono good">−{fmt(Math.round(b.payable || 0))} · {c.dpo}d</span>
+        </div>
+        <hr className="sep" />
+      </>}
       <div className="kv">
         <span><b>Cash stuck in the cycle</b></span>
         <span className={'mono ' + (c.tied > (b.cash || 0) ? 'bad' : '')}><b>{fmt(c.tied)}</b></span>

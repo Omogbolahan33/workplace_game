@@ -14952,7 +14952,7 @@ function cashPictureHTML(a){
       {t: 'Capex', v: -a.capexQ}, {t: 'Financing', v: a.financing}, {t: 'Closing', v: a.closeCash, kind: 'total'}], 'Cash this quarter') +
     ringsHTML([day('Customers pay', 'people', a.dso, 'var(--info)'), day('Stock sits', 'box', a.dio, 'var(--info)'), day('You pay', 'truck', a.dpo, 'var(--info)'),
       day('Cash cycle', 'calendar', a.ccc, a.ccc < 45 ? 'var(--good)' : a.ccc > 90 ? 'var(--bad)' : 'var(--warn)')]) +
-    '<div class="tiny muted" style="margin-top:7px">The cash cycle is how long a naira spends inside the business before it comes back. ' +
+    '<div class="tiny muted prose" style="margin-top:7px">The cash cycle is how long a naira spends inside the business before it comes back. ' +
     (a.ccc > 90 ? 'Yours is ' + a.ccc + ' days, which means growth consumes cash faster than it generates it.' : a.ccc < 45 ? 'Yours is ' + a.ccc + ' days. Growth here is close to self-funding.' : 'Yours is ' + a.ccc + ' days, which is normal and worth watching.') + '</div>';
 }
 /* the operating KPIs as gauges where they are a share, rows where they are money */
@@ -14965,6 +14965,59 @@ function kpisPictureHTML(a, b){
     (outside ? acctRow('Quarterly burn', a.burn, undefined, function(v){ return v > 0 ? '<span class="bad">' + fmt(v) + '</span>' : 'profitable'; }) + acctRow('Company debt', a.debt) +
       '<div class="tiny muted" style="margin-top:7px">' + (a.runway < 4 ? 'Under four quarters of runway, outside shareholders stop asking about strategy and start asking about the next raise.'
         : a.runway < 8 ? 'Eight quarters is enough to raise from a position of strength. Fewer is not.' : 'You have time, which is the only thing money cannot buy later.') + '</div>' : '') + '</div>';
+}
+/* The cash cycle, drawn as time: how long the stock sits, then how long the
+   customers take to pay - and under it how long the suppliers wait for you.
+   The gap is the cash cycle: the days a naira is inside the business. */
+function wcCycleInner(b){
+  const c = cccOf(b), W = 390, L = 8, R = 8, span = Math.max(30, c.dio + c.dso, c.dpo);
+  const X = function(d){ return L + d / span * (W - L - R); };
+  const tone = c.ccc < 45 ? '#2fd47a' : c.ccc > 90 ? '#ff5f6d' : '#ff9f43';
+  const seg = function(x0, x1, y, col){ return '<rect x="' + X(x0).toFixed(1) + '" y="' + y + '" width="' + Math.max(2, X(x1) - X(x0)).toFixed(1) + '" height="14" rx="3" fill="' + col + '"/>'; };
+  return '<svg class="gfx wccycle" viewBox="0 0 ' + W + ' 112" role="img" aria-label="' + esc('Stock sits ' + c.dio + ' days, customers take ' + c.dso + ' days, you take ' + c.dpo + ' days to pay suppliers: a cash cycle of ' + c.ccc + ' days') + '">' +
+    '<text x="' + L + '" y="12" font-size="9.5" fill="#ff9f43">stock sits ' + c.dio + 'd · ' + fmt(Math.round(b.inventory || 0)) + '</text>' +
+    '<text x="' + (W - R) + '" y="12" font-size="9.5" fill="#5aa9ff" text-anchor="end">customers owe ' + c.dso + 'd · ' + fmt(Math.round(b.recv || 0)) + '</text>' +
+    seg(0, c.dio, 18, '#ff9f43') + seg(c.dio, c.dio + c.dso, 18, '#5aa9ff') +
+    seg(0, c.dpo, 44, '#2fd47a') + '<text x="' + L + '" y="72" font-size="9.5" fill="#2fd47a">suppliers wait ' + c.dpo + 'd · you owe ' + fmt(Math.round(b.payable || 0)) + '</text>' +
+    '<path d="M' + X(Math.min(c.dpo, c.dio + c.dso)).toFixed(1) + ' 86 V94 H' + X(c.dio + c.dso).toFixed(1) + ' V86" fill="none" stroke="' + tone + '" stroke-width="2"/>' +
+    '<text x="' + ((X(Math.min(c.dpo, c.dio + c.dso)) + X(c.dio + c.dso)) / 2).toFixed(1) + '" y="107" font-size="10.5" font-weight="700" text-anchor="middle" fill="' + tone + '">cash cycle ' + c.ccc + ' days</text></svg>';
+}
+/* The position, drawn: what the company owns against what it owes, as two
+   bars to the same scale - the gap is what you actually own - and the quarter
+   as a waterfall from revenue to profit. */
+function positionInner(b){
+  const equip = Math.max(0, b.capex || 0), cash = Math.max(0, b.cash || 0), recv = b.recv || 0, stock = b.inventory || 0, pay = b.payable || 0, arr = b.arrears || 0;
+  const owns = cash + recv + stock + equip, owes = pay + arr, top = Math.max(1, owns, owes), W = 390, L = 46, R = 8;
+  const bar = function(parts, y){
+    let x = L;
+    return parts.map(function(p){ const w = p[1] / top * (W - L - R), s = p[1] > 0 ? '<rect x="' + x.toFixed(1) + '" y="' + y + '" width="' + Math.max(1, w).toFixed(1) + '" height="18" fill="' + p[2] + '"><title>' + esc(p[0] + ' ' + fmt(Math.round(p[1]))) + '</title></rect>' : ''; x += w; return s; }).join('');
+  };
+  const parts = [['Cash', cash, '#2fd47a'], ['Owed by customers', recv, '#5aa9ff'], ['Stock on hand', stock, '#ff9f43'], ['Equipment & fit-out', equip, '#8b9bb0']];
+  const debts = [['Owed to suppliers', pay, '#ff5f6d'], ['Wages in arrears', arr, '#a3303a']];
+  const run = (b.cash || 0) > 0 ? ((b.cash || 0) / Math.max(1, (b.opex || 0))).toFixed(1) : '0';
+  return '<svg class="gfx posbars" viewBox="0 0 ' + W + ' 64" role="img" aria-label="' + esc('Owns ' + fmt(Math.round(owns)) + ', owes ' + fmt(Math.round(owes))) + '">' +
+      '<text x="0" y="17" font-size="10" fill="#9aa7b6">owns</text>' + bar(parts, 4) + '<text x="0" y="45" font-size="10" fill="#9aa7b6">owes</text>' + bar(debts, 32) +
+      '<rect x="' + L + '" y="32" width="' + (W - L - R) + '" height="18" fill="none" stroke="rgba(255,255,255,.08)"/></svg>' +
+    '<div class="row wrap" style="gap:5px;margin:4px 0 8px">' + parts.concat(debts).filter(function(p){ return p[1] > 0; }).map(function(p){
+      return '<span class="chip"><i class="dot" style="background:' + p[2] + '"></i>' + esc(p[0]) + ' ' + fmt(Math.round(p[1])) + '</span>'; }).join('') + '</div>' +
+    '<div class="kv"><span><b>What you actually own</b></span><span class="mid ' + (owns - owes >= 0 ? 'good' : 'bad') + '">' + fmt(Math.round(owns - owes)) + '</span></div>' +
+    waterfallSVG([{t: 'Revenue', v: b.revenue || 0, kind: 'total'}, {t: 'Cost of goods', v: -(b.cogs || 0)}, {t: 'Overheads', v: -(b.opex || 0)}, {t: 'Profit', v: b.profit || 0, kind: 'total'}], 'The quarter') +
+    '<div class="tiny muted" style="margin-top:6px">Written off as bad debt this quarter: ' + fmt(b.badDebtQ || 0) + '. Lost to shrinkage and spoilage: ' + fmt(b.shrinkQ || 0) + '.</div>' +
+    '<div class="tiny muted" style="margin-top:5px">At current overheads the company has <b>' + run + '</b> quarters of cash.</div>';
+}
+/* What you sold, what you can make and what was wanted, on one meter; and
+   the company's standing as gauges */
+function companyMeterInner(b){
+  const sold = Math.round(b.units || 0), cap = Math.round(b.capacity || 0), dem = Math.round(b.demand || 0), top = Math.max(1, sold, cap, dem) * 1.06, W = 390, L = 4, R = 4;
+  const X = function(v){ return L + v / top * (W - L - R); };
+  return '<svg class="gfx dmeter" viewBox="0 0 ' + W + ' 66" role="img" aria-label="' + esc('Sold ' + sold + ', can make ' + cap + ', wanted ' + dem) + '">' +
+      '<rect x="' + L + '" y="22" width="' + (W - L - R) + '" height="16" rx="8" fill="rgba(255,255,255,.07)"/>' +
+      '<rect x="' + L + '" y="22" width="' + Math.max(2, X(sold) - L).toFixed(1) + '" height="16" rx="8" fill="#f5b301"/>' +
+      '<path d="M' + X(cap).toFixed(1) + ' 16 V44" stroke="#dfe6ee" stroke-width="2.2"/><text x="' + X(cap).toFixed(1) + '" y="56" font-size="9.5" text-anchor="' + (X(cap) > W - 60 ? 'end' : 'middle') + '" fill="#dfe6ee">can make ' + cap + '</text>' +
+      '<path d="M' + (X(dem) - 5).toFixed(1) + ' 8 h10 l-5 9z" fill="#5aa9ff"/><text x="' + X(dem).toFixed(1) + '" y="7" font-size="9.5" text-anchor="' + (X(dem) > W - 60 ? 'end' : X(dem) < 60 ? 'start' : 'middle') + '" fill="#5aa9ff" dy="-0">wanted ' + dem + '</text>' +
+      '<text x="' + (L + 6) + '" y="34" font-size="9.5" font-weight="700" fill="#0b1017">sold ' + sold + '</text></svg>' +
+    ringsHTML([{ico: 'star', label: 'Reputation', v: b.rep || 0, text: Math.round(b.rep || 0) + '/100'}, {ico: 'seal', label: 'Your equity', v: b.equity || 0, text: (b.equity || 0) + '%', tone: 'var(--acc)'},
+      {ico: 'shop', label: 'Locations', v: Math.min(100, (b.locations || 1) * 20), text: String(b.locations || 1), tone: 'var(--info)'}]);
 }
 /* the card a tap opens: a person, or you */
 function hotModal(M){
@@ -15129,7 +15182,7 @@ function hotModal(M){
 }
 
 /* -------------------------------------------------------------------------
-   Everything above, exported. 767 names: the simulation's whole surface.
+   Everything above, exported. 770 names: the simulation's whole surface.
    ------------------------------------------------------------------------- */
 export {
   ALL_EVENTS,
@@ -15381,6 +15434,7 @@ export {
   commitTilesHTML,
   committedFixedQ,
   companyCulture,
+  companyMeterInner,
   completeSale,
   computeTune,
   confirmBox,
@@ -15655,6 +15709,7 @@ export {
   planVariance,
   poolPct,
   portfolioBar,
+  positionInner,
   positionStrip,
   priceBand,
   profReset,
@@ -15876,6 +15931,7 @@ export {
   volRet,
   waterfallSVG,
   wcCollectRate,
+  wcCycleInner,
   wcFunded,
   wcPolicy,
   wcTargetInv,

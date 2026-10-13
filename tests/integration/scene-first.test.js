@@ -230,3 +230,24 @@ test('the board pack leads with the waterfalls; (i) brings the rows back', async
   assert.doesNotMatch(rows, /wfchart/); assert.match(rows, /Opening cash/);
   C.UI.details = false;
 });
+
+test('the business screen draws working capital, position and demand; (i) brings the rows back', async () => {
+  stubDOM();
+  const C = await core();
+  (await ui()).install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  for (let i = 0; i < 4; i++) { C.advanceQuarter(); C.UI.modal = null; }
+  const b = C.S.biz;
+  C.UI.details = false;
+  assert.ok(C.viewWorkingCapital().includes(C.wcCycleInner(b)));
+  assert.match(C.viewWorkingCapital(), /The bill for growth/, 'the bill for growth went with the rows');
+  assert.ok(C.viewEngine().includes(C.positionInner(b)));
+  assert.ok(C.viewBiz().includes(C.companyMeterInner(b)));
+  C.UI.details = true;
+  assert.match(C.viewWorkingCapital(), /Sitting in stock/);
+  assert.match(C.viewEngine(), /Equipment &amp; fit-out/);
+  assert.match(C.viewBiz(), /Demand at current price/);
+  C.UI.details = false;
+});

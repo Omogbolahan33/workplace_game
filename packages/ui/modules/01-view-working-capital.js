@@ -1,7 +1,7 @@
 
 /* Working capital, on screen. The cycle is invisible arithmetic until it is
    the reason a profitable company cannot make payroll, so it gets a card. */
-import { CITY, PKEY, PROF, R, S, SKEY, UI, bar, blankProfile, cccOf, clamp, cloudConfigured, cloudPullQuiet, cloudPushQuiet, cloudReady, cloudRefresh, cloudSessionValid, commitBreak, commitBuilding, committedFixedQ, esc, fmt, growthBill, normTab, noteResume, noteSaved, parseSaveRaw, recentGrowth, recompute, setProfile, setS } from '@ledger/core';
+import { CITY, PKEY, PROF, R, S, SKEY, UI, bar, blankProfile, cccOf, clamp, cloudConfigured, cloudPullQuiet, cloudPushQuiet, cloudReady, cloudRefresh, cloudSessionValid, commitBreak, commitBuilding, committedFixedQ, esc, fmt, growthBill, normTab, noteResume, noteSaved, parseSaveRaw, recentGrowth, recompute, sceneFirst, setProfile, setS, wcCycleInner } from '@ledger/core';
 
 /* Generated from src/01-view-working-capital.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export function viewWorkingCapital(){
@@ -11,17 +11,21 @@ export function viewWorkingCapital(){
   const bill = growthBill(b, Math.max(0.10, g > 0 ? g : 0.10));
   const funded = b.wcFunded===undefined ? 1 : b.wcFunded;
   let h = '<div class="card"><h3>Working capital <span class="tag">CCC '+c.ccc+' days</span></h3>';
-  h += '<div class="tiny muted" style="margin-bottom:10px">'+
-    'Every naira of new revenue has to be financed first &mdash; as stock before it sells, '+
-    'as a receivable after it does. That cash leaves quarters before the profit arrives, '+
-    'and it does not appear on the P&amp;L.</div>';
-  h += '<div class="kv"><span class="muted">Owed by customers &middot; DSO</span>'+
-    '<span class="mono">'+fmt(Math.round(b.recv||0))+' &middot; '+c.dso+'d</span></div>';
-  h += '<div class="kv"><span class="muted">Sitting in stock &middot; DIO</span>'+
-    '<span class="mono">'+fmt(Math.round(b.inventory||0))+' &middot; '+c.dio+'d</span></div>';
-  h += '<div class="kv"><span class="muted">Owed to suppliers &middot; DPO</span>'+
-    '<span class="mono good">&minus;'+fmt(Math.round(b.payable||0))+' &middot; '+c.dpo+'d</span></div>';
-  h += '<hr class="sep">';
+  /* world-first: the cycle drawn as time - the rows with the explanations shown */
+  if(sceneFirst()) h += '<div class="wcpic">'+wcCycleInner(b)+'</div>';
+  else {
+    h += '<div class="tiny muted" style="margin-bottom:10px">'+
+      'Every naira of new revenue has to be financed first &mdash; as stock before it sells, '+
+      'as a receivable after it does. That cash leaves quarters before the profit arrives, '+
+      'and it does not appear on the P&amp;L.</div>';
+    h += '<div class="kv"><span class="muted">Owed by customers &middot; DSO</span>'+
+      '<span class="mono">'+fmt(Math.round(b.recv||0))+' &middot; '+c.dso+'d</span></div>';
+    h += '<div class="kv"><span class="muted">Sitting in stock &middot; DIO</span>'+
+      '<span class="mono">'+fmt(Math.round(b.inventory||0))+' &middot; '+c.dio+'d</span></div>';
+    h += '<div class="kv"><span class="muted">Owed to suppliers &middot; DPO</span>'+
+      '<span class="mono good">&minus;'+fmt(Math.round(b.payable||0))+' &middot; '+c.dpo+'d</span></div>';
+    h += '<hr class="sep">';
+  }
   h += '<div class="kv"><span><b>Cash stuck in the cycle</b></span>'+
     '<span class="mono '+(c.tied > (b.cash||0) ? 'bad':'')+'"><b>'+fmt(c.tied)+'</b></span></div>';
   h += '<div class="tiny muted" style="margin:-2px 0 9px">Your cash on hand is '+fmt(Math.round(b.cash||0))+'.</div>';
