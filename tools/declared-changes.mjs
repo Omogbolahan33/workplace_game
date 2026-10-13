@@ -904,6 +904,9 @@ const EDITS = [
   { marker: 'const ACT',
     name: 'the action table — the scene can be tapped',
     why: 'hot opens the card a tap on the scene asks for; a tap on the scene, by hot or by goto from inside #scene, marks it found (S.flags.tapped) so the hint goes' },
+  { marker: 'function houseButtonsHTML(st)', addition: true,
+    name: 'houseButtonsHTML — a household member\'s four decisions',
+    why: 'train, +10%, pay review, let go: the Household screen wrote them inline in both renderers, and the card you open by tapping them at home has them too' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

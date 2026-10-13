@@ -137,12 +137,12 @@
  },
  "ui/src/10-view-household.js": {
   "importAt": 320,
-  "importLen": 530,
+  "importLen": 548,
   "exports": [
-   850,
-   1066,
-   9871,
-   14264
+   868,
+   1084,
+   9484,
+   13877
   ]
  },
  "ui/src/11-view-legacy.js": {

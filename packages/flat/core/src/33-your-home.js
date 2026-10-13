@@ -34,6 +34,8 @@ function homeLook(){
     gen: owned('gen') > 0, solar: owned('solar') > 0, car: Math.min(2, owned('car')),
     job: !!p.job, age: p.age, spouse: !!p.married, kids: p.kids || 0, kidAge: Math.max(0, Math.min(15, (S.turn || 0) / 8)),
     staff: (S.house || []).map(function(h){ return h.role; }),
+    /* the first of each role, as the scene stands them, so a tap opens the right card */
+    houseIds: (S.house || []).reduce(function(o, h){ if(!o[h.role]) o[h.role] = h.id; return o; }, /** @type {Object<string,string>} */ ({})),
     grid: S.mkt ? S.mkt.power : 50, era: S.era ? S.era.id : 'calm',
     city: S.city, season: skinOf(S.city).seasons[q],
     time: hr >= 6 && hr < 17 ? 'day' : hr >= 17 && hr < 19 ? 'dusk' : 'night',

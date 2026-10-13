@@ -3,7 +3,7 @@
    five times over — once per person and once per candidate — which is the
    opposite of what "say a thing once" asks for. They are also the sentences that
    tell you what a hire does to your house, so they are one tap away, not gone. */
-import { DIFFS, HOUSE_PERKS, HOUSE_ROLES, MAX_RUNS, S, SEASON_AXES, TRAITS, bar, bigStat, bizList, challengeLabel, cloudReady, ensureProfile, esc, fmt, foldHTML, houseMonthly, housePayrollSummary, houseRoleAvail, houseSalaryFor, houseTimeBoost, ownerTime, ownerTimeEff, pct, profileHeadHTML, profileSummary, refreshHouseCands, scoreRun, seasonRefreshLeaderboard, seasonStatus, seedName, statRow } from '@ledger/core';
+import { DIFFS, HOUSE_PERKS, HOUSE_ROLES, MAX_RUNS, S, SEASON_AXES, TRAITS, bar, bigStat, bizList, challengeLabel, cloudReady, ensureProfile, esc, fmt, foldHTML, houseButtonsHTML, houseMonthly, housePayrollSummary, houseRoleAvail, houseSalaryFor, houseTimeBoost, ownerTime, ownerTimeEff, pct, profileHeadHTML, profileSummary, refreshHouseCands, scoreRun, seasonRefreshLeaderboard, seasonStatus, seedName, statRow } from '@ledger/core';
 
 /* Generated from src/10-view-household.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export function traitsGlossaryHTML(){
@@ -89,12 +89,7 @@ export function viewHousehold(){
           (st.declared ? 'declared and grossed up for tax.' : '<b>undeclared</b> — that is a tax exposure with your name on it.')+
           ' <button class="btn xs" data-a="housedeclare" data-i="'+st.id+'">'+(st.declared?'Stop declaring it':'Declare it')+'</button></div>';
       }
-      h += '<div class="row wrap" style="gap:5px">'+
-        '<button class="btn xs" data-a="housetrain" data-i="'+st.id+'">Train ('+fmt(Math.round((st.salary||0)*0.9))+')</button>'+
-        '<button class="btn xs" data-a="houseraise" data-i="'+st.id+'" data-v="0.10">+10%</button>'+
-        '<button class="btn xs" data-a="housereview" data-i="'+st.id+'">Pay review</button>'+
-        '<button class="btn xs bad" data-a="housefire" data-i="'+st.id+'">Let go</button>'+
-        '</div>';
+      h += '<div class="row wrap" style="gap:5px">'+houseButtonsHTML(st)+'</div>';
       h += '</div>';
     });
   }

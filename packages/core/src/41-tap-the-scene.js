@@ -24,6 +24,14 @@ function householdButtonsHTML(){
     '<button class="btn xs" data-a="spend" data-k="health">Private care ('+fmt(Math.round(220000*S.cumInfl))+')</button>'+
     '<button class="btn xs" data-a="spend" data-k="social">Be seen ('+fmt(Math.round(120000*S.cumInfl))+')</button>';
 }
+/* a member of the household's four decisions, in one place: the Household
+   screen in both renderers, and the card you open by tapping them at home */
+function houseButtonsHTML(st){
+  return '<button class="btn xs" data-a="housetrain" data-i="'+esc(st.id)+'">Train ('+fmt(Math.round((st.salary||0)*0.9))+')</button>'+
+    '<button class="btn xs" data-a="houseraise" data-i="'+esc(st.id)+'" data-v="0.10">+10%</button>'+
+    '<button class="btn xs" data-a="housereview" data-i="'+esc(st.id)+'">Pay review</button>'+
+    '<button class="btn xs bad" data-a="housefire" data-i="'+esc(st.id)+'">Let go</button>';
+}
 /* at home: the house, what you own, you, and whoever is at the gate */
 function homeTaps(st, visitorId){
   return function(k){
@@ -37,6 +45,10 @@ function homeTaps(st, visitorId){
       cars.slice(0, Math.max(1, st.car)).forEach(function(c){ out.push(goZone(c[0], c[1], 84, 38, 'Your car: what you own', 'money', 'property')); });
     }
     const me = st.tier >= 3 ? [300, 270] : st.tier === 2 ? [108, 272] : [150, 268];
+    /* the household staff, where the scene stands them: each opens their card */
+    const ids = st.houseIds || {};
+    const at = {security: [st.tier >= 3 ? 64 : 30, gy + 46], driver: st.car ? [st.tier >= 3 ? 206 : 226, gy + 84] : null, nanny: [me[0] - 26, me[1] + 2], cook: [me[0] - 48, me[1] + 1]};
+    Object.keys(at).forEach(function(role){ const p = at[role]; if(p && ids[role]) out.push(hotZone(p[0] - 11, p[1] - 52, 22, 54, 'Your ' + ((HOUSE_ROLES[role] || {}).label || role).toLowerCase(), {a: 'hot', k: 'house', c: ids[role]})); });
     out.push(hotZone(me[0] - 14, me[1] - 60, 28, 62, 'You: your health, your family, your standing', {a: 'hot', k: 'you'}));
     if(visitorId) out.push(hotZone(320, gy + 32, 30, 66, 'At your gate', {a: 'hot', k: 'person', c: visitorId}));
     return out.join('');
@@ -82,6 +94,14 @@ function hotModal(M){
       ringsHTML([{ico: 'star', label: 'Skill', v: (s.skill || 0) * 10, text: (s.skill || 0) + '/10', tone: 'var(--info)'}, {ico: 'smile', label: 'Morale', v: s.morale || 0}]) +
       '<div class="row wrap" style="margin-top:12px;gap:6px"><button class="btn sm" data-a="raise" data-i="' + esc(s.id) + '">Raise pay 15%</button><button class="btn sm bad" data-a="fire" data-i="' + esc(s.id) + '">Let go</button></div>',
       '<button class="btn" data-a="goto" data-t="work" data-s="business">The business</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:420px"');
+  }
+  if(M.kind === 'house'){
+    const h = (S.house || []).find(function(x){ return x.id === M.id; });
+    if(!h) return modalHTML('<h2>Not here</h2>', '<div class="tiny muted">They no longer work for you.</div>', '<button class="btn primary" data-a="close">Close</button>');
+    return modalHTML('<h2>' + esc(h.name) + '</h2><div class="tiny muted">' + esc((HOUSE_ROLES[h.role] || {label: 'Household'}).label) + ' \u00b7 ' + fmt(h.salary || 0) + '/month</div>',
+      ringsHTML([{ico: 'star', label: 'Skill', v: (h.skill || 0) * 10, text: (h.skill || 0) + '/10', tone: 'var(--info)'}, {ico: 'smile', label: 'Morale', v: h.morale || 0}, {ico: 'hands', label: 'Loyalty', v: h.loyalty || 0}]) +
+      '<div class="row wrap" style="margin-top:12px;gap:6px">' + houseButtonsHTML(h) + '</div>',
+      '<button class="btn" data-a="goto" data-t="work" data-s="household">The household</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:440px"');
   }
   return modalHTML('<h2>You</h2>', lifeRingsHTML() + '<div class="row wrap" style="margin-top:12px;gap:6px">' + householdButtonsHTML() + '</div>',
     '<button class="btn" data-a="goto" data-t="legacy" data-s="record">Your record</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');

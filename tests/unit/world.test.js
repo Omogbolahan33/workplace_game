@@ -348,3 +348,16 @@ test('your staff are at their stations, and each opens their own card', async ()
   assert.doesNotMatch(C.worldHTML(), /class="taphint"/);
   C.UI.tab = 'overview'; C.UI.sub = '';
 });
+
+test('the household staff in your compound each open their card, with the Household screen\'s four', async () => {
+  const C = await world();
+  C.S.fin.goods.push({ id: 'car', turn: 0 });
+  C.S.house = ['security', 'driver', 'nanny'].map((r, i) => ({ id: 'hh' + i, role: r, name: 'H' + i, skill: 5, salary: 120000, morale: 60, loyalty: 70, perks: {}, payer: 'you' }));
+  C.UI.tab = 'overview'; C.UI.sub = '';
+  const ids = [...C.worldHTML().matchAll(/data-k="house" data-c="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(ids.sort(), ['hh0', 'hh1', 'hh2'], 'not every member of the household can be tapped');
+  const card = C.hotModal({ type: 'hot', kind: 'house', id: 'hh2' });
+  for (const a of ['housetrain', 'houseraise', 'housereview', 'housefire']) assert.match(card, new RegExp('data-a="' + a + '" data-i="hh2"'), a + ' is not on the card');
+  /* the screen and the card read the same four */
+  assert.equal(C.houseButtonsHTML(C.S.house[2]), card.match(/<div class="row wrap"[^>]*>(.*?)<\/div>/)[1]);
+});

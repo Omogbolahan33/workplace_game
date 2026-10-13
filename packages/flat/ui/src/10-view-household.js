@@ -86,12 +86,7 @@ function viewHousehold(){
           (st.declared ? 'declared and grossed up for tax.' : '<b>undeclared</b> — that is a tax exposure with your name on it.')+
           ' <button class="btn xs" data-a="housedeclare" data-i="'+st.id+'">'+(st.declared?'Stop declaring it':'Declare it')+'</button></div>';
       }
-      h += '<div class="row wrap" style="gap:5px">'+
-        '<button class="btn xs" data-a="housetrain" data-i="'+st.id+'">Train ('+fmt(Math.round((st.salary||0)*0.9))+')</button>'+
-        '<button class="btn xs" data-a="houseraise" data-i="'+st.id+'" data-v="0.10">+10%</button>'+
-        '<button class="btn xs" data-a="housereview" data-i="'+st.id+'">Pay review</button>'+
-        '<button class="btn xs bad" data-a="housefire" data-i="'+st.id+'">Let go</button>'+
-        '</div>';
+      h += '<div class="row wrap" style="gap:5px">'+houseButtonsHTML(st)+'</div>';
       h += '</div>';
     });
   }

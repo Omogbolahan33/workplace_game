@@ -34,7 +34,7 @@
 import {
   S, fmt, pct, bar, statRow, houseMonthly, housePayrollSummary, houseTimeBoost,
   ownerTime, ownerTimeEff, houseRoleAvail, houseSalaryFor, refreshHouseCands,
-  bizList, HOUSE_ROLES, HOUSE_PERKS, TRAITS
+  bizList, HOUSE_ROLES, HOUSE_PERKS, TRAITS, houseButtonsHTML
 } from '@ledger/core';
 
 function Terms({ st }) {
@@ -118,12 +118,8 @@ function StaffBox({ st }) {
         </div>
       ) : null}
 
-      <div className="row wrap" style={{ gap: '5px' }}>
-        <button className="btn xs" data-a="housetrain" data-i={st.id}>Train ({fmt(Math.round((st.salary || 0) * 0.9))})</button>
-        <button className="btn xs" data-a="houseraise" data-i={st.id} data-v="0.10">+10%</button>
-        <button className="btn xs" data-a="housereview" data-i={st.id}>Pay review</button>
-        <button className="btn xs bad" data-a="housefire" data-i={st.id}>Let go</button>
-      </div>
+      {/* the four, core's - the card you open by tapping them at home has the same */}
+      <div className="row wrap" style={{ gap: '5px' }} dangerouslySetInnerHTML={{ __html: houseButtonsHTML(st) }} />
     </div>
   );
 }

@@ -360,6 +360,7 @@
  "hoursLeft": "core.js",
  "hoursSpent": "core.js",
  "houseBasePay": "core.js",
+ "houseButtonsHTML": "core.js",
  "houseMonthly": "core.js",
  "houseMonthlyBiz": "core.js",
  "houseMonthlyYou": "core.js",
