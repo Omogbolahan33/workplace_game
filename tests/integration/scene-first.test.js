@@ -70,3 +70,27 @@ test('the household and the board are faces on the sheet; (i) brings the rows ba
   for (const d of C.boardOf(b).filter((x) => !x.departing)) assert.ok(fullBoard.includes(C.directorFactsHTML(b, d)));
   C.UI.details = false;
 });
+
+test('the applicants and the household\'s job seekers are faces on the sheet; (i) brings the offer cards back', async () => {
+  stubDOM();
+  const C = await core();
+  (await ui()).install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  C.S.candidates = [0, 1, 2].map((i) => ({ id: 'cd' + i, name: 'Applicant ' + i, skill: 4 + i * 2, salary: 300000, ask: 330000, trait: null }));
+  C.S.houseCands = [0, 1, 2].map((i) => ({ id: 'hc' + i, name: 'Seeker ' + i, role: 'driver', skill: 5, salary: 150000, ask: 170000, trait: null }));
+
+  C.UI.details = false;
+  const biz = C.viewBiz();
+  assert.deepEqual([...biz.matchAll(/class="facebtn" data-a="hot" data-k="applicant" data-c="([^"]+)"/g)].map((m) => m[1]), ['cd0', 'cd1', 'cd2']);
+  assert.doesNotMatch(biz, /data-a="hirenego"/, 'the offer cards are still on the sheet');
+  const house = C.viewHousehold();
+  assert.deepEqual([...house.matchAll(/class="facebtn" data-a="hot" data-k="seeker" data-c="([^"]+)"/g)].map((m) => m[1]), ['hc0', 'hc1', 'hc2']);
+  assert.doesNotMatch(house, /data-a="housenego"/);
+
+  C.UI.details = true;
+  assert.match(C.viewBiz(), /data-a="hirenego" data-i="cd0"/, 'the offer cards did not come back with (i)');
+  assert.match(C.viewHousehold(), /data-a="housenego" data-i="hc0"/);
+  C.UI.details = false;
+});

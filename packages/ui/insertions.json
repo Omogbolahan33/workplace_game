@@ -99,19 +99,19 @@
  },
  "ui/src/07-view-money-position.js": {
   "importAt": 2,
-  "importLen": 559,
+  "importLen": 579,
   "exports": [
-   561,
-   3102,
-   3357,
-   6519,
-   6794,
-   8073,
-   8659,
-   11168,
-   11379,
-   26787,
-   30940
+   581,
+   3122,
+   3377,
+   6539,
+   6814,
+   8093,
+   8679,
+   11188,
+   11399,
+   27183,
+   31336
   ]
  },
  "ui/src/08-view-people.js": {
@@ -137,12 +137,12 @@
  },
  "ui/src/10-view-household.js": {
   "importAt": 320,
-  "importLen": 548,
+  "importLen": 568,
   "exports": [
-   868,
-   1084,
-   8256,
-   12649
+   888,
+   1104,
+   8660,
+   13053
   ]
  },
  "ui/src/11-view-legacy.js": {

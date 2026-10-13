@@ -40,13 +40,18 @@ function sceneSVG(vh){
   /* the money screens are your city, from above: everything you own where it
      stands; the budget and your things are the household's, at home */
   if(k.indexOf('money') === 0 && !/budget|property/.test(k)) return citySceneSVG(cityLook(), vh);
-  if(mode){ const L = workLook(mode); return workSceneSVG(Object.assign(L, {hot: workTaps(L)}), vh); }
+  if(mode){
+    /* this quarter's applicants queue outside a company's premises */
+    const W = workLook(mode), L = Object.assign(W, {queue: W.kind !== 'tower' && W.kind !== 'tolet' ? doorQueue(S.candidates, 'applicant') : []});
+    return workSceneSVG(Object.assign(L, {extra: doorQueueLayer(L.queue) || undefined, hot: workTaps(L)}), vh);
+  }
   /* the People screen is everyone gathered in your compound */
   if(k === 'legacy/people') return peopleSceneSVG(peopleLook(), vh);
   /* at home, whatever you set in motion is on its way up the road to you, and
      whoever a story is open with is at your gate */
-  const coming = comingBack(), extra = bothLayers(coming.length ? arrivalsLayer(coming) : null, storyVisitorLayer());
-  const look = homeLook(), visitor = storyVisitor();
+  /* and whoever is looking for work in the house is waiting there too */
+  const coming = comingBack(), look = Object.assign(homeLook(), {queue: doorQueue(S.houseCands, 'seeker')}), visitor = storyVisitor();
+  const extra = bothLayers(bothLayers(coming.length ? arrivalsLayer(coming) : null, storyVisitorLayer()), doorQueueLayer(look.queue));
   return homeSceneSVG(Object.assign({}, look, {extra: extra || undefined, hot: homeTaps(look, visitor ? visitor.id : '')}), vh);
 }
 function workLook(mode){

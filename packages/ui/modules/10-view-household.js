@@ -3,7 +3,7 @@
    five times over — once per person and once per candidate — which is the
    opposite of what "say a thing once" asks for. They are also the sentences that
    tell you what a hire does to your house, so they are one tap away, not gone. */
-import { DIFFS, HOUSE_ROLES, MAX_RUNS, S, SEASON_AXES, TRAITS, bar, bigStat, bizList, challengeLabel, cloudReady, ensureProfile, esc, fmt, foldHTML, houseControlsHTML, houseFacesHTML, houseMonthly, housePayrollSummary, houseSalaryFor, houseTimeBoost, ownerTime, ownerTimeEff, pct, profileHeadHTML, profileSummary, refreshHouseCands, sceneFirst, scoreRun, seasonRefreshLeaderboard, seasonStatus, seedName, statRow } from '@ledger/core';
+import { DIFFS, HOUSE_ROLES, MAX_RUNS, S, SEASON_AXES, TRAITS, applicantFacesHTML, bar, bigStat, bizList, challengeLabel, cloudReady, ensureProfile, esc, fmt, foldHTML, houseControlsHTML, houseFacesHTML, houseMonthly, housePayrollSummary, houseSalaryFor, houseTimeBoost, ownerTime, ownerTimeEff, pct, profileHeadHTML, profileSummary, refreshHouseCands, sceneFirst, scoreRun, seasonRefreshLeaderboard, seasonStatus, seedName, statRow } from '@ledger/core';
 
 /* Generated from src/10-view-household.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export function traitsGlossaryHTML(){
@@ -83,7 +83,10 @@ export function viewHousehold(){
   if(!cands.length){
     h += '<div class="small muted">Nobody is available right now. Check again next quarter.</div>';
   } else {
-    cands.forEach(function(c){
+    /* world-first: they are waiting at your gate in the picture; here each is
+       a face that opens the same card, with the offer, the take and the payer */
+    if(sceneFirst()) h += '<div class="facerow">'+applicantFacesHTML(cands,'seeker')+'</div><div class="tiny muted prose">Tap anyone, here or at your gate in the picture, for what they ask and what you can do.</div>';
+    else cands.forEach(function(c){
       const R0 = HOUSE_ROLES[c.role]; if(!R0) return;
       const tr = TRAITS.find(function(x){ return x.id===c.trait; })||{name:'',d:''};
       const fair = houseSalaryFor(c.role, c.skill);

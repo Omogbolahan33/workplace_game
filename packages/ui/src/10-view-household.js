@@ -80,7 +80,10 @@ function viewHousehold(){
   if(!cands.length){
     h += '<div class="small muted">Nobody is available right now. Check again next quarter.</div>';
   } else {
-    cands.forEach(function(c){
+    /* world-first: they are waiting at your gate in the picture; here each is
+       a face that opens the same card, with the offer, the take and the payer */
+    if(sceneFirst()) h += '<div class="facerow">'+applicantFacesHTML(cands,'seeker')+'</div><div class="tiny muted prose">Tap anyone, here or at your gate in the picture, for what they ask and what you can do.</div>';
+    else cands.forEach(function(c){
       const R0 = HOUSE_ROLES[c.role]; if(!R0) return;
       const tr = TRAITS.find(function(x){ return x.id===c.trait; })||{name:'',d:''};
       const fair = houseSalaryFor(c.role, c.skill);

@@ -31,7 +31,7 @@
 */
 import {
   S, fmt, esc, pct, bar, BIZ, TRAITS, bizValue, startBizCost, priceBand,
-  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML, UI, staffStripBody
+  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML, UI, staffStripBody, applicantFacesHTML
 } from '@ledger/core';
 
 /* --------------------------------------------------------------------------
@@ -276,6 +276,12 @@ export function CandidatesCard() {
       <h3>Candidates this quarter</h3>
       {!cands.length ? (
         <div className="small muted">No one is waiting. Check back next quarter.</div>
+      ) : !UI.details ? (
+        /* world-first: they are queuing outside in the picture; each face opens the same card */
+        <>
+          <div className="facerow" dangerouslySetInnerHTML={{ __html: applicantFacesHTML(cands, 'applicant') }} />
+          <div className="tiny muted prose">Tap anyone, here or in the queue outside, for what they ask and what you can do.</div>
+        </>
       ) : (
         <>
           {cands.map((c) => {

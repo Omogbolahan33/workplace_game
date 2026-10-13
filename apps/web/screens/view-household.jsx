@@ -34,7 +34,7 @@
 import {
   S, fmt, pct, bar, statRow, houseMonthly, housePayrollSummary, houseTimeBoost,
   ownerTime, ownerTimeEff, houseRoleAvail, houseSalaryFor, refreshHouseCands,
-  bizList, HOUSE_ROLES, HOUSE_PERKS, TRAITS, houseButtonsHTML, UI, houseFacesHTML
+  bizList, HOUSE_ROLES, HOUSE_PERKS, TRAITS, houseButtonsHTML, UI, houseFacesHTML, applicantFacesHTML
 } from '@ledger/core';
 
 function Terms({ st }) {
@@ -200,7 +200,13 @@ export default function ViewHousehold() {
           <div className="small muted">Nobody is available right now. Check again next quarter.</div>
         ) : (
           <>
-            {cands.map((c) => {
+            {/* world-first: they are waiting at your gate in the picture; each face opens the same card */}
+            {!UI.details ? (
+              <>
+                <div className="facerow" dangerouslySetInnerHTML={{ __html: applicantFacesHTML(cands, 'seeker') }} />
+                <div className="tiny muted prose">Tap anyone, here or at your gate in the picture, for what they ask and what you can do.</div>
+              </>
+            ) : cands.map((c) => {
               const R0 = HOUSE_ROLES[c.role];
               if (!R0) return null;
               const tr = TRAITS.find((x) => x.id === c.trait) || { name: '', d: '' };

@@ -432,3 +432,32 @@ test('the sheet\'s face strips: every member of staff and of the cast is a face 
   C.UI.details = true; assert.equal(C.sceneFirst(), false);
   C.UI.details = false; assert.equal(C.sceneFirst(), true);
 });
+
+test('people looking for work queue at your door, and each opens their card', async () => {
+  const C = await world();
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  C.S.candidates = [0, 1, 2].map((i) => ({ id: 'cd' + i, name: 'Applicant ' + i, skill: 4 + i * 2, salary: 300000, ask: 330000, trait: null }));
+  C.S.houseCands = [0, 1, 2].map((i) => ({ id: 'hc' + i, name: 'Seeker ' + i, role: 'driver', skill: 5, salary: 150000, ask: 170000, trait: null }));
+  const before = JSON.stringify(C.S);
+  /* outside the premises: every applicant, up to the four places */
+  C.UI.tab = 'work'; C.UI.sub = 'business';
+  const work = C.worldHTML();
+  assert.deepEqual([...work.matchAll(/data-k="applicant" data-c="([^"]+)"/g)].map((m) => m[1]), ['cd0', 'cd1', 'cd2']);
+  const a = C.hotModal({ type: 'hot', kind: 'applicant', id: 'cd1' });
+  assert.match(a, /data-a="hirenego" data-i="cd1"/); assert.match(a, /data-a="hireask" data-i="cd1"/);
+  /* at your gate: the household's, as many as the gate has places for */
+  C.UI.tab = 'overview'; C.UI.sub = '';
+  const home = C.worldHTML();
+  assert.deepEqual([...home.matchAll(/data-k="seeker" data-c="([^"]+)"/g)].map((m) => m[1]), ['hc0', 'hc1']);
+  const s = C.hotModal({ type: 'hot', kind: 'seeker', id: 'hc2' });
+  for (const k of ['data-a="housenego" data-i="hc2"', 'data-a="houseask" data-i="hc2"', 'data-hpayerc="hc2"']) assert.ok(s.includes(k), k + ' is not on the card');
+  /* a taken candidate's card says so instead of breaking */
+  assert.match(C.hotModal({ type: 'hot', kind: 'applicant', id: 'nobody' }), /found work somewhere else/);
+  /* a tower has no queue: you are the one looking */
+  C.UI.tab = 'work'; C.UI.sub = 'career';
+  assert.doesNotMatch(C.worldHTML(), /data-k="applicant"/);
+  /* and looking changed nothing */
+  assert.equal(JSON.stringify(C.S), before);
+  C.UI.tab = 'overview'; C.UI.sub = '';
+});

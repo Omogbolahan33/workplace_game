@@ -287,6 +287,10 @@ function viewBiz(){
   h += '<div class="card"><h3>Candidates this quarter</h3>';
   if(!S.candidates || !S.candidates.length){
     h += '<div class="small muted">No one is waiting. Check back next quarter.</div>';
+  } else if(sceneFirst()){
+    /* world-first: they are queuing outside in the picture; here each is a
+       face that opens the same card, with the offer and the take */
+    h += '<div class="facerow">'+applicantFacesHTML(S.candidates,'applicant')+'</div><div class="tiny muted prose">Tap anyone, here or in the queue outside, for what they ask and what you can do.</div>';
   } else {
     S.candidates.forEach(function(c){
       const tr = TRAITS.find(x=>x.id===c.trait)||{name:'—',d:''};
