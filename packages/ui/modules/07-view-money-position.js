@@ -1,6 +1,6 @@
 
 
-import { ASSETS, BIZ, CAREER, CITY, D, PRINCIPLES, S, TRAITS, bar, bizTypeTileHTML, bizValue, buyoutExternal, clamp, dateLabel, esc, expandCost, fmt, foldHTML, hoursBudget, hoursLeft, marketSalary, needs, ownerTime, pct, positionStrip, priceBand, sleepDebt, staffMonthly, startBizCost, statRow, weeklyFreeHours } from '@ledger/core';
+import { ASSETS, BIZ, CAREER, CITY, D, PRINCIPLES, S, TRAITS, bar, bizTypeTileHTML, bizValue, buyoutExternal, clamp, dateLabel, esc, expandCost, fmt, foldHTML, hoursBudget, hoursLeft, marketSalary, needs, ownerTime, pct, positionStrip, priceBand, sceneFirst, sleepDebt, staffMonthly, staffStripHTML, startBizCost, statRow, weeklyFreeHours } from '@ledger/core';
 import { viewMoneyBudget, viewMoneyProperty } from './06-view-money-budget.js';
 
 /* Generated from src/07-view-money-position.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
@@ -264,23 +264,28 @@ export function viewBiz(){
   h += '<div class="tiny muted" style="margin-top:9px">Owner attention: <b>'+(ownerTime()*100).toFixed(0)+'%</b>'+(S.p.job?' — you still have a job.':(S.flags.moonlight?' — moonlighting.':' — full-time. This is your only income.'))+
     (S.p.job?' <button class="btn xs" data-a="toggle" data-k="moonlight">'+(S.flags.moonlight?'Stop':'Work evenings too')+'</button>':'')+'</div>';
   h += '</div>';
-  // staff
-  h += '<div class="card" style="margin-top:12px"><h3>People <span class="tag">'+b.staff.length+' staff · '+fmt(staffMonthly())+'/mo</span></h3>';
-  if(b.staff.length){
-    h += '<table><tr><th>Name</th><th>Skill</th><th>Type</th><th class="num">Salary</th><th>Morale</th><th></th></tr>';
-    b.staff.forEach(function(s){
-      const tr = TRAITS.find(x=>x.id===s.trait)||{name:'—'};
-      h += '<tr><td>'+esc(s.name)+'</td><td class="num">'+s.skill+'/10</td><td><span class="chip '+(s.trait==='thief'||s.trait==='lazy'?'r':s.trait==='genius'||s.trait==='sharp'?'g':'')+'">'+tr.name+'</span></td>'+
-        '<td class="num">'+fmt(s.salary)+'</td>'+
-        '<td>'+bar(s.morale,100,s.morale>60?'var(--good)':s.morale>35?'var(--warn)':'var(--bad)')+'</td>'+
-        '<td class="num"><button class="btn xs" data-a="raise" data-i="'+s.id+'">+15%</button> <button class="btn xs bad" data-a="fire" data-i="'+s.id+'">Let go</button></td></tr>';
-    });
-    h += '</table>';
-  } else {
-    h += '<div class="small muted">No staff. You are the operations department, the sales team and the cleaner. That works until it does not.</div>';
+  // staff - world-first, a strip of badges, each opening the card the picture
+  // opens; with the explanations shown, the full table comes back
+  if(sceneFirst()) h += staffStripHTML(b);
+  else {
+    h += '<div class="card" style="margin-top:12px"><h3>People <span class="tag">'+b.staff.length+' staff · '+fmt(staffMonthly())+'/mo</span></h3>';
+    if(b.staff.length){
+      h += '<table><tr><th>Name</th><th>Skill</th><th>Type</th><th class="num">Salary</th><th>Morale</th><th></th></tr>';
+      b.staff.forEach(function(s){
+        const tr = TRAITS.find(x=>x.id===s.trait)||{name:'—'};
+        h += '<tr><td>'+esc(s.name)+'</td><td class="num">'+s.skill+'/10</td><td><span class="chip '+(s.trait==='thief'||s.trait==='lazy'?'r':s.trait==='genius'||s.trait==='sharp'?'g':'')+'">'+tr.name+'</span></td>'+
+          '<td class="num">'+fmt(s.salary)+'</td>'+
+          '<td>'+bar(s.morale,100,s.morale>60?'var(--good)':s.morale>35?'var(--warn)':'var(--bad)')+'</td>'+
+          '<td class="num"><button class="btn xs" data-a="raise" data-i="'+s.id+'">+15%</button> <button class="btn xs bad" data-a="fire" data-i="'+s.id+'">Let go</button></td></tr>';
+      });
+      h += '</table>';
+    } else {
+      h += '<div class="small muted">No staff. You are the operations department, the sales team and the cleaner. That works until it does not.</div>';
+    }
+    h += '<hr class="sep"><div class="tiny muted">Fair market salary for a skill-5 hire right now: <b>'+fmt(marketSalary(5))+'</b>/month. Underpay and they leave or steal; overpay and your break-even rises permanently.</div>';
+    h += '</div>';
   }
-  h += '<hr class="sep"><div class="tiny muted">Fair market salary for a skill-5 hire right now: <b>'+fmt(marketSalary(5))+'</b>/month. Underpay and they leave or steal; overpay and your break-even rises permanently.</div>';
-  h += '</div></div>';
+  h += '</div>';
   // right column: hiring, partner
   h += '<div>';
   h += '<div class="card"><h3>Candidates this quarter</h3>';

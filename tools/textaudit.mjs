@@ -130,8 +130,17 @@ for (const route of ROUTES) {
   } else {
     for (let i = 0; i < 12; i++) { M.advanceQuarter(); M.UI.modal = null; }
   }
-  const { html, missing } = render(route);
-  if (missing) { rows.push({ key, missing }); continue; }
+  const rendered = render(route);
+  if (rendered.missing) { rows.push({ key, missing: rendered.missing }); continue; }
+  const html = rendered.html;
+  /* A control one tap away is still on the route (VISUAL.md, M11). In the
+     world-first view a list of people becomes a strip of their faces, and each
+     face opens a card holding the buttons the list held. Those buttons are
+     counted as this route's, read from the card itself - so a strip that lost
+     a person's card, or a card that lost a button, is still a lost control. */
+  const cards = [...html.matchAll(/<button[^>]*data-a="hot"[^>]*>/g)].map((m) => m[0]).map((t) => ({
+    kind: (t.match(/data-k="([^"]*)"/) || [])[1], id: (t.match(/data-c="([^"]*)"/) || [])[1] || '' }));
+  const behind = cards.map((c) => typeof M.hotModal === 'function' ? M.hotModal({ type: 'hot', kind: c.kind, id: c.id }) : '').join('');
   const blocks = textOf(html);
   const shown = textOf(inTheWay(html));
   const chars = blocks.reduce((n, b) => n + b.length, 0);
@@ -155,7 +164,9 @@ for (const route of ROUTES) {
     /* every control, by the action it fires and the words on it. Compared as a
        set: a redesign may re-label a button (and the label is reported), but a
        button that disappears is a feature that disappeared. */
-    acts: (html.match(/<button[^>]*data-a="([^"]+)"[^>]*>[\s\S]*?<\/button>/g) || [])
+    acts: ((html + behind).match(/<button[^>]*data-a="([^"]+)"[^>]*>[\s\S]*?<\/button>/g) || [])
+      /* the faces and the card's own way out are how you reach a control, not controls the screen had */
+      .filter(b => !/data-a="(hot|close)"/.test(b) && !/data-a="goto"[^>]*>(Everyone|The business|The board|The household|Your record)</.test(b))
       .map(b => (b.match(/data-a="([^"]+)"/) || [,'?'])[1] + '|' +
                 textOf(b.replace(/<button[^>]*>/, '')).join(' ').slice(0, 40).replace(/\|/g, '/'))
       .sort(),

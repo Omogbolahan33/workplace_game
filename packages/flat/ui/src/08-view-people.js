@@ -21,16 +21,21 @@ function viewPeople(){
      Nothing was removed: the relation chip and its bar, the traits, the memory
      line, and every action stay, and `textaudit --check` fails if one loses its
      button. */
-  h += '<div class="card"><h3>The cast</h3>';
-  /* each person is a face now - castTileHTML(), the tile the app draws too:
-     the relation ring around them, their mood on their face, means and standing
-     as meters, and the same traits, memory and actions as before */
-  h += '<div class="ctiles">'+cast.map(function(c){ return castTileHTML(c); }).join('')+'</div>';
-  /* the sentence that opened this card, at the foot of it, one tap away */
-  h += '<details class="fold"><summary>Why they remember</summary><div>'+
-    'These people get older, richer, poorer and dead whether you are paying attention or not. '+
-    'What they remember is what you did.</div></details>';
-  h += '</div></div><div>';
+  /* world-first: the cast is a strip of faces, each opening the card the
+     picture opens; with the explanations shown, the full tiles come back */
+  if(sceneFirst()) h += castStripHTML(cast);
+  else {
+    h += '<div class="card"><h3>The cast</h3>';
+    /* each person is a face now - castTileHTML(), the tile the app draws too:
+       the relation ring around them, their mood on their face, means and standing
+       as meters, and the same traits, memory and actions as before */
+    h += '<div class="ctiles">'+cast.map(function(c){ return castTileHTML(c); }).join('')+'</div>';
+    /* the sentence that opened this card, at the foot of it, one tap away */
+    h += '<details class="fold"><summary>Why they remember</summary><div>'+
+      'These people get older, richer, poorer and dead whether you are paying attention or not. '+
+      'What they remember is what you did.</div></details></div>';
+  }
+  h += '</div><div>';
   h += '<div class="card"><h3>Household &amp; family</h3>'+
     lifeRingsHTML()+
     '<hr class="sep">'+

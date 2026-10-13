@@ -99,27 +99,27 @@
  },
  "ui/src/07-view-money-position.js": {
   "importAt": 2,
-  "importLen": 531,
+  "importLen": 559,
   "exports": [
-   533,
-   3074,
-   3329,
-   6491,
-   6766,
-   8045,
-   8631,
-   11140,
-   11351,
-   26525,
-   30678
+   561,
+   3102,
+   3357,
+   6519,
+   6794,
+   8073,
+   8659,
+   11168,
+   11379,
+   26787,
+   30940
   ]
  },
  "ui/src/08-view-people.js": {
   "importAt": 1,
-  "importLen": 256,
+  "importLen": 283,
   "exports": [
-   257,
-   3604
+   284,
+   3858
   ]
  },
  "ui/src/09-view-levers.js": {

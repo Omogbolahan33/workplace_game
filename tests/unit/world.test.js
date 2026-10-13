@@ -403,3 +403,21 @@ test('customers, the bank\'s man and what is on its way each open their card', a
   assert.match(C.worldHTML(), /data-k="coming" data-c="0"/);
   assert.match(C.hotModal({ type: 'hot', kind: 'coming', id: '0' }), /The loan comes due/);
 });
+
+test('the sheet\'s face strips: every member of staff and of the cast is a face that opens their card', async () => {
+  const C = await world();
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  for (let i = 0; i < 3; i++) C.S.biz.staff.push({ id: 'st' + i, name: 'Staff ' + i, role: 'ops', skill: 5, salary: 90000, morale: 60, trait: null, joined: 0 });
+  const staff = C.staffStripHTML(C.S.biz);
+  assert.deepEqual([...staff.matchAll(/data-a="hot" data-k="staff" data-c="([^"]+)"/g)].map((m) => m[1]), ['st0', 'st1', 'st2']);
+  assert.match(staff, /3 staff/);
+  assert.match(C.staffStripHTML({ staff: [] }), /No staff/);
+  const alive = C.S.cast.filter((c) => c.alive);
+  const cast = C.castStripHTML(alive);
+  const ids = [...cast.matchAll(/data-a="hot" data-k="person" data-c="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(ids, alive.map((c) => c.id));
+  for (const id of ids) assert.match(C.hotModal({ type: 'hot', kind: 'person', id }), /data-a=/, id + '\'s card has nothing to do');
+  C.UI.details = true; assert.equal(C.sceneFirst(), false);
+  C.UI.details = false; assert.equal(C.sceneFirst(), true);
+});

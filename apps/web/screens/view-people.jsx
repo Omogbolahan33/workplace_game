@@ -15,7 +15,7 @@
      health is `lifeRingsHTML()`. One converted screen does not get to have its
      own opinion about what a person looks like.
 */
-import { S, castTileHTML, lifeRingsHTML, householdButtonsHTML } from '@ledger/core';
+import { S, UI, castTileHTML, castStripBody, lifeRingsHTML, householdButtonsHTML } from '@ledger/core';
 import { RivalCard } from './view-rival.jsx';
 import Group from './group.jsx';
 
@@ -51,6 +51,10 @@ export default function ViewPeople() {
     <div className="grid g2">
       <div>
         <Group route="legacy/people" i={0}>
+          {/* world-first: the cast as a strip of faces, each opening the card the
+              picture opens (core's, as the string path draws it); with the
+              explanations shown, the full tiles below */}
+          {!UI.details ? <div className="card" dangerouslySetInnerHTML={{ __html: castStripBody(cast) }} /> : (
           <div className="card">
             <h3>The cast</h3>
             {/* each person is a face - castTileHTML(), the same tile the string renderer draws */}
@@ -64,6 +68,7 @@ export default function ViewPeople() {
               </div>
             </details>
           </div>
+          )}
         </Group>
 
         <div className="card" style={{ marginTop: '12px' }}>

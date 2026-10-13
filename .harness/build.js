@@ -78,7 +78,10 @@ const names=['newGame','advanceQuarter','ACT','UI','render','netWorth','DIFFS','
 'noteSaved','savedAtLabel','saveLineHTML','profileHeadHTML',
 'intercoLoan','repayInterco','intercoOwed','intercoUpstream','intercoInterestTotal','divCapacity','divNote',
 'payDividendUp','stepGroup','groupAccounts','groupBreaches','groupCrossDefault','groupCovenantStrip','viewGroup',
-'WHT_RATE','IC_RATE','ARMS_LENGTH','_gcell','_glabel'];
+'WHT_RATE','IC_RATE','ARMS_LENGTH','_gcell','_glabel',
+/* the scene you can tap (VISUAL.md, M11): the cards a tap opens, so the text
+   audit can count the buttons one tap away as the route's own */
+'hotModal','sceneFirst','castStripHTML','staffStripHTML','castStripBody','staffStripBody'];
 const decl=new Set();
 for(const m of src.matchAll(/^(?:async\s+)?function\s+([A-Za-z_$][\w$]*)/gm)) decl.add(m[1]);
 for(const m of src.matchAll(/^(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=/gm)) decl.add(m[1]);

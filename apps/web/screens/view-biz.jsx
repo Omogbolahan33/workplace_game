@@ -31,7 +31,7 @@
 */
 import {
   S, fmt, esc, pct, bar, BIZ, TRAITS, bizValue, startBizCost, priceBand,
-  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML
+  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML, UI, staffStripBody
 } from '@ledger/core';
 
 /* --------------------------------------------------------------------------
@@ -226,6 +226,10 @@ export function OperationsCard() {
 
 export function BizPeopleCard() {
   const b = S.biz; if (!b) return null;
+  /* world-first: a strip of badges, each opening the card the picture opens
+     (core's, as the string path draws it); with the explanations shown, the
+     full table */
+  if (!UI.details) return <div className="card" style={{ marginTop: 12 }} dangerouslySetInnerHTML={{ __html: staffStripBody(b) }} />;
   return (
     <div className="card" style={{ marginTop: '12px' }}>
       <h3>People <span className="tag">{b.staff.length} staff · {fmt(staffMonthly())}/mo</span></h3>

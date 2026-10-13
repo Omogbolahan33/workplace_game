@@ -661,6 +661,14 @@ body.terse .prose{display:none}
 @keyframes hotfind{0%{stroke:#f5b301;stroke-width:1.4;stroke-dasharray:5 4;stroke-opacity:.9}100%{stroke-opacity:0}}
 @media (prefers-reduced-motion:reduce){.hotzone{animation:none}}
 .ctiles.one{grid-template-columns:1fr}
+/* a list of people that lives in the picture: a strip of their faces */
+.facerow{display:flex;flex-wrap:wrap;gap:10px 8px;margin:4px 0 8px}
+.facebtn{display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;padding:6px 2px;border-radius:12px;border:1px solid transparent;background:none;color:var(--txt);cursor:pointer;font-size:11px}
+.facebtn:hover,.facebtn:focus-visible{border-color:rgba(245,179,1,.5);background:rgba(245,179,1,.06)}
+.facebtn .cface{width:58px;height:58px}
+.facebtn .cface .cbadge,.facebtn .cface .cfelt,.facebtn .cface .cstory{width:20px;height:20px;font-size:12px}
+.facebtn>svg{width:50px;height:50px}
+.facebtn span{max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .covrow{padding:8px 0;border-bottom:1px solid var(--line)}
 .covbar{position:relative;display:block;height:10px;border-radius:5px;background:rgba(255,255,255,.08);margin:7px 0 4px}
 .covbar i{display:block;height:100%;border-radius:5px}
@@ -15066,6 +15074,39 @@ function boardTaps(st){
     return out.join('');
   };
 }
+/* The sheet gives way to the scene (VISUAL.md, M11): in the world-first view,
+   a list whose every row is a person you can tap in the picture becomes a strip
+   of their faces, each opening the same card the picture does. With the
+   explanations shown - the HUD's (i) - the full list comes back: the old
+   layout is the fallback, never gone. */
+function sceneFirst(){ return !UI.details; }
+/* a member of staff, small: morale as the ring, their initials inside */
+function staffBadgeSVG(s){
+  const m = Math.max(0, Math.min(100, s.morale || 0)), C = 2 * Math.PI * 19, col = m > 60 ? '#2fd47a' : m > 35 ? '#ff9f43' : '#ff5f6d';
+  const ini = String(s.name || '?').split(' ').map(function(w){ return w[0] || ''; }).join('').slice(0, 2).toUpperCase();
+  return '<svg class="gfx" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="3"/>' +
+    '<circle cx="22" cy="22" r="19" fill="none" stroke="' + col + '" stroke-width="3" stroke-dasharray="' + (C * m / 100).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 22 22)"/>' +
+    '<circle cx="22" cy="22" r="15" fill="#1f6fb2"/><text x="22" y="26.5" font-family="sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#fff">' + esc(ini) + '</text></svg>';
+}
+function staffStripBody(b){
+  const n = (b.staff || []).length;
+  return '<h3>People <span class="tag">' + n + ' staff \u00b7 ' + fmt(staffMonthly()) + '/mo</span></h3>' +
+    (n ? '<div class="facerow">' + b.staff.map(function(s){
+      return '<button class="facebtn" data-a="hot" data-k="staff" data-c="' + esc(s.id) + '" aria-label="' + esc(s.name) + '">' + staffBadgeSVG(s) + '<span>' + esc(String(s.name).split(' ')[0]) + '</span></button>';
+    }).join('') + '</div><div class="tiny muted prose">Tap anyone, here or in the picture, for their pay, their morale and what you can do.</div>'
+      : '<div class="small muted">No staff. You are the operations department, the sales team and the cleaner. That works until it does not.</div>') +
+    '<hr class="sep"><div class="tiny muted">Fair market salary for a skill-5 hire right now: <b>' + fmt(marketSalary(5)) + '</b>/month. Underpay and they leave or steal; overpay and your break-even rises permanently.</div>';
+}
+/* the card around it - the React screen draws this element itself and fills
+   it with the body, so both renderers put the same card in the section */
+function staffStripHTML(b){ return '<div class="card" style="margin-top:12px">' + staffStripBody(b) + '</div>'; }
+function castStripBody(cast){
+  return '<h3>The cast</h3><div class="facerow">' + cast.map(function(c){
+    return '<button class="facebtn" data-a="hot" data-k="person" data-c="' + esc(c.id) + '" aria-label="' + esc(c.name + ', ' + relationWord(c.relation)) + '">' + castFaceHTML(c) + '<span>' + esc(String(c.name).split(' ')[0]) + '</span></button>';
+  }).join('') + '</div><div class="tiny muted prose">Tap anyone, here or in the picture, for what they remember and what you can do.</div>' +
+    '<details class="fold"><summary>Why they remember</summary><div>These people get older, richer, poorer and dead whether you are paying attention or not. What they remember is what you did.</div></details>';
+}
+function castStripHTML(cast){ return '<div class="card">' + castStripBody(cast) + '</div>'; }
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){
@@ -16387,23 +16428,28 @@ function viewBiz(){
   h += '<div class="tiny muted" style="margin-top:9px">Owner attention: <b>'+(ownerTime()*100).toFixed(0)+'%</b>'+(S.p.job?' — you still have a job.':(S.flags.moonlight?' — moonlighting.':' — full-time. This is your only income.'))+
     (S.p.job?' <button class="btn xs" data-a="toggle" data-k="moonlight">'+(S.flags.moonlight?'Stop':'Work evenings too')+'</button>':'')+'</div>';
   h += '</div>';
-  // staff
-  h += '<div class="card" style="margin-top:12px"><h3>People <span class="tag">'+b.staff.length+' staff · '+fmt(staffMonthly())+'/mo</span></h3>';
-  if(b.staff.length){
-    h += '<table><tr><th>Name</th><th>Skill</th><th>Type</th><th class="num">Salary</th><th>Morale</th><th></th></tr>';
-    b.staff.forEach(function(s){
-      const tr = TRAITS.find(x=>x.id===s.trait)||{name:'—'};
-      h += '<tr><td>'+esc(s.name)+'</td><td class="num">'+s.skill+'/10</td><td><span class="chip '+(s.trait==='thief'||s.trait==='lazy'?'r':s.trait==='genius'||s.trait==='sharp'?'g':'')+'">'+tr.name+'</span></td>'+
-        '<td class="num">'+fmt(s.salary)+'</td>'+
-        '<td>'+bar(s.morale,100,s.morale>60?'var(--good)':s.morale>35?'var(--warn)':'var(--bad)')+'</td>'+
-        '<td class="num"><button class="btn xs" data-a="raise" data-i="'+s.id+'">+15%</button> <button class="btn xs bad" data-a="fire" data-i="'+s.id+'">Let go</button></td></tr>';
-    });
-    h += '</table>';
-  } else {
-    h += '<div class="small muted">No staff. You are the operations department, the sales team and the cleaner. That works until it does not.</div>';
+  // staff - world-first, a strip of badges, each opening the card the picture
+  // opens; with the explanations shown, the full table comes back
+  if(sceneFirst()) h += staffStripHTML(b);
+  else {
+    h += '<div class="card" style="margin-top:12px"><h3>People <span class="tag">'+b.staff.length+' staff · '+fmt(staffMonthly())+'/mo</span></h3>';
+    if(b.staff.length){
+      h += '<table><tr><th>Name</th><th>Skill</th><th>Type</th><th class="num">Salary</th><th>Morale</th><th></th></tr>';
+      b.staff.forEach(function(s){
+        const tr = TRAITS.find(x=>x.id===s.trait)||{name:'—'};
+        h += '<tr><td>'+esc(s.name)+'</td><td class="num">'+s.skill+'/10</td><td><span class="chip '+(s.trait==='thief'||s.trait==='lazy'?'r':s.trait==='genius'||s.trait==='sharp'?'g':'')+'">'+tr.name+'</span></td>'+
+          '<td class="num">'+fmt(s.salary)+'</td>'+
+          '<td>'+bar(s.morale,100,s.morale>60?'var(--good)':s.morale>35?'var(--warn)':'var(--bad)')+'</td>'+
+          '<td class="num"><button class="btn xs" data-a="raise" data-i="'+s.id+'">+15%</button> <button class="btn xs bad" data-a="fire" data-i="'+s.id+'">Let go</button></td></tr>';
+      });
+      h += '</table>';
+    } else {
+      h += '<div class="small muted">No staff. You are the operations department, the sales team and the cleaner. That works until it does not.</div>';
+    }
+    h += '<hr class="sep"><div class="tiny muted">Fair market salary for a skill-5 hire right now: <b>'+fmt(marketSalary(5))+'</b>/month. Underpay and they leave or steal; overpay and your break-even rises permanently.</div>';
+    h += '</div>';
   }
-  h += '<hr class="sep"><div class="tiny muted">Fair market salary for a skill-5 hire right now: <b>'+fmt(marketSalary(5))+'</b>/month. Underpay and they leave or steal; overpay and your break-even rises permanently.</div>';
-  h += '</div></div>';
+  h += '</div>';
   // right column: hiring, partner
   h += '<div>';
   h += '<div class="card"><h3>Candidates this quarter</h3>';
@@ -16597,16 +16643,21 @@ function viewPeople(){
      Nothing was removed: the relation chip and its bar, the traits, the memory
      line, and every action stay, and `textaudit --check` fails if one loses its
      button. */
-  h += '<div class="card"><h3>The cast</h3>';
-  /* each person is a face now - castTileHTML(), the tile the app draws too:
-     the relation ring around them, their mood on their face, means and standing
-     as meters, and the same traits, memory and actions as before */
-  h += '<div class="ctiles">'+cast.map(function(c){ return castTileHTML(c); }).join('')+'</div>';
-  /* the sentence that opened this card, at the foot of it, one tap away */
-  h += '<details class="fold"><summary>Why they remember</summary><div>'+
-    'These people get older, richer, poorer and dead whether you are paying attention or not. '+
-    'What they remember is what you did.</div></details>';
-  h += '</div></div><div>';
+  /* world-first: the cast is a strip of faces, each opening the card the
+     picture opens; with the explanations shown, the full tiles come back */
+  if(sceneFirst()) h += castStripHTML(cast);
+  else {
+    h += '<div class="card"><h3>The cast</h3>';
+    /* each person is a face now - castTileHTML(), the tile the app draws too:
+       the relation ring around them, their mood on their face, means and standing
+       as meters, and the same traits, memory and actions as before */
+    h += '<div class="ctiles">'+cast.map(function(c){ return castTileHTML(c); }).join('')+'</div>';
+    /* the sentence that opened this card, at the foot of it, one tap away */
+    h += '<details class="fold"><summary>Why they remember</summary><div>'+
+      'These people get older, richer, poorer and dead whether you are paying attention or not. '+
+      'What they remember is what you did.</div></details></div>';
+  }
+  h += '</div><div>';
   h += '<div class="card"><h3>Household &amp; family</h3>'+
     lifeRingsHTML()+
     '<hr class="sep">'+

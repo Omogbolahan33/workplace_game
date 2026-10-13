@@ -97,6 +97,39 @@ function boardTaps(st){
     return out.join('');
   };
 }
+/* The sheet gives way to the scene (VISUAL.md, M11): in the world-first view,
+   a list whose every row is a person you can tap in the picture becomes a strip
+   of their faces, each opening the same card the picture does. With the
+   explanations shown - the HUD's (i) - the full list comes back: the old
+   layout is the fallback, never gone. */
+function sceneFirst(){ return !UI.details; }
+/* a member of staff, small: morale as the ring, their initials inside */
+function staffBadgeSVG(s){
+  const m = Math.max(0, Math.min(100, s.morale || 0)), C = 2 * Math.PI * 19, col = m > 60 ? '#2fd47a' : m > 35 ? '#ff9f43' : '#ff5f6d';
+  const ini = String(s.name || '?').split(' ').map(function(w){ return w[0] || ''; }).join('').slice(0, 2).toUpperCase();
+  return '<svg class="gfx" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="3"/>' +
+    '<circle cx="22" cy="22" r="19" fill="none" stroke="' + col + '" stroke-width="3" stroke-dasharray="' + (C * m / 100).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 22 22)"/>' +
+    '<circle cx="22" cy="22" r="15" fill="#1f6fb2"/><text x="22" y="26.5" font-family="sans-serif" font-size="12" font-weight="700" text-anchor="middle" fill="#fff">' + esc(ini) + '</text></svg>';
+}
+function staffStripBody(b){
+  const n = (b.staff || []).length;
+  return '<h3>People <span class="tag">' + n + ' staff \u00b7 ' + fmt(staffMonthly()) + '/mo</span></h3>' +
+    (n ? '<div class="facerow">' + b.staff.map(function(s){
+      return '<button class="facebtn" data-a="hot" data-k="staff" data-c="' + esc(s.id) + '" aria-label="' + esc(s.name) + '">' + staffBadgeSVG(s) + '<span>' + esc(String(s.name).split(' ')[0]) + '</span></button>';
+    }).join('') + '</div><div class="tiny muted prose">Tap anyone, here or in the picture, for their pay, their morale and what you can do.</div>'
+      : '<div class="small muted">No staff. You are the operations department, the sales team and the cleaner. That works until it does not.</div>') +
+    '<hr class="sep"><div class="tiny muted">Fair market salary for a skill-5 hire right now: <b>' + fmt(marketSalary(5)) + '</b>/month. Underpay and they leave or steal; overpay and your break-even rises permanently.</div>';
+}
+/* the card around it - the React screen draws this element itself and fills
+   it with the body, so both renderers put the same card in the section */
+function staffStripHTML(b){ return '<div class="card" style="margin-top:12px">' + staffStripBody(b) + '</div>'; }
+function castStripBody(cast){
+  return '<h3>The cast</h3><div class="facerow">' + cast.map(function(c){
+    return '<button class="facebtn" data-a="hot" data-k="person" data-c="' + esc(c.id) + '" aria-label="' + esc(c.name + ', ' + relationWord(c.relation)) + '">' + castFaceHTML(c) + '<span>' + esc(String(c.name).split(' ')[0]) + '</span></button>';
+  }).join('') + '</div><div class="tiny muted prose">Tap anyone, here or in the picture, for what they remember and what you can do.</div>' +
+    '<details class="fold"><summary>Why they remember</summary><div>These people get older, richer, poorer and dead whether you are paying attention or not. What they remember is what you did.</div></details>';
+}
+function castStripHTML(cast){ return '<div class="card">' + castStripBody(cast) + '</div>'; }
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){

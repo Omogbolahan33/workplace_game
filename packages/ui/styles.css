@@ -638,6 +638,14 @@ body.terse .prose{display:none}
 @keyframes hotfind{0%{stroke:#f5b301;stroke-width:1.4;stroke-dasharray:5 4;stroke-opacity:.9}100%{stroke-opacity:0}}
 @media (prefers-reduced-motion:reduce){.hotzone{animation:none}}
 .ctiles.one{grid-template-columns:1fr}
+/* a list of people that lives in the picture: a strip of their faces */
+.facerow{display:flex;flex-wrap:wrap;gap:10px 8px;margin:4px 0 8px}
+.facebtn{display:flex;flex-direction:column;align-items:center;gap:4px;width:72px;padding:6px 2px;border-radius:12px;border:1px solid transparent;background:none;color:var(--txt);cursor:pointer;font-size:11px}
+.facebtn:hover,.facebtn:focus-visible{border-color:rgba(245,179,1,.5);background:rgba(245,179,1,.06)}
+.facebtn .cface{width:58px;height:58px}
+.facebtn .cface .cbadge,.facebtn .cface .cfelt,.facebtn .cface .cstory{width:20px;height:20px;font-size:12px}
+.facebtn>svg{width:50px;height:50px}
+.facebtn span{max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .covrow{padding:8px 0;border-bottom:1px solid var(--line)}
 .covbar{position:relative;display:block;height:10px;border-radius:5px;background:rgba(255,255,255,.08);margin:7px 0 4px}
 .covbar i{display:block;height:100%;border-radius:5px}
