@@ -192,3 +192,20 @@ test('the Deed is seals and the register a picture; (i) brings the table and the
   assert.match(viewRegister(b), /If the company were sold at today/);
   C.UI.details = false;
 });
+
+test('the chronicle reads newest first, and world-first it is a line and tiles', async () => {
+  stubDOM();
+  const C = await core();
+  (await ui()).install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  for (let i = 0; i < 6; i++) { C.advanceQuarter(); C.UI.modal = null; }
+  C.UI.details = true;
+  const list = C.viewLedgerChronicle();
+  /* the first entry on the screen is the latest thing that happened */
+  const first = list.match(/<div class="logline"[^>]*><div class="t">([^<]+)<\/div>/)[1];
+  assert.ok(first.indexOf(C.S.journal[0].date) === 0, 'the chronicle opens on ' + first + ', not on the latest quarter ' + C.S.journal[0].date);
+  C.UI.details = false;
+  const pic = C.viewLedgerChronicle();
+  assert.ok(pic.includes(C.chronicleInnerHTML(C.S.journal.slice(0, 40))));
+  assert.doesNotMatch(pic, /class="logline"/);
+});

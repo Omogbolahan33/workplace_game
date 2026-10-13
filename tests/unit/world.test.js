@@ -558,3 +558,24 @@ test('the deed is a row of seals, each clause opening its card with its amendmen
   assert.match(reg, /class="gfx wfall"/); assert.match(reg, /Your net on a sale today/);
   assert.equal(JSON.stringify(C.S), before, 'drawing the deed and the register changed the run');
 });
+
+test('the chronicle is a life: a line of what you were worth, every quarter something happened pinned on it', async () => {
+  const C = await world();
+  for (let i = 0; i < 6; i++) playQuarter(C);
+  const before = JSON.stringify(C.S);
+  const js = C.S.journal.slice(0, 40);
+  const qs = C.chronicleQuarters(js);
+  /* every entry is in exactly one quarter, newest quarter first, as the journal is */
+  assert.equal(qs.reduce((n, q) => n + q.items.length, 0), js.length);
+  for (let i = 1; i < qs.length; i++) assert.ok(qs[i - 1].turn > qs[i].turn, 'the quarters are not newest first');
+  const html = C.chronicleInnerHTML(js);
+  const tiles = [...html.matchAll(/class="qtile" data-a="hot" data-k="quarter" data-c="(\d+)"/g)].map((m) => +m[1]);
+  /* what just happened is open in full; every quarter before it is a tile */
+  assert.deepEqual(tiles, qs.slice(1).map((q) => q.turn));
+  for (const j of qs[0].items) assert.ok(html.includes(C.esc(j.text)), 'the latest quarter is not open on the screen');
+  assert.match(html, /class="gfx lifeline"/);
+  /* a quarter's card has every one of its entries, in full */
+  const q = qs[0], card = C.quarterCardHTML(q.turn);
+  for (const j of q.items) assert.ok(card.includes(C.esc(j.text)), 'an entry is missing from its quarter');
+  assert.equal(JSON.stringify(C.S), before, 'drawing the chronicle changed the run');
+});

@@ -47,8 +47,13 @@ test('the shipped payload is ten files, and the game among them is the composed 
      deliverable did not balloon, and the exact figure is in the build's own log
      and in FEATURES. A number that has to be edited on every CSS change is a
      number that gets edited without being read. */
-  assert.ok(shipped.length > 900000 && shipped.length < 1400000,
-    'the shipped game is ' + shipped.length + ' bytes — out of the band it has held all year (0.9–1.4 MB)');
+  /* The band catches a payload that is broken (a stub, a half-written file) or
+     doubled (the game inlined twice). It is not a size budget: the game is
+     becoming pictures (VISUAL.md), drawn in the file rather than fetched, and
+     growing for that was agreed - so the top of the band moved from 1.4 MB to
+     2 MB when the pictures crossed it, and a doubled game still falls outside. */
+  assert.ok(shipped.length > 900000 && shipped.length < 2000000,
+    'the shipped game is ' + shipped.length + ' bytes — out of the band (0.9–2 MB): broken, or inlined twice?');
   console.log('  the shipped game is ' + shipped.length + ' bytes');
 });
 

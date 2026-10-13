@@ -166,7 +166,7 @@ for (const route of ROUTES) {
        button that disappears is a feature that disappeared. */
     acts: ((html + behind).match(/<button[^>]*data-a="([^"]+)"[^>]*>[\s\S]*?<\/button>/g) || [])
       /* the faces and the card's own way out are how you reach a control, not controls the screen had */
-      .filter(b => !/data-a="(hot|close)"/.test(b) && !/data-a="goto"[^>]*>(Everyone|The business|The board|The household|Your record|The deals|The deed|The covenants|Everything coming back)</.test(b))
+      .filter(b => !/data-a="(hot|close)"/.test(b) && !/data-a="goto"[^>]*>(Everyone|The business|The board|The household|Your record|The deals|The deed|The chronicle|The covenants|Everything coming back)</.test(b))
       .map(b => (b.match(/data-a="([^"]+)"/) || [,'?'])[1] + '|' +
                 textOf(b.replace(/<button[^>]*>/, '')).join(' ').slice(0, 40).replace(/\|/g, '/'))
       .sort(),

@@ -1,7 +1,7 @@
 
 
 /* ---------------------------------- Legacy --------------------------------- */
-import { S, ambitionHTML, esc, estateLine, foldHTML, inheritanceNote, scoreboardRingsHTML, standRingsHTML, willLine } from '@ledger/core';
+import { S, ambitionHTML, chronicleInnerHTML, esc, estateLine, foldHTML, inheritanceNote, sceneFirst, scoreboardRingsHTML, standRingsHTML, willLine } from '@ledger/core';
 
 /* Generated from src/11-view-legacy.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export function viewLegacy(){
@@ -59,8 +59,13 @@ export function viewLedgerChronicle(){
   let h = '<div class="card"><h3>Chronicle <span class="tag">'+
     js.length+(js.length===1?' entry':' entries')+'</span></h3>';
   if(!js.length){ h += '<div class="tiny muted">Empty.</div></div>'; return h; }
-  /* the game writes the log oldest-first; the reader wants it the other way */
-  const rev = js.slice().reverse();
+  /* world-first: your life as a line, what happened pinned on it, the
+     quarters as tiles that open in full - the list with the explanations shown */
+  if(sceneFirst()) return h + '<div class="chron">'+chronicleInnerHTML(js)+'</div></div>';
+  /* log() unshifts, so the journal is already newest-first - which is what the
+     reader wants. It used to be reversed here, which put the run's first eight
+     entries on the screen and folded away everything since. */
+  const rev = js.slice();
   rev.slice(0,8).forEach(function(j){ h += entryHTML(j); });
   const rest = rev.slice(8);
   if(rest.length){

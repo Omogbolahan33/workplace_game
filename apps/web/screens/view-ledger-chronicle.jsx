@@ -11,7 +11,7 @@
   recent first. If that cap ever moves it should move once, in the game's data,
   not be re-derived by whichever screen happens to render the list.
 */
-import { S } from '@ledger/core';
+import { S, UI, chronicleInnerHTML } from '@ledger/core';
 
 const TONE = {
   good: 'var(--good)',
@@ -27,7 +27,9 @@ const TONE = {
    a mature run — the heaviest route in the game. */
 export default function ViewLedgerChronicle() {
   const entries = S.journal.slice(0, 40);
-  const rev = entries.slice().reverse();
+  /* the journal is newest-first already (log() unshifts); reversing it put the
+     run's first eight entries on the screen and folded away everything since */
+  const rev = entries.slice();
 
   const entry = (j, i) => (
     <div className="logline" key={i} style={{ borderLeftColor: TONE[j.kind] || 'var(--line)' }}>
@@ -48,8 +50,10 @@ export default function ViewLedgerChronicle() {
     <div className="card">
       <h3>Chronicle <span className="tag">{entries.length}{entries.length === 1 ? ' entry' : ' entries'}</span></h3>
       {entries.length === 0 ? <div className="tiny muted">Empty.</div> : null}
-      {rev.slice(0, 8).map(entry)}
-      {years.map((g) => (
+      {/* world-first: your life as a line with what happened pinned on it, and the quarters as tiles */}
+      {entries.length > 0 && !UI.details ? <div className="chron" dangerouslySetInnerHTML={{ __html: chronicleInnerHTML(entries) }} /> : null}
+      {entries.length > 0 && !UI.details ? null : rev.slice(0, 8).map(entry)}
+      {entries.length > 0 && !UI.details ? null : years.map((g) => (
         <details className="fold" key={g.y}>
           <summary>{g.y} · {g.items.length}{g.items.length === 1 ? ' entry' : ' entries'}</summary>
           <div>{g.items.map(entry)}</div>

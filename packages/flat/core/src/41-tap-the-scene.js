@@ -460,6 +460,75 @@ function registerPictureHTML(b){
     '<span class="gfx wfall" role="img" aria-label="' + esc(w.rows.map(function(r){ return r.name + ' ' + fmt(r.amt); }).join(', ')) + '">' + bar + '</span>' +
     '<div class="kv"><span><b>Your net on a sale today</b></span><span class="mid ' + (w.mine > 0 ? 'good' : 'bad') + '">' + fmt(w.mine) + '</span></div>';
 }
+/* The chronicle as a life: what you are worth, quarter by quarter, as one
+   line from the start of the run to now, with every quarter something
+   happened pinned on it - green where the good outweighed the bad, red where
+   it did not - and the quarters as tiles, an icon for each thing that
+   happened. Each opens the quarter in full. Read from the journal and the
+   run's own history. */
+const CHRONICLE_ICO = {biz: 'shop', life: 'home', money: 'coins', invest: 'trend', macro: 'globe', start: 'flag', career: 'case', season: 'calendar', health: 'heart', end: 'medal'};
+const CHRONICLE_TONE = {good: 'var(--good)', bad: 'var(--bad)', warn: 'var(--warn)', macro: 'var(--info)', begin: 'var(--acc)'};
+function chronicleQuarters(js){
+  const out = [];
+  js.forEach(function(j){
+    const last = out[out.length - 1];
+    if(last && last.turn === j.turn) last.items.push(j); else out.push({turn: j.turn, date: j.date, items: [j]});
+  });
+  return out;
+}
+function quarterTone(q){
+  const g = q.items.filter(function(j){ return j.kind === 'good'; }).length, b = q.items.filter(function(j){ return j.kind === 'bad'; }).length;
+  return g > b ? '#2fd47a' : b > g ? '#ff5f6d' : '#f5b301';
+}
+function lifeLineSVG(qs){
+  const hist = (S.hist || []).filter(function(h){ return typeof h.nw === 'number'; });
+  if(hist.length < 2) return '';
+  const W = 390, H = 130, L = 14, R = 14, T = 16, B = 22;
+  const t0 = hist[0].t, t1 = Math.max(t0 + 1, hist[hist.length - 1].t);
+  const lo = Math.min(0, Math.min.apply(null, hist.map(function(h){ return h.nw; }))), hi = Math.max(1, Math.max.apply(null, hist.map(function(h){ return h.nw; })));
+  const X = function(t){ return L + (t - t0) / (t1 - t0) * (W - L - R); }, Y = function(v){ return T + (1 - (v - lo) / (hi - lo)) * (H - T - B); };
+  const nwAt = function(t){ let best = hist[0]; hist.forEach(function(h){ if(h.t <= t) best = h; }); return best.nw; };
+  const line = hist.map(function(h, i){ return (i ? 'L' : 'M') + X(h.t).toFixed(1) + ' ' + Y(h.nw).toFixed(1); }).join(' ');
+  const area = line + ' L' + X(hist[hist.length - 1].t).toFixed(1) + ' ' + Y(lo).toFixed(1) + ' L' + X(t0).toFixed(1) + ' ' + Y(lo).toFixed(1) + 'Z';
+  const pins = qs.filter(function(q){ return q.turn >= t0 && q.turn <= t1; }).map(function(q){
+    const x = X(q.turn), y = Y(nwAt(q.turn)), r = 3.5 + Math.min(3.5, q.items.length * .7);
+    return '<g class="hot" data-a="hot" data-k="quarter" data-c="' + q.turn + '" role="button" tabindex="0" aria-label="' + esc(q.date + ': ' + q.items.length + ' thing' + (q.items.length === 1 ? '' : 's') + ' happened') + '"><title>' + esc(q.date) + '</title>' +
+      '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="11" fill="#fff" fill-opacity="0"/><circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + r.toFixed(1) + '" fill="' + quarterTone(q) + '" stroke="#0b1017" stroke-width="1.5"/></g>';
+  }).join('');
+  const first = hist[0], last = hist[hist.length - 1];
+  return '<svg class="gfx lifeline" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc('Net worth from ' + fmt(first.nw) + ' at ' + first.age + ' to ' + fmt(last.nw) + ' at ' + last.age) + '">' +
+    '<defs><linearGradient id="llg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f5b301" stop-opacity=".35"/><stop offset="1" stop-color="#f5b301" stop-opacity="0"/></linearGradient></defs>' +
+    (lo < 0 ? '<path d="M' + L + ' ' + Y(0).toFixed(1) + ' H' + (W - R) + '" stroke="rgba(255,255,255,.18)" stroke-dasharray="3 3"/>' : '') +
+    '<path d="' + area + '" fill="url(#llg)"/><path d="' + line + '" fill="none" stroke="#f5b301" stroke-width="2.2" stroke-linejoin="round"/>' + pins +
+    '<text x="' + L + '" y="' + (H - 6) + '" font-size="10" fill="#9aa7b6">age ' + first.age + '</text><text x="' + (W - R) + '" y="' + (H - 6) + '" font-size="10" fill="#9aa7b6" text-anchor="end">age ' + last.age + ' · ' + fmt(last.nw) + '</text>' +
+    '<text x="' + L + '" y="11" font-size="10" fill="#9aa7b6">' + fmt(hi) + '</text></svg>';
+}
+function chronicleTilesHTML(qs){
+  return qs.map(function(q){
+    return '<button class="qtile" data-a="hot" data-k="quarter" data-c="' + q.turn + '" aria-label="' + esc(q.date + ': ' + q.items.length + ' thing' + (q.items.length === 1 ? '' : 's') + ' happened') + '" style="border-top-color:' + quarterTone(q) + '">' +
+      '<b>' + esc(q.date) + '</b><span class="gfx qicos">' + q.items.slice(0, 6).map(function(j){ return '<i style="color:' + (CHRONICLE_TONE[j.kind] || 'var(--dim)') + '">' + worldIco(CHRONICLE_ICO[j.cat] || 'note') + '</i>'; }).join('') + '</span>' +
+      '<small>' + q.items.length + ' thing' + (q.items.length === 1 ? '' : 's') + '</small></button>';
+  }).join('');
+}
+/* the chronicle, world-first: the line, then what just happened open in
+   full - the newest quarter - and every quarter before it as a tile */
+function chronicleInnerHTML(js){
+  const qs = chronicleQuarters(js), now = qs[0];
+  return lifeLineSVG(qs) +
+    (now ? '<div class="qnow"><b>' + esc(now.date) + '</b>' + now.items.map(quarterEntryHTML).join('') + '</div>' : '') +
+    (qs.length > 1 ? '<div class="qtiles">' + chronicleTilesHTML(qs.slice(1)) + '</div>' : '');
+}
+function quarterEntryHTML(j){
+  return '<div class="qentry" style="border-left-color:' + (CHRONICLE_TONE[j.kind] || 'var(--line)') + '"><span class="gfx">' + worldIco(CHRONICLE_ICO[j.cat] || 'note') + '</span><div>' + esc(j.text) + '</div></div>';
+}
+function quarterCardHTML(turn){
+  const q = chronicleQuarters(S.journal.slice(0, 40)).find(function(x){ return String(x.turn) === String(turn); });
+  if(!q) return modalHTML('<h2>Not in the chronicle</h2>', '', '<button class="btn primary" data-a="close">Close</button>');
+  const h = (S.hist || []).find(function(x){ return x.t === q.turn; });
+  return modalHTML('<h2>' + esc(q.date) + '</h2><div class="tiny muted">' + (h ? 'Age ' + h.age + ' · worth ' + fmt(h.nw) + ' · ' : '') + q.items.length + ' thing' + (q.items.length === 1 ? '' : 's') + ' happened</div>',
+    q.items.map(quarterEntryHTML).join(''),
+    '<button class="btn" data-a="goto" data-t="legacy" data-s="chronicle">The chronicle</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:480px"');
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){
@@ -576,6 +645,7 @@ function hotModal(M){
     if(!S.biz) return modalHTML('<h2>No company</h2>', '', '<button class="btn primary" data-a="close">Close</button>');
     return clauseCardHTML(S.biz, M.id);
   }
+  if(M.kind === 'quarter') return quarterCardHTML(M.id);
   if(M.kind === 'deal') return dealCardHTML(M.id);
   if(M.kind === 'offer') return offerCardHTML(M.id);
   if(M.kind === 'commit'){

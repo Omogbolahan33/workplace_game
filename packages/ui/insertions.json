@@ -147,11 +147,11 @@
  },
  "ui/src/11-view-legacy.js": {
   "importAt": 84,
-  "importLen": 248,
+  "importLen": 280,
   "exports": [
-   332,
-   3158,
-   5172
+   364,
+   3190,
+   5583
   ]
  },
  "ui/src/12-view-ledger-settings.js": {
