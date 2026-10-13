@@ -646,6 +646,15 @@ body.terse .prose{display:none}
 .facebtn .cface .cbadge,.facebtn .cface .cfelt,.facebtn .cface .cstory{width:20px;height:20px;font-size:12px}
 .facebtn>svg{width:50px;height:50px}
 .facebtn span{max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.regpic{display:flex;align-items:center;gap:14px;margin:4px 0 10px}
+.regring{width:118px;height:118px;flex:none}
+.rlegs{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.rleg{display:flex;align-items:center;gap:7px;font-size:12.5px;flex-wrap:wrap}
+.rleg i{width:10px;height:10px;border-radius:3px;flex:none}
+.rleg span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wfall{display:flex;height:16px;border-radius:8px;overflow:hidden;margin:6px 0 8px;background:rgba(255,255,255,.06)}
+.wfall i{display:block;height:100%}
+.clause{font-size:15px;line-height:1.5;padding:12px 14px;border-radius:10px;border:1px solid rgba(212,175,55,.35);background:rgba(212,175,55,.06)}
 .dealgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:6px 0 4px}
 .dealtile{display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:0;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--panel2);color:var(--txt);cursor:pointer}
 .dealtile:hover,.dealtile:focus-visible{border-color:rgba(245,179,1,.55)}

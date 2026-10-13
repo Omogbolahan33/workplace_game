@@ -458,17 +458,18 @@
  },
  "41-tap-the-scene.js": {
   "needs": [
-   "00-cities.js: dateLabel, esc, fmt",
+   "00-cities.js: dateLabel, esc, fmt, pct",
    "01-game-state.js: S, UI",
    "09-resolving-decisions.js: comingBack",
    "37-what-comes-back.js: ROAD_QUARTERS, roadAheadSVG",
    "04-bizcapacity.js: houseRoleAvail, houseSalaryFor",
    "03-startbizcost-one-price-for-every-picker.js: bizList, commitBreak, commitDropCost, leverOf, marketSalary, staffMonthly, traitOf",
-   "26-governance-register-board.js: archOf, dirVotes",
+   "26-governance-register-board.js: archOf, boardOf, canShotgun, chairIsYours, chairOf, deedOf, dirVotes, extHolders, liquidationWaterfall, seatEntitlement, yourPct",
    "29-the-cast-who-remembers.js: castFaceHTML, castTileHTML, lifeRingsHTML, relationWord",
    "32-the-world.js: ringsHTML, worldIco",
    "22-everyday-life-vignette.js: modalHTML",
    "36-moments.js: momentSceneSVG",
+   "02-derived-state-personal-finance-career.js: bizValue",
    "28-votes-and-decisions.js: covenantState"
   ],
   "externals": []

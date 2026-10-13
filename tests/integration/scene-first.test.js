@@ -168,3 +168,27 @@ test('the deals on the table are pictures and the partnership offers faces; (i) 
   assert.doesNotMatch(full, /class="dealtile"/);
   C.UI.details = false;
 });
+
+test('the Deed is seals and the register a picture; (i) brings the table and the buttons back', async () => {
+  stubDOM();
+  const C = await core();
+  const U = await ui();
+  U.install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.fin.cash = 60000000;
+  C.startBiz('tech', 'Paystack 2', 6000000, null);
+  const b = C.S.biz;
+  C.ensureGov(b); C.grantPct(b, 22, { name: 'Lekki Ventures', kind: 'vc' });
+  const viewDeed = U.exported.viewDeed, viewRegister = U.exported.viewRegister;
+
+  C.UI.details = false;
+  const deed = viewDeed(b);
+  assert.ok(deed.includes(C.deedTilesHTML(b)));
+  assert.doesNotMatch(deed, /data-a="amenddeed"|data-a="shotgun"/, 'the buttons are still on the sheet');
+  assert.ok(viewRegister(b).includes(C.registerPictureHTML(b)));
+
+  C.UI.details = true;
+  assert.match(viewDeed(b), /data-a="amenddeed" data-k="preEmption"/, 'the amendments did not come back with (i)');
+  assert.match(viewRegister(b), /If the company were sold at today/);
+  C.UI.details = false;
+});

@@ -14742,6 +14742,93 @@ function offerCardHTML(id){
     '<div class="tiny muted" style="margin-top:8px">A partner takes a permanent share of everything. Choose the person, not the money.</div>',
     '<button class="btn" data-a="goto" data-t="money" data-s="deals">The deals</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
 }
+/* The shareholders' agreement, clause by clause: what each says now, in a
+   few words and in full, why it matters to you, and - for the five a special
+   resolution can change - the amendment. Read from the deed. */
+function deedClauses(b){
+  const dd = deedOf(b), dl = ({mediation: 'resolved by mediation', shotgun: 'resolved by a shotgun clause', expert: 'resolved by an independent expert'})[dd.deadlock] || dd.deadlock;
+  return [
+    {key: 'preEmption', name: 'Pre-emption', ico: 'key', on: !!dd.preEmption, short: dd.preEmption ? 'holders first' : 'open to outsiders', amend: true,
+      text: dd.preEmption ? 'Existing holders may buy new shares first' : 'New shares can go straight to an outsider', why: 'Whether a new round can dilute you without asking you first.'},
+    {key: 'drag', name: 'Drag-along', ico: 'up', on: !!dd.drag, short: dd.drag ? dd.dragPct + '% can force' : 'nobody forced', amend: true,
+      text: dd.drag ? 'Holders of ' + dd.dragPct + '% can force the rest to sell' : 'Nobody can be forced into a sale', why: 'Whether a buyer can be handed the whole company, you included.'},
+    {key: 'tag', name: 'Tag-along', ico: 'hands', on: !!dd.tag, short: dd.tag ? 'minorities join' : 'left behind', amend: true,
+      text: dd.tag ? 'Minorities can join any sale on the same terms' : 'Minorities can be left behind', why: 'Whether a sale of control has to take the small holders with it.'},
+    {key: 'deadlock', name: 'Deadlock', ico: 'swords', on: true, short: dd.deadlock, amend: true,
+      text: dl.charAt(0).toUpperCase() + dl.slice(1), why: 'What happens when the board splits and nobody will move.'},
+    {key: 'reserved', name: 'Reserved matters', ico: 'ballot', on: dd.reserved.length > 0, short: dd.reserved.length + ' matters', amend: false,
+      text: dd.reserved.map(function(k){ return (RES_KINDS[k] || {label: k}).label; }).join(', '), why: 'The decisions that need the holders, not just the board.'},
+    {key: 'nonCompete', name: 'Non-compete', ico: 'lock', on: !!dd.nonCompete, short: dd.nonCompete ? dd.nonCompete + ' years' : 'none', amend: false,
+      text: dd.nonCompete ? dd.nonCompete + ' years after you leave' : 'None', why: 'How long you cannot do this again somewhere else.'},
+    {key: 'infoRights', name: 'Reporting', ico: 'calendar', on: true, short: dd.infoRights || 'annual', amend: true,
+      text: dd.infoRights === 'monthly' ? 'Monthly accounts to holders' : (dd.infoRights === 'quarterly' ? 'Quarterly accounts to holders' : 'Annual only'), why: 'How often the holders see the numbers, and so how early they see trouble.'},
+    {key: 'leaver', name: 'Leaver', ico: 'door', on: dd.leaver === 'goodbad', short: dd.leaver === 'goodbad' ? 'good / bad' : 'vests anyway', amend: false,
+      text: dd.leaver === 'goodbad' ? 'Good leaver keeps vested equity; bad leaver forfeits' : 'All equity vests regardless', why: 'What a founder who walks away keeps.'}
+  ];
+}
+function deedTilesHTML(b){
+  const tile = function(key, ico, v, tone, name, what){
+    return '<button class="facebtn" data-a="hot" data-k="clause" data-c="' + key + '" aria-label="' + esc(name + ': ' + what) + '"><span class="gfx hring" style="--p:' + v + ';--c:' + tone + '"><em>' + worldIco(ico) + '</em></span>' +
+      '<span>' + esc(name) + '</span><small>' + esc(what) + '</small></button>';
+  };
+  return deedClauses(b).map(function(c){ return tile(c.key, c.ico, c.on ? 100 : 0, 'var(--acc)', c.name, c.short); }).join('') +
+    (extHolders(b).length ? tile('shotgun', 'target', canShotgun(b) ? 100 : 0, 'var(--bad)', 'Shotgun', canShotgun(b) ? 'can be fired' : 'not yet') : '');
+}
+function clauseCardHTML(b, key){
+  const back = '<button class="btn" data-a="goto" data-t="governance" data-s="deed">The deed</button><button class="btn ghost" data-a="close">Close</button>';
+  if(key === 'shotgun'){
+    const sg = extHolders(b);
+    return modalHTML('<h2>The shotgun</h2><div class="tiny muted">A whole-company price, named by you</div>',
+      '<div class="tiny muted">You name a whole-company price. The other side must either buy you out at it or sell to you at it. Name it too high and you fund the buyout. Name it too low and you have just sold your company at your own number.</div>' +
+      (canShotgun(b) ? '<div class="row wrap" style="margin-top:12px;gap:6px">' + sg.slice(0, 2).map(function(x){ return '<button class="btn sm bad" data-a="shotgun" data-h="' + esc(x.id) + '">Trigger against ' + esc(x.name) + '</button>'; }).join('') + '</div>'
+        : '<div class="tiny muted" style="margin-top:10px">Not available yet' + (deedOf(b).shotgunCooldown > 0 ? ' (used recently)' : (b.externalPct || 0) < 15 ? ' (needs a holder with at least 15%)' : '') + '.</div>'),
+      back, 'style="max-width:460px"');
+  }
+  const c = deedClauses(b).find(function(x){ return x.key === key; });
+  if(!c) return modalHTML('<h2>Not a clause</h2>', '', '<button class="btn primary" data-a="close">Close</button>');
+  return modalHTML('<h2>' + esc(c.name) + '</h2><div class="tiny muted">' + esc(c.why) + '</div>',
+    '<div class="clause">' + (c.key === 'reserved' ? deedOf(b).reserved.map(function(k){ return '<span class="chip">' + esc((RES_KINDS[k] || {label: k}).label) + '</span>'; }).join(' ') : esc(c.text)) + '</div>' +
+    (c.amend ? '<div class="tiny muted" style="margin-top:10px">Amendments need a special resolution — 75% of the shares. If you hold less than 25%, you can block one.</div>' +
+      '<div class="row wrap" style="margin-top:8px"><button class="btn sm" data-a="amenddeed" data-k="' + c.key + '">Propose an amendment</button></div>'
+      : '<div class="tiny muted" style="margin-top:10px">Set when the agreement was signed.</div>'),
+    back, 'style="max-width:460px"');
+}
+/* The register as a picture: who owns what as a ring - you in gold, as on
+   the boardroom wall - your holding, the board and the chair as gauges, and
+   what a sale today would pay each holder as one bar. */
+function registerPictureHTML(b){
+  const hs = (b.shares || []).slice().sort(function(a, c){ return c.shares - a.shares; });
+  const pal = ['#5aa9ff', '#a78bfa', '#2fd47a', '#ff9f43', '#ff5f6d', '#8b9bb0'];
+  const colOf = function(x, i){ return x.you ? '#f5b301' : pal[i % pal.length]; };
+  const R = 38, C = 2 * Math.PI * R;
+  let at = 0, i = 0;
+  const arcs = hs.map(function(x){
+    const p = Math.max(0, x.pct || 0) / 100, s = '<circle cx="50" cy="50" r="' + R + '" fill="none" stroke="' + colOf(x, x.you ? 0 : i++) + '" stroke-width="16" stroke-dasharray="' + (C * p).toFixed(2) + ' ' + C.toFixed(2) + '" stroke-dashoffset="' + (-C * at).toFixed(2) + '" transform="rotate(-90 50 50)"/>';
+    at += p; return s;
+  }).join('');
+  i = 0;
+  const legend = hs.map(function(x){
+    const col = colOf(x, x.you ? 0 : i++);
+    return '<div class="rleg"><i style="background:' + col + '"></i><span>' + (x.you ? '<b>' + esc(x.name) + '</b>' : esc(x.name)) + '</span><b>' + pct((x.pct || 0) / 100, 1) + '</b>' +
+      (x.pref > 0 ? '<span class="chip y">' + x.pref.toFixed(1) + 'x pref' + (x.participate ? ' + part' : '') + '</span>' : '') + '</div>';
+  }).join('');
+  const seats = boardOf(b).filter(function(d){ return !d.departing; }).length, ent = Math.max(1, seatEntitlement(b));
+  const w = liquidationWaterfall(b, bizValue(b)), tot = Math.max(1, w.rows.reduce(function(s, r){ return s + Math.max(0, r.amt); }, 0));
+  i = 0;
+  const bar = w.rows.map(function(r){
+    const col = r.you ? '#f5b301' : pal[(i++) % pal.length];
+    return '<i style="width:' + (Math.max(0, r.amt) / tot * 100).toFixed(1) + '%;background:' + col + '" title="' + esc(r.name + ' ' + fmt(r.amt)) + '"></i>';
+  }).join('');
+  return '<div class="regpic"><svg class="gfx regring" viewBox="0 0 100 100" role="img" aria-label="' + esc(hs.map(function(x){ return x.name + ' ' + Math.round(x.pct || 0) + '%'; }).join(', ')) + '">' +
+      '<circle cx="50" cy="50" r="' + R + '" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="16"/>' + arcs +
+      '<text x="50" y="48" text-anchor="middle" font-size="15" font-weight="700" fill="#f5b301">' + Math.round(yourPct(b)) + '%</text><text x="50" y="62" text-anchor="middle" font-size="8" fill="#9aa7b6">yours</text></svg>' +
+    '<div class="rlegs">' + legend + '</div></div>' +
+    ringsHTML([{ico: 'seal', label: 'Your holding', v: yourPct(b), text: pct(yourPct(b) / 100, 1)}, {ico: 'table', label: 'Board seats', v: seats / ent * 100, text: seats + ' / ' + ent, tone: 'var(--info)'},
+      {ico: 'medal', label: 'Chair', v: chairIsYours(b) ? 100 : 0, text: chairIsYours(b) ? 'You' : (chairOf(b) || {name: '—'}).name.split(' ')[0], tone: 'var(--acc)'}]) +
+    '<div class="tiny muted" style="margin-top:10px">Sold at today’s value, after the preference stack:</div>' +
+    '<span class="gfx wfall" role="img" aria-label="' + esc(w.rows.map(function(r){ return r.name + ' ' + fmt(r.amt); }).join(', ')) + '">' + bar + '</span>' +
+    '<div class="kv"><span><b>Your net on a sale today</b></span><span class="mid ' + (w.mine > 0 ? 'good' : 'bad') + '">' + fmt(w.mine) + '</span></div>';
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){
@@ -14854,6 +14941,10 @@ function hotModal(M){
       '<div class="tiny muted" style="margin-top:8px">Automation raises output per person and improves stock control. Compliance is what an assessment will be judged against.</div>',
       back, 'style="max-width:460px"');
   }
+  if(M.kind === 'clause'){
+    if(!S.biz) return modalHTML('<h2>No company</h2>', '', '<button class="btn primary" data-a="close">Close</button>');
+    return clauseCardHTML(S.biz, M.id);
+  }
   if(M.kind === 'deal') return dealCardHTML(M.id);
   if(M.kind === 'offer') return offerCardHTML(M.id);
   if(M.kind === 'commit'){
@@ -14900,7 +14991,7 @@ function hotModal(M){
 }
 
 /* -------------------------------------------------------------------------
-   Everything above, exported. 750 names: the simulation's whole surface.
+   Everything above, exported. 754 names: the simulation's whole surface.
    ------------------------------------------------------------------------- */
 export {
   ALL_EVENTS,
@@ -15111,6 +15202,7 @@ export {
   cityLook,
   citySceneSVG,
   clamp,
+  clauseCardHTML,
   closeBiz,
   closeBizSilent,
   closeOutlet,
@@ -15165,7 +15257,9 @@ export {
   dealTilesHTML,
   debtTotal,
   declareDividend,
+  deedClauses,
   deedOf,
+  deedTilesHTML,
   defaultBudget,
   defaultDeed,
   defaultPlan,
@@ -15439,6 +15533,7 @@ export {
   refreshDeals,
   refreshHouseCands,
   refreshTargets,
+  registerPictureHTML,
   relate,
   relateRival,
   relationWord,

@@ -533,3 +533,28 @@ test('a deal is a picture of where it happens, with whoever brought it; its card
   assert.equal(JSON.stringify(C.S), before, 'drawing the deals changed the run');
   assert.match(C.dealCardHTML('gone'), /off the table/);
 });
+
+test('the deed is a row of seals, each clause opening its card with its amendment; the register is a picture', async () => {
+  const C = await world();
+  C.S.fin.cash = 60000000;
+  C.startBiz('tech', 'Paystack 2', 6000000, null);
+  const b = C.S.biz;
+  C.ensureGov(b); C.grantPct(b, 22, { name: 'Lekki Ventures', kind: 'vc' });
+  /* the Deed screen has always signed the company's agreement on its defaults
+     the first time it is read (deedOf); from there on, looking changes nothing */
+  C.deedOf(b);
+  const before = JSON.stringify(C.S);
+  const keys = [...C.deedTilesHTML(b).matchAll(/data-k="clause" data-c="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(keys, C.deedClauses(b).map((c) => c.key).concat(['shotgun']));
+  /* the five amendments the Deed's buttons offered, each on its clause's card */
+  for (const k of ['preEmption', 'drag', 'tag', 'deadlock', 'infoRights']) assert.match(C.clauseCardHTML(b, k), new RegExp('data-a="amenddeed" data-k="' + k + '"'), k + ' cannot be amended from its card');
+  assert.doesNotMatch(C.clauseCardHTML(b, 'leaver'), /data-a="amenddeed"/);
+  /* the shotgun: its triggers, or why it cannot be fired */
+  const sg = C.clauseCardHTML(b, 'shotgun');
+  assert.ok(/data-a="shotgun" data-h=/.test(sg) || /Not available yet/.test(sg));
+  /* the register: every holder in the ring and the legend, the sale as one bar, your net */
+  const reg = C.registerPictureHTML(b);
+  for (const h of b.shares) assert.ok(reg.includes(h.name), h.name + ' is missing from the register picture');
+  assert.match(reg, /class="gfx wfall"/); assert.match(reg, /Your net on a sale today/);
+  assert.equal(JSON.stringify(C.S), before, 'drawing the deed and the register changed the run');
+});

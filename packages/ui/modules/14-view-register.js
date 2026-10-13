@@ -1,10 +1,13 @@
 
 
-import { LOBBY_MODES, RES_KINDS, S, archOf, bar, bidHead, bizValue, boardFacesHTML, boardOf, boardSkill, canShotgun, chairIsYours, chairOf, dateLabel, deedOf, directorButtonsHTML, directorFactsHTML, esc, extHolders, fmt, freeSeats, liquidationWaterfall, openResolutions, pct, resMeta, sceneFirst, seatEntitlement, undertakingMet, whipCount, yourPct } from '@ledger/core';
+import { LOBBY_MODES, RES_KINDS, S, archOf, bar, bidHead, bizValue, boardFacesHTML, boardOf, boardSkill, canShotgun, chairIsYours, chairOf, dateLabel, deedOf, deedTilesHTML, directorButtonsHTML, directorFactsHTML, esc, extHolders, fmt, freeSeats, liquidationWaterfall, openResolutions, pct, registerPictureHTML, resMeta, sceneFirst, seatEntitlement, undertakingMet, whipCount, yourPct } from '@ledger/core';
 
 /* Generated from src/14-view-register.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export function viewRegister(b){
   let h = '<div class="card"><h3>The register <span class="tag">'+fmt(bizValue(b))+' equity value</span></h3>';
+  /* world-first: who owns what as a ring, the board and the chair as gauges,
+     a sale today as one bar - the table with the explanations shown */
+  if(sceneFirst()) return h + registerPictureHTML(b) + '</div>';
   h += '<div class="grid g4" style="margin-bottom:8px">'+
     '<div><div class="tiny muted">Your holding</div><div class="mid '+(yourPct(b)>=50?'good':'bad')+'">'+pct(yourPct(b)/100,1)+'</div></div>'+
     '<div><div class="tiny muted">Outside money</div><div class="mid">'+pct((b.externalPct||0)/100,1)+'</div></div>'+
@@ -135,6 +138,10 @@ export function viewResolutions(b){
 export function viewDeed(b){
   const dd = deedOf(b);
   let h = '<div class="card"><h3>Shareholders\u2019 agreement <span class="tag">'+(dd.amended||0)+' amendment(s)</span></h3>';
+  /* world-first: each clause is a seal - gold when it is in force - that opens
+     the clause in full, why it matters and its amendment; the shotgun too */
+  if(sceneFirst()) return h + '<div class="facerow">'+deedTilesHTML(b)+'</div>'+
+    '<div class="tiny muted prose">Tap a clause for what it says, why it matters to you, and how to change it.</div></div>';
   const rows = [
     ['Pre-emption', dd.preEmption?'Existing holders may buy new shares first':'New shares can go straight to an outsider'],
     ['Drag-along', dd.drag?('Holders of '+dd.dragPct+'% can force the rest to sell'):'Nobody can be forced into a sale'],
