@@ -529,6 +529,64 @@ function quarterCardHTML(turn){
     q.items.map(quarterEntryHTML).join(''),
     '<button class="btn" data-a="goto" data-t="legacy" data-s="chronicle">The chronicle</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:480px"');
 }
+/* A waterfall: totals stand on the floor, each movement steps from where the
+   last bar ended - up in green, down in red. The board pack's profit and its
+   cash, drawn the way a finance director draws them. */
+function waterfallSVG(steps, label){
+  const W = 390, H = 170, T = 18, B = 30, L = 4, n = steps.length, bw = (W - L * 2) / n;
+  let run = 0;
+  const bars = steps.map(function(s){
+    const from = s.kind === 'total' ? 0 : run, to = s.kind === 'total' ? s.v : run + s.v;
+    run = to;
+    return {s: s, from: from, to: to};
+  });
+  const vals = bars.reduce(function(a, b){ return a.concat([b.from, b.to]); }, [0]);
+  const lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals), span = Math.max(1, hi - lo);
+  const Y = function(v){ return T + (1 - (v - lo) / span) * (H - T - B); };
+  const short = function(v){ const a = Math.abs(v), sign = v < 0 ? '−' : ''; return sign + '₦' + (a >= 1e9 ? (a / 1e9).toFixed(1) + 'b' : a >= 1e6 ? (a / 1e6).toFixed(1) + 'm' : a >= 1e3 ? Math.round(a / 1e3) + 'k' : Math.round(a)); };
+  const g = bars.map(function(b, i){
+    const x = L + i * bw + bw * .14, w = bw * .72, y0 = Y(Math.max(b.from, b.to)), h = Math.max(1.5, Math.abs(Y(b.from) - Y(b.to)));
+    const col = b.s.kind === 'total' ? (b.to >= 0 ? '#f5b301' : '#ff5f6d') : (b.s.v >= 0 ? '#2fd47a' : '#ff5f6d');
+    const link = i < bars.length - 1 ? '<path d="M' + (x + w).toFixed(1) + ' ' + Y(b.to).toFixed(1) + ' H' + (x + bw).toFixed(1) + '" stroke="rgba(255,255,255,.25)" stroke-dasharray="2 2"/>' : '';
+    return '<rect x="' + x.toFixed(1) + '" y="' + y0.toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2" fill="' + col + '"' + (b.s.kind === 'total' ? '' : ' opacity=".9"') + '/>' + link +
+      '<text x="' + (x + w / 2).toFixed(1) + '" y="' + (y0 - 4).toFixed(1) + '" font-size="8.5" text-anchor="middle" fill="#dfe6ee"' + (b.s.kind === 'total' ? ' font-weight="700"' : '') + '>' + short(b.s.v) + '</text>' +
+      '<text x="' + (x + w / 2).toFixed(1) + '" y="' + (H - 16) + '" font-size="8.5" text-anchor="middle" fill="#9aa7b6">' + esc(b.s.t) + '</text>';
+  }).join('');
+  return '<svg class="gfx wfchart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(label + ': ' + steps.map(function(s){ return s.t + ' ' + fmt(s.v); }).join(', ')) + '">' +
+    (lo < 0 ? '<path d="M0 ' + Y(0).toFixed(1) + ' H' + W + '" stroke="rgba(255,255,255,.22)"/>' : '') + g + '</svg>';
+}
+/* the management accounts as a picture: the quarter from revenue down to
+   net profit, the margins and the year on year under it */
+function accountsPictureHTML(a){
+  const yoy = function(name, cur, prev){ const d = delta(cur, prev); return d === undefined ? '' : '<span class="chip ' + (d >= 0 ? 'g' : 'r') + '">' + name + ' ' + (d >= 0 ? '+' : '−') + pct(Math.abs(d), 0) + ' on last year</span>'; };
+  return waterfallSVG([{t: 'Revenue', v: a.revenue, kind: 'total'}, {t: 'Costs', v: -a.cogs}, {t: 'Gross', v: a.gross, kind: 'total'}, {t: 'Opex', v: -a.opex},
+      {t: 'EBITDA', v: a.ebitdaQ, kind: 'total'}, {t: 'Deprec.', v: -a.dep}, {t: 'Interest', v: -a.interest}, {t: 'Tax', v: -(a.cur.tax || 0)}, {t: 'Net', v: a.profit, kind: 'total'}], 'The quarter, revenue to net profit') +
+    '<div class="row wrap" style="gap:5px;margin:6px 0 8px"><span class="chip">gross margin ' + pct(a.gm, 0) + '</span><span class="chip">costs ' + pct(a.om, 0) + ' of revenue</span><span class="chip ' + (a.nm >= 0 ? 'g' : 'r') + '">net margin ' + pct(a.nm, 0) + '</span>' +
+      yoy('revenue', a.revenue, a.yoy ? a.yoy.revenue : null) + yoy('EBITDA', a.ebitdaQ, a.yoy ? a.yoy.ebitda : null) + yoy('profit', a.profit, a.yoy ? a.yoy.profit : null) + '</div>' +
+    acctRow('Trailing twelve months: revenue', a.revTTM) +
+    acctRow('Trailing twelve months: EBITDA', a.ebitda, undefined, function(v){ return '<span class="' + (v >= 0 ? 'good' : 'bad') + '">' + fmt(v) + '</span>'; });
+}
+/* the cash as a picture: opening to closing, and how long a naira is inside */
+function cashPictureHTML(a){
+  const day = function(label, ico, d, tone){ return {ico: ico, label: label, v: Math.min(100, d / 120 * 100), text: d + ' days', tone: tone}; };
+  return waterfallSVG([{t: 'Opening', v: a.openCash, kind: 'total'}, {t: 'Trading', v: Math.round(a.profit + a.dep)}, {t: 'Working cap.', v: -Math.round(a.wcMove)},
+      {t: 'Capex', v: -a.capexQ}, {t: 'Financing', v: a.financing}, {t: 'Closing', v: a.closeCash, kind: 'total'}], 'Cash this quarter') +
+    ringsHTML([day('Customers pay', 'people', a.dso, 'var(--info)'), day('Stock sits', 'box', a.dio, 'var(--info)'), day('You pay', 'truck', a.dpo, 'var(--info)'),
+      day('Cash cycle', 'calendar', a.ccc, a.ccc < 45 ? 'var(--good)' : a.ccc > 90 ? 'var(--bad)' : 'var(--warn)')]) +
+    '<div class="tiny muted" style="margin-top:7px">The cash cycle is how long a naira spends inside the business before it comes back. ' +
+    (a.ccc > 90 ? 'Yours is ' + a.ccc + ' days, which means growth consumes cash faster than it generates it.' : a.ccc < 45 ? 'Yours is ' + a.ccc + ' days. Growth here is close to self-funding.' : 'Yours is ' + a.ccc + ' days, which is normal and worth watching.') + '</div>';
+}
+/* the operating KPIs as gauges where they are a share, rows where they are money */
+function kpisPictureHTML(a, b){
+  const outside = (b.externalPct || 0) > 0;
+  return ringsHTML([{ico: 'gear', label: 'Capacity used', v: a.util * 100, text: pct(a.util, 0), tone: a.util > .95 ? 'var(--bad)' : a.util > .6 ? 'var(--good)' : 'var(--warn)'}].concat(outside ? [
+      {ico: 'calendar', label: 'Runway', v: Math.min(100, a.runway / 12 * 100), text: a.runway >= 99 ? 'indefinite' : a.runway + ' quarters', tone: a.runway < 4 ? 'var(--bad)' : a.runway < 8 ? 'var(--warn)' : 'var(--good)'}] : [])) +
+    '<div style="margin-top:8px">' + acctRow('Revenue per head', a.staff > 0 ? a.revPerHead : 0, undefined, function(v){ return a.staff > 0 ? fmt(v) : '\u2014'; }) +
+    acctRow('Revenue per unit', a.revPerUnit) + acctRow('Headcount', a.staff, undefined, function(v){ return String(v); }) +
+    (outside ? acctRow('Quarterly burn', a.burn, undefined, function(v){ return v > 0 ? '<span class="bad">' + fmt(v) + '</span>' : 'profitable'; }) + acctRow('Company debt', a.debt) +
+      '<div class="tiny muted" style="margin-top:7px">' + (a.runway < 4 ? 'Under four quarters of runway, outside shareholders stop asking about strategy and start asking about the next raise.'
+        : a.runway < 8 ? 'Eight quarters is enough to raise from a position of strength. Fewer is not.' : 'You have time, which is the only thing money cannot buy later.') + '</div>' : '') + '</div>';
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){

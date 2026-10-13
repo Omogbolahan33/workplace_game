@@ -11,61 +11,71 @@ function viewPack(b){
   /* ---- P&L ---- */
   h += '<div class="card"><h3>Management accounts <span class="tag">quarter ended '+dateLabel(S.turn)+'</span></h3>';
   if(!a.h.length){ h += '<div class="tiny muted">No quarter has closed yet.</div></div>'; return h; }
-  h += acctRow('Revenue', a.revenue, delta(a.revenue, a.yoy?a.yoy.revenue:null));
-  h += acctRow('Cost of sales', -a.cogs);
-  h += acctRow('Gross profit', a.gross, undefined, function(v){ return fmt(v)+' <span class="tiny muted">'+pct(a.gm,0)+'</span>'; });
-  h += acctRow('Operating costs', -a.opex, undefined, function(v){ return fmt(v)+' <span class="tiny muted">'+pct(a.om,0)+' of revenue</span>'; });
-  h += '<hr class="sep">';
-  h += acctRow('<b>EBITDA</b>', a.ebitdaQ, delta(a.ebitdaQ, a.yoy?a.yoy.ebitda:null));
-  h += acctRow('Depreciation', -a.dep);
-  h += acctRow('Interest', -a.interest);
-  h += acctRow('Tax', -(a.cur.tax||0));
-  h += acctRow('<b>Net profit</b>', a.profit, delta(a.profit, a.yoy?a.yoy.profit:null),
-        function(v){ return '<span class="'+(v>=0?'good':'bad')+'">'+fmt(v)+'</span> <span class="tiny muted">'+pct(a.nm,0)+'</span>'; });
-  h += '<hr class="sep">';
-  h += acctRow('Trailing twelve months: revenue', a.revTTM);
-  h += acctRow('Trailing twelve months: EBITDA', a.ebitda, undefined, function(v){ return '<span class="'+(v>=0?'good':'bad')+'">'+fmt(v)+'</span>'; });
-  h += '</div>';
+  /* world-first: the quarter as a waterfall, revenue down to net profit;
+     the cash as one too - the rows with the explanations shown */
+  if(sceneFirst()){
+    h += accountsPictureHTML(a)+'</div>';
+    h += '<div class="card" style="margin-top:12px"><h3>Cash and working capital</h3>'+cashPictureHTML(a)+'</div>';
+  } else {
+    h += acctRow('Revenue', a.revenue, delta(a.revenue, a.yoy?a.yoy.revenue:null));
+    h += acctRow('Cost of sales', -a.cogs);
+    h += acctRow('Gross profit', a.gross, undefined, function(v){ return fmt(v)+' <span class="tiny muted">'+pct(a.gm,0)+'</span>'; });
+    h += acctRow('Operating costs', -a.opex, undefined, function(v){ return fmt(v)+' <span class="tiny muted">'+pct(a.om,0)+' of revenue</span>'; });
+    h += '<hr class="sep">';
+    h += acctRow('<b>EBITDA</b>', a.ebitdaQ, delta(a.ebitdaQ, a.yoy?a.yoy.ebitda:null));
+    h += acctRow('Depreciation', -a.dep);
+    h += acctRow('Interest', -a.interest);
+    h += acctRow('Tax', -(a.cur.tax||0));
+    h += acctRow('<b>Net profit</b>', a.profit, delta(a.profit, a.yoy?a.yoy.profit:null),
+          function(v){ return '<span class="'+(v>=0?'good':'bad')+'">'+fmt(v)+'</span> <span class="tiny muted">'+pct(a.nm,0)+'</span>'; });
+    h += '<hr class="sep">';
+    h += acctRow('Trailing twelve months: revenue', a.revTTM);
+    h += acctRow('Trailing twelve months: EBITDA', a.ebitda, undefined, function(v){ return '<span class="'+(v>=0?'good':'bad')+'">'+fmt(v)+'</span>'; });
+    h += '</div>';
 
-  /* ---- cash + working capital ---- */
-  h += '<div class="card" style="margin-top:12px"><h3>Cash and working capital</h3>';
-  h += acctRow('Opening cash', a.openCash);
-  h += acctRow('Operating', Math.round(a.profit + a.dep - a.wcMove));
-  h += acctRow('Working capital movement', -Math.round(a.wcMove), undefined, function(v){
-    return '<span class="'+(v<=0?'good':'bad')+'">'+fmt(v)+'</span>'; });
-  h += acctRow('Capital expenditure', -a.capexQ);
-  h += acctRow('Financing and other', a.financing);
-  h += acctRow('<b>Closing cash</b>', a.closeCash, undefined, function(v){ return '<span class="'+(v>=0?'good':'bad')+'">'+fmt(v)+'</span>'; });
-  h += '<hr class="sep"><div class="grid g4" style="margin-top:4px">'+
-    '<div><div class="tiny muted">Receivable days</div><div class="mid">'+a.dso+'</div></div>'+
-    '<div><div class="tiny muted">Inventory days</div><div class="mid">'+a.dio+'</div></div>'+
-    '<div><div class="tiny muted">Payable days</div><div class="mid">'+a.dpo+'</div></div>'+
-    '<div><div class="tiny muted">Cash cycle</div><div class="mid '+(a.ccc<45?'good':a.ccc>90?'bad':'warn')+'">'+a.ccc+'</div></div>'+
-    '</div>';
-  h += '<div class="tiny muted" style="margin-top:7px">The cash cycle is how long a naira spends inside the business before it comes back. '+
-    (a.ccc>90? 'Yours is '+a.ccc+' days, which means growth consumes cash faster than it generates it.':
-     a.ccc<45? 'Yours is '+a.ccc+' days. Growth here is close to self-funding.':'Yours is '+a.ccc+' days, which is normal and worth watching.')+'</div>';
-  h += '</div>';
+    /* ---- cash + working capital ---- */
+    h += '<div class="card" style="margin-top:12px"><h3>Cash and working capital</h3>';
+    h += acctRow('Opening cash', a.openCash);
+    h += acctRow('Operating', Math.round(a.profit + a.dep - a.wcMove));
+    h += acctRow('Working capital movement', -Math.round(a.wcMove), undefined, function(v){
+      return '<span class="'+(v<=0?'good':'bad')+'">'+fmt(v)+'</span>'; });
+    h += acctRow('Capital expenditure', -a.capexQ);
+    h += acctRow('Financing and other', a.financing);
+    h += acctRow('<b>Closing cash</b>', a.closeCash, undefined, function(v){ return '<span class="'+(v>=0?'good':'bad')+'">'+fmt(v)+'</span>'; });
+    h += '<hr class="sep"><div class="grid g4" style="margin-top:4px">'+
+      '<div><div class="tiny muted">Receivable days</div><div class="mid">'+a.dso+'</div></div>'+
+      '<div><div class="tiny muted">Inventory days</div><div class="mid">'+a.dio+'</div></div>'+
+      '<div><div class="tiny muted">Payable days</div><div class="mid">'+a.dpo+'</div></div>'+
+      '<div><div class="tiny muted">Cash cycle</div><div class="mid '+(a.ccc<45?'good':a.ccc>90?'bad':'warn')+'">'+a.ccc+'</div></div>'+
+      '</div>';
+    h += '<div class="tiny muted" style="margin-top:7px">The cash cycle is how long a naira spends inside the business before it comes back. '+
+      (a.ccc>90? 'Yours is '+a.ccc+' days, which means growth consumes cash faster than it generates it.':
+       a.ccc<45? 'Yours is '+a.ccc+' days. Growth here is close to self-funding.':'Yours is '+a.ccc+' days, which is normal and worth watching.')+'</div>';
+    h += '</div>';
+  }
 
   /* ---- KPIs ---- */
-  h += '<div class="card" style="margin-top:12px"><h3>Operating KPIs</h3><div class="grid g4">'+
-    '<div><div class="tiny muted">Capacity used</div><div class="mid">'+pct(a.util,0)+'</div></div>'+
-    '<div><div class="tiny muted">Revenue per head</div><div class="mid">'+(a.staff>0?fmt(a.revPerHead):'\u2014')+'</div></div>'+
-    '<div><div class="tiny muted">Revenue per unit</div><div class="mid">'+fmt(a.revPerUnit)+'</div></div>'+
-    '<div><div class="tiny muted">Headcount</div><div class="mid">'+a.staff+'</div></div>'+
-    '</div>';
-  if((b.externalPct||0) > 0){
-    h += '<hr class="sep"><div class="grid g3">'+
-      '<div><div class="tiny muted">Quarterly burn</div><div class="mid '+(a.burn>0?'bad':'')+'">'+(a.burn>0?fmt(a.burn):'profitable')+'</div></div>'+
-      '<div><div class="tiny muted">Runway</div><div class="mid '+(a.runway<4?'bad':a.runway<8?'warn':'good')+'">'+(a.runway>=99?'indefinite':a.runway+' quarters')+'</div></div>'+
-      '<div><div class="tiny muted">Company debt</div><div class="mid '+(a.debt>0?'warn':'')+'">'+fmt(a.debt)+'</div></div>'+
+  if(sceneFirst()) h += '<div class="card" style="margin-top:12px"><h3>Operating KPIs</h3>'+kpisPictureHTML(a, b)+'</div>';
+  else {
+    h += '<div class="card" style="margin-top:12px"><h3>Operating KPIs</h3><div class="grid g4">'+
+      '<div><div class="tiny muted">Capacity used</div><div class="mid">'+pct(a.util,0)+'</div></div>'+
+      '<div><div class="tiny muted">Revenue per head</div><div class="mid">'+(a.staff>0?fmt(a.revPerHead):'\u2014')+'</div></div>'+
+      '<div><div class="tiny muted">Revenue per unit</div><div class="mid">'+fmt(a.revPerUnit)+'</div></div>'+
+      '<div><div class="tiny muted">Headcount</div><div class="mid">'+a.staff+'</div></div>'+
       '</div>';
-    h += '<div class="tiny muted" style="margin-top:7px">'+
-      (a.runway<4 ? 'Under four quarters of runway, outside shareholders stop asking about strategy and start asking about the next raise.'
-       : a.runway<8 ? 'Eight quarters is enough to raise from a position of strength. Fewer is not.'
-       : 'You have time, which is the only thing money cannot buy later.')+'</div>';
+    if((b.externalPct||0) > 0){
+      h += '<hr class="sep"><div class="grid g3">'+
+        '<div><div class="tiny muted">Quarterly burn</div><div class="mid '+(a.burn>0?'bad':'')+'">'+(a.burn>0?fmt(a.burn):'profitable')+'</div></div>'+
+        '<div><div class="tiny muted">Runway</div><div class="mid '+(a.runway<4?'bad':a.runway<8?'warn':'good')+'">'+(a.runway>=99?'indefinite':a.runway+' quarters')+'</div></div>'+
+        '<div><div class="tiny muted">Company debt</div><div class="mid '+(a.debt>0?'warn':'')+'">'+fmt(a.debt)+'</div></div>'+
+        '</div>';
+      h += '<div class="tiny muted" style="margin-top:7px">'+
+        (a.runway<4 ? 'Under four quarters of runway, outside shareholders stop asking about strategy and start asking about the next raise.'
+         : a.runway<8 ? 'Eight quarters is enough to raise from a position of strength. Fewer is not.'
+         : 'You have time, which is the only thing money cannot buy later.')+'</div>';
+    }
+    h += '</div>';
   }
-  h += '</div>';
 
   /* ---- valuation ---- */
   const VB = valuationBridge(b);

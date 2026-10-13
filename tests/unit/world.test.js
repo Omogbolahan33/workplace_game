@@ -579,3 +579,30 @@ test('the chronicle is a life: a line of what you were worth, every quarter some
   for (const j of q.items) assert.ok(card.includes(C.esc(j.text)), 'an entry is missing from its quarter');
   assert.equal(JSON.stringify(C.S), before, 'drawing the chronicle changed the run');
 });
+
+test('year on year has the right sign, and says nothing when the base is too small to mean anything', async () => {
+  const C = await world();
+  /* unchanged whenever last year was positive */
+  assert.equal(C.delta(150, 100), 0.5); assert.equal(C.delta(80, 100), -0.2);
+  /* a loss turning into a profit is a rise, not a fall */
+  assert.ok(C.delta(1330000, -440000) === undefined || C.delta(1330000, -440000) > 0);
+  assert.ok(C.delta(100, -200) > 0, 'a smaller loss read as a fall');
+  assert.ok(C.delta(-300, -200) < 0, 'a bigger loss read as a rise');
+  /* past ±1000% the base is too small to say anything */
+  assert.equal(C.delta(1380000, 4500), undefined);
+  assert.equal(C.delta(5, 0), undefined);
+});
+
+test('the board pack draws the quarter and the cash as waterfalls', async () => {
+  const C = await world();
+  const svg = C.waterfallSVG([{ t: 'Revenue', v: 1000, kind: 'total' }, { t: 'Costs', v: -400 }, { t: 'Net', v: 600, kind: 'total' }], 'test');
+  assert.equal((svg.match(/<rect /g) || []).length, 3);
+  /* a cost steps down from where revenue ended: its bar spans 1000 to 600 */
+  assert.match(svg, /fill="#ff5f6d"/); assert.match(svg, /aria-label="test: Revenue/);
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  for (let i = 0; i < 4; i++) playQuarter(C);
+  const a = C.bizAccounts(C.S.biz);
+  const pic = C.accountsPictureHTML(a) + C.cashPictureHTML(a) + C.kpisPictureHTML(a, C.S.biz);
+  assert.match(pic, /Trailing twelve months: revenue/); assert.match(pic, /Cash cycle/); assert.match(pic, /Capacity used/);
+});

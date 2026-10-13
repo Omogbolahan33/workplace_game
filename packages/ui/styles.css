@@ -646,6 +646,7 @@ body.terse .prose{display:none}
 .facebtn .cface .cbadge,.facebtn .cface .cfelt,.facebtn .cface .cstory{width:20px;height:20px;font-size:12px}
 .facebtn>svg{width:50px;height:50px}
 .facebtn span{max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wfchart{width:100%;height:auto;display:block;margin:4px 0 2px}
 .chron{margin-top:4px}
 .lifeline{width:100%;height:auto;display:block;margin:2px 0 10px}
 .qnow{margin:0 0 12px}

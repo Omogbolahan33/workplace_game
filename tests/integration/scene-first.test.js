@@ -209,3 +209,24 @@ test('the chronicle reads newest first, and world-first it is a line and tiles',
   assert.ok(pic.includes(C.chronicleInnerHTML(C.S.journal.slice(0, 40))));
   assert.doesNotMatch(pic, /class="logline"/);
 });
+
+test('the board pack leads with the waterfalls; (i) brings the rows back', async () => {
+  stubDOM();
+  const C = await core();
+  const U = await ui();
+  U.install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  for (let i = 0; i < 4; i++) { C.advanceQuarter(); C.UI.modal = null; }
+  const viewPack = U.exported.viewPack, b = C.S.biz;
+  C.UI.details = false;
+  const pack = viewPack(b);
+  assert.equal((pack.match(/class="gfx wfchart"/g) || []).length, 2, 'the accounts and the cash are not both waterfalls');
+  assert.match(pack, /data-a="proposeplan"/, 'the plan lost its control');
+  assert.equal((pack.match(/<div/g) || []).length, (pack.match(/<\/div>/g) || []).length, 'the cards do not close');
+  C.UI.details = true;
+  const rows = viewPack(b);
+  assert.doesNotMatch(rows, /wfchart/); assert.match(rows, /Opening cash/);
+  C.UI.details = false;
+});
