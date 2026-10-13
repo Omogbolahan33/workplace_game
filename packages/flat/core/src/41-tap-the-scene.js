@@ -269,6 +269,52 @@ function machineTilesHTML(b){
     tile('owner', 'coins', Math.min(100, (b.draw || 0) / Math.max(1, (b.revenue || 0) * .5) * 100), 'var(--acc)', 'You', fmt(Math.round(b.draw || 0)) + '/q') +
     tile('premises', 'shop', b.compliance || 40, t(b.compliance || 40), 'Premises', L.end > 0 ? L.end + 'q on lease' : 'renewal due');
 }
+/* The commitments as tiles: what is in flight, then each lever you can take
+   on. The ring is how far along it is - built while it is being set up, the
+   term left while it runs - and each opens its card. */
+const COMMIT_ICO = {shifts: 'moon', supply: 'truck', channel: 'cart', hire: 'hire', outlet: 'shop'};
+function commitTilesHTML(b){
+  const tile = function(id, ico, v, tone, name, what){
+    return '<button class="facebtn" data-a="hot" data-k="commit" data-c="' + esc(id) + '" aria-label="' + esc(name + ': ' + what) + '"><span class="gfx hring" style="--p:' + Math.round(Math.max(0, Math.min(100, v))) + ';--c:' + tone + '"><em>' + worldIco(ico) + '</em></span>' +
+      '<span>' + esc(name) + '</span><small>' + esc(what) + '</small></button>';
+  };
+  const live = (b.commitments || []).filter(function(c){ return (c.status === 'building' || c.status === 'active') && !LEVER_KINDS[c.kind]; });
+  return live.map(function(c){
+    const left = Math.max(0, (c.readyAt || S.turn) - S.turn), lead = Math.max(1, c.lead || 1);
+    return tile(c.id, COMMIT_ICO[c.kind] || 'calendar', c.status === 'active' ? 100 : (1 - left / lead) * 100, 'var(--warn)', String(c.label || 'Commitment').replace(/^Hiring /, ''), c.status === 'active' ? 'running' : 'arrives in ' + left + 'q');
+  }).join('') + Object.keys(LEVER_KINDS).map(function(k){
+    const K = LEVER_KINDS[k], run = leverOf(b, k, 'active'), build = leverOf(b, k, 'building');
+    if(run) return tile(k, COMMIT_ICO[k], Math.max(0, (run.endsAt || S.turn) - S.turn) / Math.max(1, K.term) * 100, 'var(--acc)', K.label, Math.max(0, (run.endsAt || S.turn) - S.turn) + 'q left');
+    if(build) return tile(k, COMMIT_ICO[k], (1 - Math.max(0, (build.readyAt || S.turn) - S.turn) / Math.max(1, K.lead)) * 100, 'var(--warn)', K.label, 'arrives in ' + Math.max(0, (build.readyAt || S.turn) - S.turn) + 'q');
+    return tile(k, COMMIT_ICO[k], 0, 'var(--line)', K.label, fmt(K.cost(b)));
+  }).join('');
+}
+/* a commitment's card: what it gives and takes, how far along, and the one
+   move it allows now - take it on, stand it down, or abandon it */
+function commitCardHTML(b, id){
+  const back = '<button class="btn" data-a="goto" data-t="work" data-s="business">The business</button><button class="btn ghost" data-a="close">Close</button>';
+  const K = LEVER_KINDS[id];
+  const c = K ? (leverOf(b, id, 'active') || leverOf(b, id, 'building')) : (b.commitments || []).find(function(x){ return x.id === id; });
+  if(!K && !c) return modalHTML('<h2>Done</h2>', '<div class="tiny muted">It has already arrived, or been let go.</div>', '<button class="btn primary" data-a="close">Close</button>');
+  const running = !!c && c.status === 'active', building = !!c && c.status === 'building';
+  const left = running ? Math.max(0, (c.endsAt || S.turn) - S.turn) : building ? Math.max(0, (c.readyAt || S.turn) - S.turn) : 0;
+  const term = K ? K.term : Math.max(1, (c && c.term) || 1), lead = K ? K.lead : Math.max(1, (c && c.lead) || 1);
+  const ring = running ? {ico: 'calendar', label: 'Term left', v: left / term * 100, text: left + 'q', tone: 'var(--acc)'}
+    : building ? {ico: 'calendar', label: 'Arrives in', v: (1 - left / lead) * 100, text: left + 'q', tone: 'var(--warn)'}
+    : {ico: 'calendar', label: 'Arrives in', v: 0, text: lead + 'q', tone: 'var(--line)'};
+  const take = !K || c ? '' : id === 'shifts' ? '<button class="btn sm primary" data-a="levershift">Commit ' + fmt(K.cost(b)) + '</button>'
+    : id === 'supply' ? '<button class="btn sm primary" data-a="leversupply">Commit ' + fmt(K.cost(b)) + '</button>'
+    : '<button class="btn sm primary" data-a="leverchannel">Commit ' + fmt(K.cost(b)) + '</button>';
+  const out = running ? '<button class="btn sm bad" data-a="leverdrop" data-i="' + esc(c.id) + '">Stand it down — ' + fmt(commitDropCost(c)) + '</button>'
+    : building ? '<button class="btn sm bad" data-a="abandon" data-i="' + esc(c.id) + '">Abandon — ' + fmt(commitBreak(c)) + '</button>' : '';
+  return modalHTML('<h2>' + esc(K ? K.label : c.label || 'Commitment') + '</h2><div class="tiny muted">' +
+      (running ? 'Running · ' + left + 'q of the term left' : building ? 'Being set up · ' + fmt(Math.round(c.paid || 0)) + ' of ' + fmt(Math.round(c.total || 0)) + ' spent' : lead + 'q to arrive · locked for ' + term + 'q') + '</div>',
+    ringsHTML([ring]) +
+    (K ? '<div class="tiny" style="margin-top:10px"><b class="good">Gives</b> — ' + esc(K.gives) + '</div><div class="tiny" style="margin-top:4px"><b class="bad">Takes</b> — ' + esc(K.takes) + '</div>' : c && c.note ? '<div class="tiny muted" style="margin-top:10px">' + esc(c.note) + '</div>' : '') +
+    '<div class="row wrap" style="margin-top:12px;gap:6px">' + take + out + '</div>' +
+    '<div class="tiny muted" style="margin-top:8px">A term, not a setting: changing your mind is priced to hurt.</div>',
+    back, 'style="max-width:460px"');
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){
@@ -380,6 +426,10 @@ function hotModal(M){
       '<div class="row wrap" style="margin-top:10px;gap:6px">' + coverButtonsHTML(b) + '</div>' +
       '<div class="tiny muted" style="margin-top:8px">Automation raises output per person and improves stock control. Compliance is what an assessment will be judged against.</div>',
       back, 'style="max-width:460px"');
+  }
+  if(M.kind === 'commit'){
+    if(!S.biz) return modalHTML('<h2>No company</h2>', '', '<button class="btn primary" data-a="close">Close</button>');
+    return commitCardHTML(S.biz, M.id);
   }
   if(M.kind === 'applicant'){
     const c = (S.candidates || []).find(function(x){ return x.id === M.id; });

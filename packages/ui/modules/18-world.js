@@ -87,15 +87,19 @@ export function worldTiles(host){
   const row = document.createElement('div');
   row.className = 'wtiles-r';
   btns.forEach(function(b){
-    const ctx = /** @type {HTMLElement} */ (b.closest('.ctile, .btile, .stile, .mrow, .opt, li, tr, .kv, .card'));
+    const ctx = /** @type {HTMLElement} */ (b.closest('.ctile, .btile, .stile, .mrow, .ltake, .lrow, .opt, li, tr, .kv, .card'));
     const named = ctx ? ctx.querySelector('b, strong, h4, .ol') : null;
     let title = (named && named.textContent || b.textContent || '').trim().replace(/\s+/g, ' ');
     /* a tile of several moves - a person, a slot - names the move and whose it is */
     if(ctx && ctx.matches('.ctile, .stile') && named) title = (b.getAttribute('aria-label') || b.textContent || '').trim() + ' \u00b7 ' + named.textContent.trim().split(' ')[0];
+    /* a face or a tile on the sheet: its name is its first line, its figure the second */
+    const face = b.classList.contains('facebtn');
+    if(face) title = ((b.querySelector(':scope > span:not(.hring)') || b).textContent || '').trim();
     if(title.length > 30) title = title.slice(0, 29) + '…';
     const costEl = ctx ? Array.prototype.slice.call(ctx.querySelectorAll('.chip')).find(function(c){ return /₦|\d+h\b/.test(c.textContent || ''); }) : null;
     const said = (b.textContent || '').trim();
-    const cost = /₦/.test(said) ? said.replace(/^[^₦]*/, '').replace(/[()]/g, '') : costEl ? costEl.textContent.trim() : '';
+    const small = face ? b.querySelector('small') : null;
+    const cost = small ? (small.textContent || '').trim() : /₦/.test(said) ? said.replace(/^[^₦]*/, '').replace(/[()]/g, '') : costEl ? costEl.textContent.trim() : '';
     const t = document.createElement('button');
     t.type = 'button';
     t.className = 'wtile' + (b.disabled ? ' off' : '');

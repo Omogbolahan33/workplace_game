@@ -979,6 +979,21 @@ const EDITS = [
   { marker: 'function machineTilesHTML(b)', addition: true,
     name: 'machineTilesHTML — the machine as four tiles',
     why: 'the stock (supplier confidence), the customers (kept), you (the draw) and the premises (compliance), each opening its card' },
+  { marker: 'const COMMIT_ICO', addition: true,
+    name: 'COMMIT_ICO — what each commitment is drawn as',
+    why: 'a moon for the second shift, a truck for the supply contract, a cart for the distributor, a person for a hire' },
+  { marker: 'function commitTilesHTML(b)', addition: true,
+    name: 'commitTilesHTML — the commitments as tiles',
+    why: 'what is in flight, then each lever you can take on; the ring is how far along - built while it is set up, the term left while it runs' },
+  { marker: 'function commitCardHTML(b, id)', addition: true,
+    name: 'commitCardHTML — a commitment\'s card',
+    why: 'what it gives and takes, how far along, and the one move it allows now: Commit, Stand it down, or Abandon - the same buttons the column had' },
+  { marker: 'function leverColSet(b){',
+    name: 'leverColSet — world-first, the dials are the machine\'s four tiles',
+    why: 'the six rows each had a Change that went to another screen; the tiles open the cards that hold the sliders themselves. The rows with the explanations shown' },
+  { marker: 'function leverColCommit(b){',
+    name: 'leverColCommit — world-first, the commitments are tiles',
+    why: 'each opens its card with Commit, Stand it down or Abandon; Hire someone and Open a unit stay. The rows with the explanations shown' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

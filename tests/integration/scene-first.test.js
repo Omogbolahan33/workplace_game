@@ -121,3 +121,26 @@ test('the Levers card is four tiles and Conditions is on their cards; (i) brings
   assert.match(full, /data-a="supplnego"/);
   C.UI.details = false;
 });
+
+test('the Levers screen leads with tiles: the dials are the machine, the commitments open their cards', async () => {
+  stubDOM();
+  const C = await core();
+  (await ui()).install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  const b = C.S.biz;
+
+  C.UI.details = false;
+  const set = C.leverColSet(b), commit = C.leverColCommit(b);
+  assert.ok(set.includes(C.machineTilesHTML(b)));
+  assert.doesNotMatch(set, /data-a="goto"/, 'the Change buttons are still on the sheet');
+  assert.ok(commit.includes(C.commitTilesHTML(b)));
+  assert.doesNotMatch(commit, /data-a="levershift"/, 'the commit rows are still on the sheet');
+  assert.match(commit, />Hire someone</); assert.match(commit, />Open a unit</);
+
+  C.UI.details = true;
+  assert.match(C.leverColSet(b), />Change</, 'the dials did not come back with (i)');
+  assert.match(C.leverColCommit(b), /data-a="levershift"/);
+  C.UI.details = false;
+});

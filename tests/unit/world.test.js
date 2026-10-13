@@ -491,3 +491,25 @@ test('the machine is in the picture: the stock, you and the premises each open t
   assert.doesNotMatch(C.worldHTML(), /data-k="stock"|data-k="owner"/);
   C.UI.tab = 'overview'; C.UI.sub = '';
 });
+
+test('each commitment is a tile that opens its card, with the one move it allows now', async () => {
+  const C = await world();
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  const b = C.S.biz;
+  const ids = [...C.commitTilesHTML(b).matchAll(/data-k="commit" data-c="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(ids, Object.keys(C.LEVER_KINDS), 'not every lever you can take on is a tile');
+  /* not taken: the card offers to take it on, with the column's own action */
+  const want = { shifts: 'levershift', supply: 'leversupply', channel: 'leverchannel' };
+  for (const k of ids) assert.match(C.commitCardHTML(b, k), new RegExp('data-a="' + want[k] + '"'), k + ' cannot be taken on from its card');
+  /* being set up: abandon; running: stand it down - never the commit again */
+  b.commitments = [{ id: 'cm1', kind: 'shifts', status: 'building', readyAt: C.S.turn + 2, total: 2000000, paid: 500000, label: 'Second shift' }];
+  let card = C.commitCardHTML(b, 'shifts');
+  assert.match(card, /data-a="abandon" data-i="cm1"/); assert.doesNotMatch(card, /data-a="levershift"/);
+  b.commitments[0].status = 'active'; b.commitments[0].endsAt = C.S.turn + 5;
+  card = C.commitCardHTML(b, 'shifts');
+  assert.match(card, /data-a="leverdrop" data-i="cm1"/);
+  assert.match(C.commitTilesHTML(b), /5q left/);
+  /* a commitment that has gone says so instead of breaking */
+  assert.match(C.commitCardHTML(b, 'nothing-here'), /already arrived/);
+});

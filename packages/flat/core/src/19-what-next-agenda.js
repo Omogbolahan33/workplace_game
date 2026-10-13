@@ -206,6 +206,12 @@ function leverRow(name, val, note, btn, flag, col){
 }
 /* ---- 1. the dials ---- */
 function leverColSet(b){
+  /* world-first: the dials are on the cards the machine opens - the stock,
+     the customers, you, the premises - so the column is those four tiles,
+     each one tap from the slider rather than a "Change" that goes elsewhere */
+  if(sceneFirst()) return '<div class="card"><h3>Set each quarter <span class="tag">effective next quarter</span></h3>'+
+    '<div class="facerow">'+machineTilesHTML(b)+'</div>'+
+    '<div class="tiny muted prose">Price, marketing, quality and credit are on the customers; stock depth on the stock; the draw on you.</div></div>';
   const band = priceBand(b), px = b.priceIdx||1;
   const stock = (b.stockPolicy===undefined?0.45:b.stockPolicy);
   const rows = [
@@ -246,6 +252,10 @@ function leverColCommit(b){
       : 'nothing on')+'</span></h3>';
   h += '<div class="tiny muted" style="margin-bottom:10px">Lumpy, slow to arrive, and priced so that changing your '+
     'mind hurts. You are buying a number you will be stuck with for quarters.</div>';
+  /* world-first: what is in flight and each lever you can take on, as tiles
+     that open their cards - the commit, the stand-down and the abandon are there */
+  if(sceneFirst()) return h + '<div class="facerow">'+commitTilesHTML(b)+'</div>'+
+    '<div class="row wrap" style="gap:6px;margin-top:2px">'+leverGoto('Team','Hire someone') + leverGoto('Units','Open a unit') + '</div></div>';
 
   (b.commitments||[]).forEach(function(c){
     const running = c.status === 'active';
