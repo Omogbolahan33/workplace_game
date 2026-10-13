@@ -462,7 +462,8 @@
    "22-everyday-life-vignette.js: modalHTML",
    "29-the-cast-who-remembers.js: castTileHTML, lifeRingsHTML",
    "03-startbizcost-one-price-for-every-picker.js: bizList, traitOf",
-   "32-the-world.js: ringsHTML"
+   "32-the-world.js: ringsHTML",
+   "26-governance-register-board.js: archOf"
   ],
   "externals": []
  }

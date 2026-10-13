@@ -59,15 +59,7 @@ function viewBoard(b){
       ' / voted with you '+(d.votesFor||0)+' / against '+(d.votesAgainst||0)+' / abstained '+(d.abstained||0)+
       ((d.consulting||0)>0 ? ' / '+fmt(d.consulting)+' in fee arrangements' : '')+'</div>';
     if(!d.yours){
-      h += '<div class="row wrap" style="gap:5px;margin-top:7px">'+
-        '<button class="btn xs" data-a="lobby" data-d="'+d.id+'" data-m="brief">Brief</button>'+
-        '<button class="btn xs" data-a="lobby" data-d="'+d.id+'" data-m="concede">Promise</button>'+
-        '<button class="btn xs" data-a="lobby" data-d="'+d.id+'" data-m="pay">Fee</button>'+
-        '<button class="btn xs" data-a="lobby" data-d="'+d.id+'" data-m="equity">Shares</button>'+
-        '<button class="btn xs" data-a="lobby" data-d="'+d.id+'" data-m="pressure">Pressure</button>'+
-        '<button class="btn xs" data-a="lobby" data-d="'+d.id+'" data-m="favour">Favour</button>'+
-        '<button class="btn xs bad" data-a="removedir" data-d="'+d.id+'">Remove</button>'+
-        '</div>';
+      h += '<div class="row wrap" style="gap:5px;margin-top:7px">'+directorButtonsHTML(d)+'</div>';
       h += '<div class="tiny muted" style="margin-top:5px">Wants: '+esc(A.likes)+'. Cannot stand: '+esc(A.hates)+'.</div>';
     }
     h += '</div>';

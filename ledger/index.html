@@ -14645,7 +14645,7 @@ function boardLook(){
   const board = (b.board || []).filter(function(d){ return !d.departed; });
   const seats = board.length ? board.map(function(d){
     const h = d.holderId ? shares.find(function(x){ return x.id === d.holderId; }) : null;
-    return {name: d.name, yours: !!d.yours, chair: d.role === 'chair', label: d.label || '',
+    return {id: d.id, name: d.name, yours: !!d.yours, chair: d.role === 'chair', label: d.label || '',
       pct: d.yours ? mine : h ? pctOf(h) : 0,
       vote: res ? dirStance(b, d, res).vote : ''};
   }) : [{name: S.name || 'You', yours: true, chair: true, label: 'founder', pct: mine, vote: res ? 'for' : ''}];
@@ -14992,6 +14992,13 @@ function houseButtonsHTML(st){
     '<button class="btn xs" data-a="housereview" data-i="'+esc(st.id)+'">Pay review</button>'+
     '<button class="btn xs bad" data-a="housefire" data-i="'+esc(st.id)+'">Let go</button>';
 }
+/* a director's seven: the ways to lobby them, and removing them - in one
+   place, for the Board screen and the card you open by tapping them */
+function directorButtonsHTML(d){
+  const m = [['brief', 'Brief'], ['concede', 'Promise'], ['pay', 'Fee'], ['equity', 'Shares'], ['pressure', 'Pressure'], ['favour', 'Favour']];
+  return m.map(function(x){ return '<button class="btn xs" data-a="lobby" data-d="'+esc(d.id)+'" data-m="'+x[0]+'">'+x[1]+'</button>'; }).join('')+
+    '<button class="btn xs bad" data-a="removedir" data-d="'+esc(d.id)+'">Remove</button>';
+}
 /* at home: the house, what you own, you, and whoever is at the gate */
 function homeTaps(st, visitorId){
   return function(k){
@@ -15033,6 +15040,13 @@ function boardTaps(st){
     out.push(goZone(36, gy - 66, 250, 170, 'The board', 'governance', 'board'));
     out.push(goZone(280, gy - 138, 84, 98, 'The register: who owns what', 'governance', 'register'));
     if(st.lender) out.push(goZone(284, gy - 40, 36, 92, 'The bank: covenants', 'governance', 'pack'));
+    /* each director at the table opens their card; your own seat opens yours */
+    const seats = st.seats || [], n = seats.length;
+    seats.forEach(function(s, i){
+      const x = n === 1 ? 150 : 56 + 188 * i / (n - 1), y = gy + 50;
+      out.push(s.yours ? hotZone(x - 15, y - 92, 30, 94, 'You', {a: 'hot', k: 'you'})
+        : s.id ? hotZone(x - 15, y - 92, 30, 94, s.name + ', ' + (s.label || 'director'), {a: 'hot', k: 'director', c: s.id}) : '');
+    });
     return out.join('');
   };
 }
@@ -15062,6 +15076,17 @@ function hotModal(M){
       ringsHTML([{ico: 'star', label: 'Skill', v: (h.skill || 0) * 10, text: (h.skill || 0) + '/10', tone: 'var(--info)'}, {ico: 'smile', label: 'Morale', v: h.morale || 0}, {ico: 'hands', label: 'Loyalty', v: h.loyalty || 0}]) +
       '<div class="row wrap" style="margin-top:12px;gap:6px">' + houseButtonsHTML(h) + '</div>',
       '<button class="btn" data-a="goto" data-t="work" data-s="household">The household</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:440px"');
+  }
+  if(M.kind === 'director'){
+    const b = S.biz, d = b ? (b.board || []).find(function(x){ return x.id === M.id; }) : null;
+    if(!d) return modalHTML('<h2>Not here</h2>', '<div class="tiny muted">They are no longer on the board.</div>', '<button class="btn primary" data-a="close">Close</button>');
+    const A = archOf(d.arc);
+    return modalHTML('<h2>' + esc(d.name) + '</h2><div class="tiny muted">' + esc(d.role === 'chair' ? 'Chair' : d.label || A.label || 'Director') + (d.holderName ? ' \u00b7 nominated by ' + esc(d.holderName) : '') + '</div>',
+      ringsHTML([{ico: 'hands', label: 'Loyalty', v: d.loyalty || 0}, {ico: 'glass', label: 'Patience', v: d.patience || 0}]) +
+      '<div class="row wrap" style="gap:5px;margin:10px 0 4px">' + (d.agenda || []).map(function(a){ return '<span class="chip ' + (a === 'sell' || a === 'buyout' ? 'r' : '') + '">' + esc((RES_KINDS[a] || {label: a}).label) + '</span>'; }).join('') + '</div>' +
+      '<div class="tiny muted">Wants: ' + esc(A.likes || '') + '. Cannot stand: ' + esc(A.hates || '') + '.</div>' +
+      '<div class="row wrap" style="margin-top:12px;gap:5px">' + directorButtonsHTML(d) + '</div>',
+      '<button class="btn" data-a="goto" data-t="governance" data-s="board">The board</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
   }
   return modalHTML('<h2>You</h2>', lifeRingsHTML() + '<div class="row wrap" style="margin-top:12px;gap:6px">' + householdButtonsHTML() + '</div>',
     '<button class="btn" data-a="goto" data-t="legacy" data-s="record">Your record</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
@@ -17679,15 +17704,7 @@ function viewBoard(b){
       ' / voted with you '+(d.votesFor||0)+' / against '+(d.votesAgainst||0)+' / abstained '+(d.abstained||0)+
       ((d.consulting||0)>0 ? ' / '+fmt(d.consulting)+' in fee arrangements' : '')+'</div>';
     if(!d.yours){
-      h += '<div class="row wrap" style="gap:5px;margin-top:7px">'+
-        '<button class="btn xs" data-a="lobby" data-d="'+d.id+'" data-m="brief">Brief</button>'+
-        '<button class="btn xs" data-a="lobby" data-d="'+d.id+'" data-m="concede">Promise</button>'+
-        '<button class="btn xs" data-a="lobby" data-d="'+d.id+'" data-m="pay">Fee</button>'+
-        '<button class="btn xs" data-a="lobby" data-d="'+d.id+'" data-m="equity">Shares</button>'+
-        '<button class="btn xs" data-a="lobby" data-d="'+d.id+'" data-m="pressure">Pressure</button>'+
-        '<button class="btn xs" data-a="lobby" data-d="'+d.id+'" data-m="favour">Favour</button>'+
-        '<button class="btn xs bad" data-a="removedir" data-d="'+d.id+'">Remove</button>'+
-        '</div>';
+      h += '<div class="row wrap" style="gap:5px;margin-top:7px">'+directorButtonsHTML(d)+'</div>';
       h += '<div class="tiny muted" style="margin-top:5px">Wants: '+esc(A.likes)+'. Cannot stand: '+esc(A.hates)+'.</div>';
     }
     h += '</div>';

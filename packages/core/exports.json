@@ -258,6 +258,7 @@
  "diligenceTarget": "core.js",
  "dirStance": "core.js",
  "dirVotes": "core.js",
+ "directorButtonsHTML": "core.js",
  "directorById": "core.js",
  "divCapacity": "core.js",
  "divNote": "core.js",

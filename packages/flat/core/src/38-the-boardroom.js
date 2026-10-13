@@ -22,7 +22,7 @@ function boardLook(){
   const board = (b.board || []).filter(function(d){ return !d.departed; });
   const seats = board.length ? board.map(function(d){
     const h = d.holderId ? shares.find(function(x){ return x.id === d.holderId; }) : null;
-    return {name: d.name, yours: !!d.yours, chair: d.role === 'chair', label: d.label || '',
+    return {id: d.id, name: d.name, yours: !!d.yours, chair: d.role === 'chair', label: d.label || '',
       pct: d.yours ? mine : h ? pctOf(h) : 0,
       vote: res ? dirStance(b, d, res).vote : ''};
   }) : [{name: S.name || 'You', yours: true, chair: true, label: 'founder', pct: mine, vote: res ? 'for' : ''}];

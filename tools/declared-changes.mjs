@@ -907,6 +907,12 @@ const EDITS = [
   { marker: 'function houseButtonsHTML(st)', addition: true,
     name: 'houseButtonsHTML — a household member\'s four decisions',
     why: 'train, +10%, pay review, let go: the Household screen wrote them inline in both renderers, and the card you open by tapping them at home has them too' },
+  { marker: 'function directorButtonsHTML(d)', addition: true,
+    name: 'directorButtonsHTML — the ways to lobby a director, and removing them',
+    why: 'brief, promise, fee, shares, pressure, favour and remove: the Board screen wrote them inline, and the card you open by tapping a director at the table has them too' },
+  { marker: 'function viewBoard(b)',
+    name: 'viewBoard — a director\'s buttons are directorButtonsHTML()',
+    why: 'the same seven buttons, now from the one place the card you open by tapping a director at the table also reads' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

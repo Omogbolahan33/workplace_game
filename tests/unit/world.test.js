@@ -361,3 +361,21 @@ test('the household staff in your compound each open their card, with the Househ
   /* the screen and the card read the same four */
   assert.equal(C.houseButtonsHTML(C.S.house[2]), card.match(/<div class="row wrap"[^>]*>(.*?)<\/div>/)[1]);
 });
+
+test('each director at the table opens their card, with the Board screen\'s seven', async () => {
+  const C = await world();
+  C.S.fin.cash = 60000000;
+  C.startBiz('tech', 'Paystack 2', 6000000, null);
+  const b = C.S.biz;
+  C.ensureGov(b); C.grantPct(b, 22, { name: 'Lekki Ventures', kind: 'vc' }); C.formBoard(b, {});
+  C.UI.tab = 'governance'; C.UI.sub = 'board';
+  const html = C.worldHTML();
+  const others = (b.board || []).filter((d) => !d.yours && !d.departed).map((d) => d.id);
+  const ids = [...html.matchAll(/data-k="director" data-c="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(ids.sort(), others.sort(), 'not every other director at the table can be tapped');
+  assert.match(html, /data-k="you"/, 'your own seat is not a control');
+  const card = C.hotModal({ type: 'hot', kind: 'director', id: ids[0] });
+  for (const m of ['brief', 'concede', 'pay', 'equity', 'pressure', 'favour']) assert.match(card, new RegExp('data-a="lobby" data-d="' + ids[0] + '" data-m="' + m + '"'));
+  assert.match(card, new RegExp('data-a="removedir" data-d="' + ids[0] + '"'));
+  C.UI.tab = 'overview'; C.UI.sub = '';
+});
