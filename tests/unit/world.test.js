@@ -461,3 +461,33 @@ test('people looking for work queue at your door, and each opens their card', as
   assert.equal(JSON.stringify(C.S), before);
   C.UI.tab = 'overview'; C.UI.sub = '';
 });
+
+test('the machine is in the picture: the stock, you and the premises each open their card, with the levers on them', async () => {
+  const C = await world();
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  const b = C.S.biz;
+  C.UI.tab = 'work'; C.UI.sub = 'business';
+  const before = JSON.stringify(C.S);
+  const html = C.worldHTML();
+  for (const k of ['stock', 'owner', 'premises']) assert.match(html, new RegExp('data-a="hot" data-k="' + k + '"'), k + ' cannot be tapped');
+  for (const k of ['stock', 'owner', 'premises', 'customers']) C.hotModal({ type: 'hot', kind: k });
+  assert.equal(JSON.stringify(C.S), before, 'looking at the machine changed the run');
+  /* each lever is on a card, the same markup the Levers card reads */
+  const stock = C.hotModal({ type: 'hot', kind: 'stock' });
+  assert.ok(stock.includes(C.leverSliderHTML(b, 'stock'))); assert.match(stock, /data-a="supplnego"/);
+  assert.ok(C.hotModal({ type: 'hot', kind: 'owner' }).includes(C.leverSliderHTML(b, 'draw')));
+  assert.ok(C.hotModal({ type: 'hot', kind: 'customers' }).includes(C.leverSliderHTML(b, 'cred')));
+  const prem = C.hotModal({ type: 'hot', kind: 'premises' });
+  assert.ok(prem.includes(C.coverButtonsHTML(b)));
+  for (const a of ['bizinsure', 'bizacct', 'bizauto']) assert.match(prem, new RegExp('data-a="' + a + '"'));
+  /* when the engine room says the suppliers are close to cutting you off, one of them is at the pile */
+  const quiet = C.worldHTML().length;
+  b.diag = [{ level: 'bad', key: 'pay', text: 'You owe suppliers' }];
+  assert.ok(C.worldHTML().length > quiet, 'the supplier with the invoice is not drawn');
+  b.diag = [];
+  /* at a tower, or a shop to let, there is no pile and no owner's card */
+  C.UI.sub = 'career';
+  assert.doesNotMatch(C.worldHTML(), /data-k="stock"|data-k="owner"/);
+  C.UI.tab = 'overview'; C.UI.sub = '';
+});

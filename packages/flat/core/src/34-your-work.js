@@ -75,6 +75,11 @@ function workLook(mode){
     staff: staff, customers: Math.round(busy * 6), branches: Math.max(0, Math.min(4, (b.locations || 1) - 1)),
     shifts: typeof leverActive === 'function' ? leverActive(b, 'shifts') : false,
     broke: (b.cash || 0) < 0, decline: stage === 'decline', seed: 37 + (b.type || '').length * 5,
+    /* the stock on hand, as deep as the policy keeps it; and a supplier at the
+       pile with the invoice when the engine room says they are close to
+       cutting you off - the same reading, not a second one */
+    stock: b.stockPolicy === undefined ? .45 : b.stockPolicy,
+    owed: (b.diag || []).some(function(d){ return d.key === 'pay' && d.level === 'bad'; }),
     gen: true, label: (b.name || 'Your company') + ': ' + (BIZ_STAGES[stage] ? BIZ_STAGES[stage].label : stage).toLowerCase() + ', ' + staff + ' staff'});
 }
 /* The picture of it, with the same kit as your home. */
@@ -129,6 +134,22 @@ function workSceneSVG(st, vh){
     const at = zoomed(q[0], q[1]), sc = (q[2] || 1) * (st.kind === 'tower' ? 1 : 1.22);
     st.cspots.push({x: at[0] - 10 * sc, y: at[1] - 46 * sc, w: 20 * sc, h: 48 * sc});
   });
+  /* the stock: crates and sacks stacked beside the premises, one to six as
+     the stock policy runs lean to very deep; where it stands, for the tap */
+  st.stockspot = null;
+  const stockAt = (x, y) => {
+    const n = 1 + Math.round(Math.max(0, Math.min(1, st.stock || 0)) * 5), rows = [[0, 0], [14, 0], [28, 0], [7, -11], [21, -11], [14, -22]];
+    let s = '<g>';
+    for (let i = 0; i < n; i++) {
+      const c = rows[i], cx = x + c[0], cy = y + c[1];
+      s += i % 3 === 1 ? '<path d="M' + (cx + 1) + ' ' + cy + ' q0 -11 6.5 -11 q6.5 0 6.5 11z" fill="' + shade('#d8c9a3', dayK) + '" stroke="#8a7a5a" stroke-width=".6"/>'
+        : '<rect x="' + cx + '" y="' + (cy - 11) + '" width="13" height="11" fill="' + shade('#a9773f', dayK) + '" stroke="#6b4a26" stroke-width=".7"/><path d="M' + cx + ' ' + (cy - 5.5) + 'h13M' + (cx + 6.5) + ' ' + (cy - 11) + 'v11" stroke="#6b4a26" stroke-width=".5" opacity=".7"/>';
+    }
+    if (st.owed) s += person(x + 46, y + 6, {shirt: '#6d6f73', skin: '#5a3b27', scale: 1}) + '<rect x="' + (x + 50) + '" y="' + (y - 16) + '" width="8" height="10" fill="#c62828" transform="rotate(8 ' + (x + 54) + ' ' + (y - 11) + ')"/>';
+    add(s + '</g>');
+    const a = zoomed(x - 2, y + 2), b = zoomed(x + (st.owed ? 56 : 43), y - 40), z = st.kind === 'tower' ? 1 : 1.22;
+    st.stockspot = {x: a[0], y: b[1], w: b[0] - a[0], h: a[1] - b[1] + 2 * z};
+  };
   /* branches: the same sign, further down the street */
   const branches = () => { for (let i = 0; i < (st.branches || 0); i++) { const bx = box([6 + i * 52, groundY - 2], 40, 14, 30 + (i % 2) * 8, '#e3d8c2', {flat: '#cdbd9c'}); add(bx.parts.join('') + sign(bx, 3, 20, 34, 7, st.name, brand) + door(bx, 14, 12, 18, '#2a2f36')); } };
   let me = {x: 300, y: 270};
@@ -197,6 +218,7 @@ function workSceneSVG(st, vh){
     for (let i = 0; i < 9; i++) add('<rect x="' + f1(top[0] - 50 + i * 11) + '" y="' + f1(top[1] - 10 - (i % 3) * 4) + '" width="10" height="' + (10 + (i % 3) * 4) + '" fill="' + shade(['#e05a4a', '#e7b931', '#3a7fcf', '#2fae6a', '#f1efe8'][i % 5], dayK) + '"/>');
     add('<path d="M' + f1(top[0]) + ' ' + f1(top[1] - 14) + ' v-62" stroke="#555" stroke-width="2"/><path d="M' + f1(top[0] - 70) + ' ' + f1(top[1] - 60) + ' Q' + f1(top[0]) + ' ' + f1(top[1] - 104) + ' ' + f1(top[0] + 70) + ' ' + f1(top[1] - 60) + 'Z" fill="' + shade(brand, dayK) + '"/>' +
       '<path d="M' + f1(top[0] - 70) + ' ' + f1(top[1] - 60) + ' Q' + f1(top[0] - 35) + ' ' + f1(top[1] - 92) + ' ' + f1(top[0]) + ' ' + f1(top[1] - 76) + ' Q' + f1(top[0] + 35) + ' ' + f1(top[1] - 92) + ' ' + f1(top[0] + 70) + ' ' + f1(top[1] - 60) + '" fill="#fff" opacity=".18"/>');
+    stockAt(252, groundY + 54);
     staffAt([[150, groundY + 50, 1]]);
     customersAt([[110, groundY + 92, 1.1], [260, groundY + 90, 1.1], [286, groundY + 94, 1.1]]);
     me = {x: 200, y: groundY + 50};
@@ -223,6 +245,7 @@ function workSceneSVG(st, vh){
     staffAt([[ga[0] + 30, groundY + 18, .9], [ga[0] + 70, groundY + 18, .9], [ga[0] + 110, groundY + 18, .9], [ga[0] + 150, groundY + 18, .9], [ga[0] + 50, groundY + 18, .9], [ga[0] + 130, groundY + 18, .9]]);
     customersAt([[120, groundY + 82, 1.1], [142, groundY + 86, 1.1], [236, groundY + 84, 1.1], [258, groundY + 88, 1.1], [280, groundY + 84, 1.1], [100, groundY + 90, 1.1]]);
     if (st.kind === 'store') add(van(250, groundY + 62, '#f1f1ef'));
+    stockAt(big ? 306 : 270, groundY + 36);
     add(pole(30));
   }
 
@@ -238,6 +261,7 @@ function workSceneSVG(st, vh){
     for (let i = 0; i < 3; i++) { const px = 40 + i * 22, py = groundY + 70; add('<ellipse cx="' + px + '" cy="' + py + '" rx="10" ry="4" fill="' + shade('#3a3a3a', dayK) + '"/><path d="M' + (px - 10) + ' ' + py + ' q0 12 10 12 q10 0 10 -12z" fill="' + shade('#2b2b2b', dayK) + '"/>' +
       '<path d="M' + (px - 6) + ' ' + (py + 14) + ' l3 -5 l3 5 l3 -6 l3 6" stroke="#e8771e" stroke-width="2" fill="none"/>' +
       '<g fill="#bdbdbd" opacity=".45"><circle cx="' + px + '" cy="' + (py - 9) + '" r="3"/><circle cx="' + (px + 3) + '" cy="' + (py - 17) + '" r="4.5"/></g>'); }
+    stockAt(300, groundY + 46);
     staffAt([[60, groundY + 62, 1.05], [96, groundY + 62, 1.05], [250, groundY + 58, 1]]);
     customersAt([[140, groundY + 58, 1], [170, groundY + 58, 1], [210, groundY + 58, 1], [300, groundY + 82, 1.1], [324, groundY + 86, 1.1], [190, groundY + 92, 1.1]]);
     if (st.broke) add(notice(c0[0] + cw - 30, c0[1] + 20));
@@ -258,6 +282,7 @@ function workSceneSVG(st, vh){
     else { add(truck(14, groundY + 46) + truck(96, groundY + 66) + van(4, groundY + 92, '#f1f1ef')); }
     if (st.decline) add(shutter(b, 10, 16, 26, .8));
     if (st.broke) { const n = b.p(30, 22, 0); add(notice(f1(n[0]), f1(n[1]))); }
+    stockAt(big ? 160 : 182, groundY + 34);
     staffAt([[190, groundY + 76, 1.05], [210, groundY + 82, 1.05], [176, groundY + 90, 1.05], [300, groundY + 80, 1.05], [324, groundY + 84, 1.05], [348, groundY + 88, 1.05]]);
     add(pole(big ? 380 : 214));
     me = {x: 260, y: groundY + 94};
@@ -276,6 +301,7 @@ function workSceneSVG(st, vh){
       '<ellipse cx="' + f1(d0[0] + 72) + '" cy="' + f1(d0[1] - 10) + '" rx="40" ry="24" fill="#9fd0ff" opacity="' + (night ? .18 : .06) + '"/>');
     const fan = b.p(250, 130, 0); add('<circle cx="' + f1(fan[0]) + '" cy="' + f1(fan[1]) + '" r="12" fill="none" stroke="#777"/><path d="M' + f1(fan[0]) + ' ' + f1(fan[1]) + ' l-9 -5 M' + f1(fan[0]) + ' ' + f1(fan[1]) + ' l8 -6 M' + f1(fan[0]) + ' ' + f1(fan[1]) + ' l1 10" stroke="#888" stroke-width="2"/>');
     add(sign(b, 20, 132, 110, 10, st.name, brand));
+    stockAt(Math.round(d0[0] + 200), groundY + 70);
     me = {x: Math.round(d0[0] + 40), y: groundY + 86};
     staffAt([[Math.round(d0[0] + 140), groundY + 88, 1.1], [Math.round(d0[0] + 170), groundY + 90, 1.1]]);
   }
@@ -287,6 +313,7 @@ function workSceneSVG(st, vh){
     add(b.parts.join('') + sign(b, 6, 30, 78, 9, st.name, brand) + door(b, 30, 26, 28, '#6a4630'));
     add('<rect x="200" y="' + (groundY - 50) + '" width="20" height="26" rx="5" fill="' + shade('#1d1d1f', dayK * 1.4) + '"/><path d="M203 ' + (groundY - 24) + 'v28M217 ' + (groundY - 24) + 'v28" stroke="#555" stroke-width="2"/>');
     if (st.stage !== 'startup') add('<g transform="translate(40 ' + (groundY + 60) + ')"><rect x="0" y="-18" width="30" height="16" fill="' + shade('#c0392b', dayK) + '"/><rect x="26" y="-30" width="16" height="14" fill="' + shade('#c0392b', dayK) + '"/><circle cx="8" cy="0" r="9" fill="#151515"/><circle cx="38" cy="2" r="6" fill="#151515"/></g>');
+    stockAt(212, groundY + 34);
     staffAt([[110, groundY + 52, 1], [150, groundY + 66, 1], [190, groundY + 80, 1.05], [80, groundY + 94, 1.1], [230, groundY + 92, 1.1], [130, groundY + 38, .9]]);
     me = {x: 300, y: groundY + 92};
   }
@@ -300,6 +327,7 @@ function workSceneSVG(st, vh){
     for (let i = 0; i < 3; i++) for (let j = 0; j < 4 - i; j++) add('<rect x="' + (40 + j * 13 + i * 6) + '" y="' + (groundY + 80 - i * 7) + '" width="12" height="6" fill="' + shade('#c9c4b8', dayK) + '" stroke="#888" stroke-width=".5"/>');
     add('<g stroke="' + shade('#e0a21b', dayK) + '" stroke-width="3" fill="none"><path d="M330 ' + (groundY + 40) + 'V-60M330 -56h-150M330 -56l20 10M186 -56v40"/></g><rect x="180" y="-16" width="12" height="9" fill="' + shade('#888', dayK) + '"/>');
     add(sign({p: (x, y) => [x, -y]}, 260, -(groundY + 22), 100, 12, st.name, brand));
+    stockAt(52, groundY + 52);
     staffAt([[110, groundY + 86, 1.05], [200, groundY + 92, 1.05], [240, groundY + 94, 1.05], [280, groundY + 90, 1.05], [96, groundY + 66, 1], [300, groundY + 70, 1]]);
     me = {x: 330, y: groundY + 96};
   }
@@ -318,12 +346,15 @@ function workSceneSVG(st, vh){
     if (big) { const c = b.p(200, 90, 30); add('<rect x="' + f1(c[0]) + '" y="' + f1(c[1] - 70) + '" width="14" height="70" fill="' + shade('#8a7a6a', dayK) + '"/><g fill="#a9a9a9" opacity=".5"><circle cx="' + f1(c[0] + 7) + '" cy="' + f1(c[1] - 80) + '" r="7"/><circle cx="' + f1(c[0] + 16) + '" cy="' + f1(c[1] - 94) + '" r="10"/><circle cx="' + f1(c[0] + 30) + '" cy="' + f1(c[1] - 110) + '" r="13"/></g>'); add(truck(260, groundY + 62)); }
     if (st.decline) add(shutter(b, 16, (big ? 134 : 104), big ? 58 : 40, .7));
     if (st.broke) { const n = b.p(big ? 170 : 140, 30, 0); add(notice(f1(n[0]), f1(n[1]))); }
+    stockAt(big ? 40 : 270, groundY + 40);
     staffAt([[124, groundY + 22, .9], [164, groundY + 22, .9], [204, groundY + 22, .9], [144, groundY + 26, .95], [184, groundY + 26, .95], [224, groundY + 26, .95]]);
     add(pole(30));
     me = {x: big ? 120 : 280, y: groundY + 90};
   }
 
   if (me) add(person(me.x, me.y, {shirt: S.p && S.p.job && st.kind === 'tower' ? '#ece7dc' : '#3c79c4', legs: '#20242c', scale: 1.3, grey: st.age >= 50, tie: st.kind === 'tower'}));
+  /* you, at your company: the tap opens what you take out of it */
+  if (me && st.kind !== 'tower' && st.kind !== 'tolet') { const at = zoomed(me.x, me.y), sc = 1.3 * 1.22; st.mespot = {x: at[0] - 11 * sc, y: at[1] - 46 * sc, w: 22 * sc, h: 48 * sc}; }
   if (close) add('</g>');
   return k.finish('workscene', st.label || 'Your work');
 }

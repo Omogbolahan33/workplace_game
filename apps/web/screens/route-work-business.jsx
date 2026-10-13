@@ -39,7 +39,7 @@
   members' own headings — the same strings, from the same functions.
 */
 import {
-  S, fmt, portfolioBar, staffMonthly, outletCount, outletRent
+  S, UI, fmt, portfolioBar, staffMonthly, outletCount, outletRent
 } from '@ledger/core';
 import Group from './group.jsx';
 import ViewAgenda from './view-agenda.jsx';
@@ -80,7 +80,9 @@ export default function WorkBusiness() {
               <EngineRoomCard />
               <LeversCard />
               <PositionCard />
-              <ConditionsCard />
+              {/* world-first, the conditions are on the cards the Levers tiles
+                  open: three members, as the string path counts them */}
+              {UI.details ? <ConditionsCard /> : null}
             </Group>
           </div>
 

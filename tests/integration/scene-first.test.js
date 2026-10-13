@@ -94,3 +94,30 @@ test('the applicants and the household\'s job seekers are faces on the sheet; (i
   assert.match(C.viewHousehold(), /data-a="housenego" data-i="hc0"/);
   C.UI.details = false;
 });
+
+test('the Levers card is four tiles and Conditions is on their cards; (i) brings both back', async () => {
+  stubDOM();
+  const C = await core();
+  (await ui()).install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  const b = C.S.biz;
+
+  C.UI.details = false;
+  const engine = C.viewEngine();
+  assert.deepEqual([...engine.matchAll(/class="facebtn" data-a="hot" data-k="([^"]+)"/g)].map((m) => m[1]), ['stock', 'customers', 'owner', 'premises']);
+  assert.match(engine, /<h3>Levers /, 'the agenda\'s "Levers" link has nowhere to land');
+  assert.doesNotMatch(engine, /data-inp="bizcred"|data-inp="bizstock"|data-inp="bizdraw"/, 'the sliders are still on the sheet');
+  assert.doesNotMatch(engine, /<h3>Conditions<\/h3>/);
+  /* the grid still closes: as many </div> as <div */
+  assert.equal((engine.match(/<div/g) || []).length, (engine.match(/<\/div>/g) || []).length);
+
+  C.UI.details = true;
+  const full = C.viewEngine();
+  for (const w of ['cred', 'stock', 'draw']) assert.ok(full.includes(C.leverSliderHTML(b, w)), w + ' did not come back with (i)');
+  assert.ok(full.includes(C.coverButtonsHTML(b)));
+  assert.match(full, /<h3>Conditions<\/h3>/);
+  assert.match(full, /data-a="supplnego"/);
+  C.UI.details = false;
+});

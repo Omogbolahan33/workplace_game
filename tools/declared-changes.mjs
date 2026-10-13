@@ -260,7 +260,7 @@ const EDITS = [
     why: 'three outlet buttons were disabled on company cash with no figure attached' },
   { marker: 'function viewEngine()',
     name: 'viewEngine — insuring an insured company says it is already insured',
-    why: 'the button was disabled in its own success state, which read as broken rather than done' },
+    why: 'the button was disabled in its own success state, which read as broken rather than done. World-first, the Levers card is four tiles - the stock, the customers, you, the premises - each opening the card the same thing opens in the picture, with the levers, the cover buttons and every line of Conditions on them (leverSliderHTML, coverButtonsHTML: the markup the card had); Conditions is not drawn; (i) brings both cards back' },
   { marker: 'function viewDeals()',
     name: 'viewDeals — committing to a deal says the gap, and that the deal expires',
     why: 'a disabled Commit looked like a dead deal rather than one you cannot afford yet' },
@@ -967,6 +967,18 @@ const EDITS = [
   { marker: 'function applicantFacesHTML(list, kind)', addition: true,
     name: 'applicantFacesHTML — the applicants as faces on the sheet',
     why: 'skill as the ring, skill or role under the name; each opens the same card as the queue' },
+  { marker: 'function leverSliderHTML(b, which)', addition: true,
+    name: 'leverSliderHTML — the three levers, in one place',
+    why: 'credit terms, stock depth and owner draw: the Levers card and the cards opened from the scene, the same inputs through bindInputs()' },
+  { marker: 'function stockWord(sp)', addition: true,
+    name: 'stockWord — the stock policy, said',
+    why: 'Lean, Balanced, Deep, Very deep - the slider readout and the tile' },
+  { marker: 'function coverButtonsHTML(b)', addition: true,
+    name: 'coverButtonsHTML — insure, an accountant, equipment',
+    why: 'the Levers card and the premises card, the Insure button disabled in its own success state as before' },
+  { marker: 'function machineTilesHTML(b)', addition: true,
+    name: 'machineTilesHTML — the machine as four tiles',
+    why: 'the stock (supplier confidence), the customers (kept), you (the draw) and the premises (compliance), each opening its card' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

@@ -159,23 +159,24 @@ function viewEngine(){
   h += '</div>';
 
   /* ---- working capital levers ---- */
-  h += '<div class="card" style="margin-top:12px"><h3>Levers <span class="tag">take effect next quarter</span></h3>'+
-    '<div class="tiny muted" style="margin-bottom:10px">These are the four decisions that decide whether a profitable business has money. '+
-    'Profit is an opinion. Cash is a fact, and these levers are what turn one into the other.</div>';
-  h += '<div class="slider"><span>Credit terms</span><input type="range" data-inp="bizcred" min="0" max="100" step="5" value="'+Math.round((b.creditTerms||0)*100)+'"><span class="mono" style="text-align:right">'+Math.round((b.creditTerms||0)*90)+' days</span></div>'+
-    '<div class="tiny muted" style="margin:-4px 0 9px 0">Selling on credit raises demand by up to 22%, but the cash arrives later and some of it never arrives at all.</div>';
-  h += '<div class="slider"><span>Stock depth</span><input type="range" data-inp="bizstock" min="0" max="100" step="5" value="'+Math.round((b.stockPolicy===undefined?45:b.stockPolicy)*100)+'"><span class="mono" style="text-align:right">'+((b.stockPolicy===undefined?0.45:b.stockPolicy)<0.25?'Lean':(b.stockPolicy===undefined?0.45:b.stockPolicy)<0.5?'Balanced':(b.stockPolicy===undefined?0.45:b.stockPolicy)<0.75?'Deep':'Very deep')+'</span></div>'+
-    '<div class="tiny muted" style="margin:-4px 0 9px 0">Under-stock and you turn customers away with demand in the room. Over-stock and your cash is on a shelf, shrinking.</div>';
-  h += '<div class="slider"><span>Owner draw</span><input type="range" data-inp="bizdraw" min="0" max="'+Math.max(1000000, Math.round(rev*0.5))+'" step="'+Math.max(50000, Math.round(rev*0.01))+'" value="'+Math.round(b.draw||0)+'"><span class="mono" style="text-align:right">'+fmt(Math.round(b.draw||0))+'</span></div>'+
-    '<div class="tiny muted" style="margin:-4px 0 9px 0">Per quarter, if the company can fund it. Last quarter it paid out '+fmt(b.drawnQ||0)+'.</div>';
-  h += '<div class="row wrap" style="margin-top:4px">'+
-    '<button class="btn sm" data-a="bizinsure"'+(b.insured?' disabled aria-disabled="true" title="'+(b.insured===true?'This company is fully insured already':'It is part-insured; the policy tops up at the next quarter')+'"':'')+'>'+(b.insured===true?'Insured':b.insured?'Part-insured':'Insure ('+fmt(Math.round(Math.max(180000, rev*0.012)))+'/q)')+'</button>'+
-    '<button class="btn sm" data-a="bizacct">Engage an accountant ('+fmt(Math.round(Math.max(120000, rev*0.008)))+'/q)</button>'+
-    '<button class="btn sm" data-a="bizauto">Invest in equipment</button>'+
-    '</div>';
-  h += '<div class="tiny muted" style="margin-top:8px">Automation '+Math.round(b.auto||0)+'/100 — raises output per person and improves stock control. '+
-       'Compliance '+Math.round(b.compliance||40)+'/100 — this is what an assessment will be judged against.</div>';
-  h += '</div>';
+  /* world-first: the levers live where they act - the stock beside the
+     premises, the customers at the door, you, the premises themselves - and
+     here each is a tile that opens the same card. (i) brings the card back. */
+  if(sceneFirst()){
+    h += '<div class="card" style="margin-top:12px"><h3>Levers <span class="tag">take effect next quarter</span></h3>'+
+      '<div class="facerow">'+machineTilesHTML(b)+'</div>'+
+      '<div class="tiny muted prose">Tap a tile, or the thing in the picture: the stock, the customers, yourself, the premises.</div></div>';
+  } else {
+    h += '<div class="card" style="margin-top:12px"><h3>Levers <span class="tag">take effect next quarter</span></h3>'+
+      '<div class="tiny muted" style="margin-bottom:10px">These are the four decisions that decide whether a profitable business has money. '+
+      'Profit is an opinion. Cash is a fact, and these levers are what turn one into the other.</div>';
+    /* the three levers and the three buttons - core's, the cards have the same */
+    h += leverSliderHTML(b,'cred') + leverSliderHTML(b,'stock') + leverSliderHTML(b,'draw');
+    h += '<div class="row wrap" style="margin-top:4px">'+coverButtonsHTML(b)+'</div>';
+    h += '<div class="tiny muted" style="margin-top:8px">Automation '+Math.round(b.auto||0)+'/100 — raises output per person and improves stock control. '+
+         'Compliance '+Math.round(b.compliance||40)+'/100 — this is what an assessment will be judged against.</div>';
+    h += '</div>';
+  }
 
   /* ---- balance sheet + P&L ---- */
   const equip = Math.max(0, b.capex||0);
@@ -203,6 +204,8 @@ function viewEngine(){
   h += '</div>';
 
   /* ---- conditions ---- */
+  /* world-first: every line of it is on a card the tiles open */
+  if(sceneFirst()){ h += '</div>'; return h; }
   h += '<div class="card" style="margin-top:12px"><h3>Conditions</h3>';
   const L = b.lease||{};
   h += '<div class="kv"><span class="muted">Premises</span><span>'+fmt(Math.round(L.rent||0))+'/mo · '+(L.end>0? L.end+'q left on lease':'RENEWAL DUE')+'</span></div>';

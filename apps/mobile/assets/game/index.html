@@ -669,6 +669,9 @@ body.terse .prose{display:none}
 .facebtn .cface .cbadge,.facebtn .cface .cfelt,.facebtn .cface .cstory{width:20px;height:20px;font-size:12px}
 .facebtn>svg{width:50px;height:50px}
 .facebtn span{max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.facebtn .hring{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--c) calc(var(--p) * 1%),rgba(255,255,255,.13) 0);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
+.facebtn .hring em{font-style:normal;width:39px;height:39px;border-radius:50%;background:var(--panel2);display:grid;place-items:center;font-size:20px;color:var(--acc)}
 .facebtn small{max-width:70px;margin-top:-3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--dim)}
 .covrow{padding:8px 0;border-bottom:1px solid var(--line)}
 .covbar{position:relative;display:block;height:10px;border-radius:5px;background:rgba(255,255,255,.08);margin:7px 0 4px}
@@ -14014,6 +14017,11 @@ function workLook(mode){
     staff: staff, customers: Math.round(busy * 6), branches: Math.max(0, Math.min(4, (b.locations || 1) - 1)),
     shifts: typeof leverActive === 'function' ? leverActive(b, 'shifts') : false,
     broke: (b.cash || 0) < 0, decline: stage === 'decline', seed: 37 + (b.type || '').length * 5,
+    /* the stock on hand, as deep as the policy keeps it; and a supplier at the
+       pile with the invoice when the engine room says they are close to
+       cutting you off - the same reading, not a second one */
+    stock: b.stockPolicy === undefined ? .45 : b.stockPolicy,
+    owed: (b.diag || []).some(function(d){ return d.key === 'pay' && d.level === 'bad'; }),
     gen: true, label: (b.name || 'Your company') + ': ' + (BIZ_STAGES[stage] ? BIZ_STAGES[stage].label : stage).toLowerCase() + ', ' + staff + ' staff'});
 }
 /* The picture of it, with the same kit as your home. */
@@ -14068,6 +14076,22 @@ function workSceneSVG(st, vh){
     const at = zoomed(q[0], q[1]), sc = (q[2] || 1) * (st.kind === 'tower' ? 1 : 1.22);
     st.cspots.push({x: at[0] - 10 * sc, y: at[1] - 46 * sc, w: 20 * sc, h: 48 * sc});
   });
+  /* the stock: crates and sacks stacked beside the premises, one to six as
+     the stock policy runs lean to very deep; where it stands, for the tap */
+  st.stockspot = null;
+  const stockAt = (x, y) => {
+    const n = 1 + Math.round(Math.max(0, Math.min(1, st.stock || 0)) * 5), rows = [[0, 0], [14, 0], [28, 0], [7, -11], [21, -11], [14, -22]];
+    let s = '<g>';
+    for (let i = 0; i < n; i++) {
+      const c = rows[i], cx = x + c[0], cy = y + c[1];
+      s += i % 3 === 1 ? '<path d="M' + (cx + 1) + ' ' + cy + ' q0 -11 6.5 -11 q6.5 0 6.5 11z" fill="' + shade('#d8c9a3', dayK) + '" stroke="#8a7a5a" stroke-width=".6"/>'
+        : '<rect x="' + cx + '" y="' + (cy - 11) + '" width="13" height="11" fill="' + shade('#a9773f', dayK) + '" stroke="#6b4a26" stroke-width=".7"/><path d="M' + cx + ' ' + (cy - 5.5) + 'h13M' + (cx + 6.5) + ' ' + (cy - 11) + 'v11" stroke="#6b4a26" stroke-width=".5" opacity=".7"/>';
+    }
+    if (st.owed) s += person(x + 46, y + 6, {shirt: '#6d6f73', skin: '#5a3b27', scale: 1}) + '<rect x="' + (x + 50) + '" y="' + (y - 16) + '" width="8" height="10" fill="#c62828" transform="rotate(8 ' + (x + 54) + ' ' + (y - 11) + ')"/>';
+    add(s + '</g>');
+    const a = zoomed(x - 2, y + 2), b = zoomed(x + (st.owed ? 56 : 43), y - 40), z = st.kind === 'tower' ? 1 : 1.22;
+    st.stockspot = {x: a[0], y: b[1], w: b[0] - a[0], h: a[1] - b[1] + 2 * z};
+  };
   /* branches: the same sign, further down the street */
   const branches = () => { for (let i = 0; i < (st.branches || 0); i++) { const bx = box([6 + i * 52, groundY - 2], 40, 14, 30 + (i % 2) * 8, '#e3d8c2', {flat: '#cdbd9c'}); add(bx.parts.join('') + sign(bx, 3, 20, 34, 7, st.name, brand) + door(bx, 14, 12, 18, '#2a2f36')); } };
   let me = {x: 300, y: 270};
@@ -14136,6 +14160,7 @@ function workSceneSVG(st, vh){
     for (let i = 0; i < 9; i++) add('<rect x="' + f1(top[0] - 50 + i * 11) + '" y="' + f1(top[1] - 10 - (i % 3) * 4) + '" width="10" height="' + (10 + (i % 3) * 4) + '" fill="' + shade(['#e05a4a', '#e7b931', '#3a7fcf', '#2fae6a', '#f1efe8'][i % 5], dayK) + '"/>');
     add('<path d="M' + f1(top[0]) + ' ' + f1(top[1] - 14) + ' v-62" stroke="#555" stroke-width="2"/><path d="M' + f1(top[0] - 70) + ' ' + f1(top[1] - 60) + ' Q' + f1(top[0]) + ' ' + f1(top[1] - 104) + ' ' + f1(top[0] + 70) + ' ' + f1(top[1] - 60) + 'Z" fill="' + shade(brand, dayK) + '"/>' +
       '<path d="M' + f1(top[0] - 70) + ' ' + f1(top[1] - 60) + ' Q' + f1(top[0] - 35) + ' ' + f1(top[1] - 92) + ' ' + f1(top[0]) + ' ' + f1(top[1] - 76) + ' Q' + f1(top[0] + 35) + ' ' + f1(top[1] - 92) + ' ' + f1(top[0] + 70) + ' ' + f1(top[1] - 60) + '" fill="#fff" opacity=".18"/>');
+    stockAt(252, groundY + 54);
     staffAt([[150, groundY + 50, 1]]);
     customersAt([[110, groundY + 92, 1.1], [260, groundY + 90, 1.1], [286, groundY + 94, 1.1]]);
     me = {x: 200, y: groundY + 50};
@@ -14162,6 +14187,7 @@ function workSceneSVG(st, vh){
     staffAt([[ga[0] + 30, groundY + 18, .9], [ga[0] + 70, groundY + 18, .9], [ga[0] + 110, groundY + 18, .9], [ga[0] + 150, groundY + 18, .9], [ga[0] + 50, groundY + 18, .9], [ga[0] + 130, groundY + 18, .9]]);
     customersAt([[120, groundY + 82, 1.1], [142, groundY + 86, 1.1], [236, groundY + 84, 1.1], [258, groundY + 88, 1.1], [280, groundY + 84, 1.1], [100, groundY + 90, 1.1]]);
     if (st.kind === 'store') add(van(250, groundY + 62, '#f1f1ef'));
+    stockAt(big ? 306 : 270, groundY + 36);
     add(pole(30));
   }
 
@@ -14177,6 +14203,7 @@ function workSceneSVG(st, vh){
     for (let i = 0; i < 3; i++) { const px = 40 + i * 22, py = groundY + 70; add('<ellipse cx="' + px + '" cy="' + py + '" rx="10" ry="4" fill="' + shade('#3a3a3a', dayK) + '"/><path d="M' + (px - 10) + ' ' + py + ' q0 12 10 12 q10 0 10 -12z" fill="' + shade('#2b2b2b', dayK) + '"/>' +
       '<path d="M' + (px - 6) + ' ' + (py + 14) + ' l3 -5 l3 5 l3 -6 l3 6" stroke="#e8771e" stroke-width="2" fill="none"/>' +
       '<g fill="#bdbdbd" opacity=".45"><circle cx="' + px + '" cy="' + (py - 9) + '" r="3"/><circle cx="' + (px + 3) + '" cy="' + (py - 17) + '" r="4.5"/></g>'); }
+    stockAt(300, groundY + 46);
     staffAt([[60, groundY + 62, 1.05], [96, groundY + 62, 1.05], [250, groundY + 58, 1]]);
     customersAt([[140, groundY + 58, 1], [170, groundY + 58, 1], [210, groundY + 58, 1], [300, groundY + 82, 1.1], [324, groundY + 86, 1.1], [190, groundY + 92, 1.1]]);
     if (st.broke) add(notice(c0[0] + cw - 30, c0[1] + 20));
@@ -14197,6 +14224,7 @@ function workSceneSVG(st, vh){
     else { add(truck(14, groundY + 46) + truck(96, groundY + 66) + van(4, groundY + 92, '#f1f1ef')); }
     if (st.decline) add(shutter(b, 10, 16, 26, .8));
     if (st.broke) { const n = b.p(30, 22, 0); add(notice(f1(n[0]), f1(n[1]))); }
+    stockAt(big ? 160 : 182, groundY + 34);
     staffAt([[190, groundY + 76, 1.05], [210, groundY + 82, 1.05], [176, groundY + 90, 1.05], [300, groundY + 80, 1.05], [324, groundY + 84, 1.05], [348, groundY + 88, 1.05]]);
     add(pole(big ? 380 : 214));
     me = {x: 260, y: groundY + 94};
@@ -14215,6 +14243,7 @@ function workSceneSVG(st, vh){
       '<ellipse cx="' + f1(d0[0] + 72) + '" cy="' + f1(d0[1] - 10) + '" rx="40" ry="24" fill="#9fd0ff" opacity="' + (night ? .18 : .06) + '"/>');
     const fan = b.p(250, 130, 0); add('<circle cx="' + f1(fan[0]) + '" cy="' + f1(fan[1]) + '" r="12" fill="none" stroke="#777"/><path d="M' + f1(fan[0]) + ' ' + f1(fan[1]) + ' l-9 -5 M' + f1(fan[0]) + ' ' + f1(fan[1]) + ' l8 -6 M' + f1(fan[0]) + ' ' + f1(fan[1]) + ' l1 10" stroke="#888" stroke-width="2"/>');
     add(sign(b, 20, 132, 110, 10, st.name, brand));
+    stockAt(Math.round(d0[0] + 200), groundY + 70);
     me = {x: Math.round(d0[0] + 40), y: groundY + 86};
     staffAt([[Math.round(d0[0] + 140), groundY + 88, 1.1], [Math.round(d0[0] + 170), groundY + 90, 1.1]]);
   }
@@ -14226,6 +14255,7 @@ function workSceneSVG(st, vh){
     add(b.parts.join('') + sign(b, 6, 30, 78, 9, st.name, brand) + door(b, 30, 26, 28, '#6a4630'));
     add('<rect x="200" y="' + (groundY - 50) + '" width="20" height="26" rx="5" fill="' + shade('#1d1d1f', dayK * 1.4) + '"/><path d="M203 ' + (groundY - 24) + 'v28M217 ' + (groundY - 24) + 'v28" stroke="#555" stroke-width="2"/>');
     if (st.stage !== 'startup') add('<g transform="translate(40 ' + (groundY + 60) + ')"><rect x="0" y="-18" width="30" height="16" fill="' + shade('#c0392b', dayK) + '"/><rect x="26" y="-30" width="16" height="14" fill="' + shade('#c0392b', dayK) + '"/><circle cx="8" cy="0" r="9" fill="#151515"/><circle cx="38" cy="2" r="6" fill="#151515"/></g>');
+    stockAt(212, groundY + 34);
     staffAt([[110, groundY + 52, 1], [150, groundY + 66, 1], [190, groundY + 80, 1.05], [80, groundY + 94, 1.1], [230, groundY + 92, 1.1], [130, groundY + 38, .9]]);
     me = {x: 300, y: groundY + 92};
   }
@@ -14239,6 +14269,7 @@ function workSceneSVG(st, vh){
     for (let i = 0; i < 3; i++) for (let j = 0; j < 4 - i; j++) add('<rect x="' + (40 + j * 13 + i * 6) + '" y="' + (groundY + 80 - i * 7) + '" width="12" height="6" fill="' + shade('#c9c4b8', dayK) + '" stroke="#888" stroke-width=".5"/>');
     add('<g stroke="' + shade('#e0a21b', dayK) + '" stroke-width="3" fill="none"><path d="M330 ' + (groundY + 40) + 'V-60M330 -56h-150M330 -56l20 10M186 -56v40"/></g><rect x="180" y="-16" width="12" height="9" fill="' + shade('#888', dayK) + '"/>');
     add(sign({p: (x, y) => [x, -y]}, 260, -(groundY + 22), 100, 12, st.name, brand));
+    stockAt(52, groundY + 52);
     staffAt([[110, groundY + 86, 1.05], [200, groundY + 92, 1.05], [240, groundY + 94, 1.05], [280, groundY + 90, 1.05], [96, groundY + 66, 1], [300, groundY + 70, 1]]);
     me = {x: 330, y: groundY + 96};
   }
@@ -14257,12 +14288,15 @@ function workSceneSVG(st, vh){
     if (big) { const c = b.p(200, 90, 30); add('<rect x="' + f1(c[0]) + '" y="' + f1(c[1] - 70) + '" width="14" height="70" fill="' + shade('#8a7a6a', dayK) + '"/><g fill="#a9a9a9" opacity=".5"><circle cx="' + f1(c[0] + 7) + '" cy="' + f1(c[1] - 80) + '" r="7"/><circle cx="' + f1(c[0] + 16) + '" cy="' + f1(c[1] - 94) + '" r="10"/><circle cx="' + f1(c[0] + 30) + '" cy="' + f1(c[1] - 110) + '" r="13"/></g>'); add(truck(260, groundY + 62)); }
     if (st.decline) add(shutter(b, 16, (big ? 134 : 104), big ? 58 : 40, .7));
     if (st.broke) { const n = b.p(big ? 170 : 140, 30, 0); add(notice(f1(n[0]), f1(n[1]))); }
+    stockAt(big ? 40 : 270, groundY + 40);
     staffAt([[124, groundY + 22, .9], [164, groundY + 22, .9], [204, groundY + 22, .9], [144, groundY + 26, .95], [184, groundY + 26, .95], [224, groundY + 26, .95]]);
     add(pole(30));
     me = {x: big ? 120 : 280, y: groundY + 90};
   }
 
   if (me) add(person(me.x, me.y, {shirt: S.p && S.p.job && st.kind === 'tower' ? '#ece7dc' : '#3c79c4', legs: '#20242c', scale: 1.3, grey: st.age >= 50, tie: st.kind === 'tower'}));
+  /* you, at your company: the tap opens what you take out of it */
+  if (me && st.kind !== 'tower' && st.kind !== 'tolet') { const at = zoomed(me.x, me.y), sc = 1.3 * 1.22; st.mespot = {x: at[0] - 11 * sc, y: at[1] - 46 * sc, w: 22 * sc, h: 48 * sc}; }
   if (close) add('</g>');
   return k.finish('workscene', st.label || 'Your work');
 }
@@ -15056,12 +15090,17 @@ function workTaps(st){
   return function(k){
     const gy = k.groundY, out = [];
     if(st.kind === 'tower') out.push(goZone(110, -30, 214, 250, st.employed ? 'Your job' : 'Looking for work', 'work', 'career'));
-    else out.push(goZone(54, gy - 134, 293, 183, st.kind === 'tolet' ? 'Start a company' : (st.name || 'Your company'), 'work', 'business'));
+    else if(st.kind === 'tolet') out.push(goZone(54, gy - 134, 293, 183, 'Start a company', 'work', 'business'));
+    /* the premises open their card: the lease, the cover, the books */
+    else out.push(hotZone(54, gy - 134, 293, 183, (st.name || 'Your company') + ': the premises, the cover, the books', {a: 'hot', k: 'premises'}));
     if(st.rival && st.kind !== 'tower' && st.kind !== 'tolet') out.push(goZone(316, gy - 80, 74, 104, 'Your rival: ' + st.rival.name, 'work', 'rival'));
     /* the customers at the door: what brings them in */
     (st.cspots || []).forEach(function(c){ out.push(hotZone(c.x, c.y, Math.max(16, c.w), Math.max(30, c.h), 'Your customers: price, marketing, quality', {a: 'hot', k: 'customers'})); });
     /* your staff, at their stations, over the premises: each opens their card */
     (st.spots || []).forEach(function(sp){ out.push(hotZone(sp.x, sp.y, Math.max(16, sp.w), Math.max(30, sp.h), 'Your staff', {a: 'hot', k: 'staff', c: sp.id})); });
+    /* the stock beside it, and you */
+    if(st.stockspot) out.push(hotZone(st.stockspot.x, st.stockspot.y, Math.max(24, st.stockspot.w), Math.max(24, st.stockspot.h), 'Your stock and your suppliers', {a: 'hot', k: 'stock'}));
+    if(st.mespot) out.push(hotZone(st.mespot.x, st.mespot.y, st.mespot.w, st.mespot.h, 'You: what you take out of the company', {a: 'hot', k: 'owner'}));
     /* the applicants queuing outside */
     out.push(doorQueueTaps(st.queue || [], k));
     return out.join('');
@@ -15213,6 +15252,40 @@ function applicantFacesHTML(list, kind){
       faceBadgeSVG(c.name, (c.skill || 0) * 10, '#5b6b7d') + '<span>' + esc(String(c.name).split(' ')[0]) + '</span><small>' + esc(what) + '</small></button>';
   }).join('');
 }
+/* The machine, in one place: the three levers that turn profit into cash and
+   the three buttons for cover, books and equipment - the Levers card and the
+   cards opened from the scene (the stock, the customers, you, the premises),
+   the same inputs through the same handlers */
+function leverSliderHTML(b, which){
+  const rev = Math.max(1, b.revenue || 0), sp = b.stockPolicy === undefined ? .45 : b.stockPolicy;
+  if(which === 'cred') return '<div class="slider"><span>Credit terms</span><input type="range" data-inp="bizcred" min="0" max="100" step="5" value="' + Math.round((b.creditTerms || 0) * 100) + '"><span class="mono" style="text-align:right">' + Math.round((b.creditTerms || 0) * 90) + ' days</span></div>' +
+    '<div class="tiny muted" style="margin:-4px 0 9px 0">Selling on credit raises demand by up to 22%, but the cash arrives later and some of it never arrives at all.</div>';
+  if(which === 'stock') return '<div class="slider"><span>Stock depth</span><input type="range" data-inp="bizstock" min="0" max="100" step="5" value="' + Math.round(sp * 100) + '"><span class="mono" style="text-align:right">' + stockWord(sp) + '</span></div>' +
+    '<div class="tiny muted" style="margin:-4px 0 9px 0">Under-stock and you turn customers away with demand in the room. Over-stock and your cash is on a shelf, shrinking.</div>';
+  return '<div class="slider"><span>Owner draw</span><input type="range" data-inp="bizdraw" min="0" max="' + Math.max(1000000, Math.round(rev * 0.5)) + '" step="' + Math.max(50000, Math.round(rev * 0.01)) + '" value="' + Math.round(b.draw || 0) + '"><span class="mono" style="text-align:right">' + fmt(Math.round(b.draw || 0)) + '</span></div>' +
+    '<div class="tiny muted" style="margin:-4px 0 9px 0">Per quarter, if the company can fund it. Last quarter it paid out ' + fmt(b.drawnQ || 0) + '.</div>';
+}
+function stockWord(sp){ return sp < 0.25 ? 'Lean' : sp < 0.5 ? 'Balanced' : sp < 0.75 ? 'Deep' : 'Very deep'; }
+function coverButtonsHTML(b){
+  const rev = Math.max(1, b.revenue || 0);
+  return '<button class="btn sm" data-a="bizinsure"' + (b.insured ? ' disabled aria-disabled="true" title="' + (b.insured === true ? 'This company is fully insured already' : 'It is part-insured; the policy tops up at the next quarter') + '"' : '') + '>' + (b.insured === true ? 'Insured' : b.insured ? 'Part-insured' : 'Insure (' + fmt(Math.round(Math.max(180000, rev * 0.012))) + '/q)') + '</button>' +
+    '<button class="btn sm" data-a="bizacct">Engage an accountant (' + fmt(Math.round(Math.max(120000, rev * 0.008))) + '/q)</button>' +
+    '<button class="btn sm" data-a="bizauto">Invest in equipment</button>';
+}
+/* the machine as four tiles on the sheet: each opens its card */
+function machineTilesHTML(b){
+  const sp = b.stockPolicy === undefined ? .45 : b.stockPolicy, conf = b.supplierConf === undefined ? 70 : b.supplierConf;
+  const kept = Math.round((1 - (b.churnQ || 0)) * 100), L = b.lease || {};
+  const tile = function(kind, ico, v, tone, name, what){
+    return '<button class="facebtn" data-a="hot" data-k="' + kind + '" aria-label="' + esc(name + ': ' + what) + '"><span class="gfx hring" style="--p:' + Math.round(Math.max(0, Math.min(100, v))) + ';--c:' + tone + '"><em>' + worldIco(ico) + '</em></span>' +
+      '<span>' + esc(name) + '</span><small>' + esc(what) + '</small></button>';
+  };
+  const t = function(v){ return v >= 60 ? 'var(--good)' : v >= 35 ? 'var(--warn)' : 'var(--bad)'; };
+  return tile('stock', 'box', conf, t(conf), 'Stock', stockWord(sp)) +
+    tile('customers', 'people', kept, t(kept), 'Customers', Math.round((b.creditTerms || 0) * 90) + ' days credit') +
+    tile('owner', 'coins', Math.min(100, (b.draw || 0) / Math.max(1, (b.revenue || 0) * .5) * 100), 'var(--acc)', 'You', fmt(Math.round(b.draw || 0)) + '/q') +
+    tile('premises', 'shop', b.compliance || 40, t(b.compliance || 40), 'Premises', L.end > 0 ? L.end + 'q on lease' : 'renewal due');
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){
@@ -15259,13 +15332,21 @@ function hotModal(M){
     const b = S.biz;
     if(!b) return modalHTML('<h2>No company</h2>', '', '<button class="btn primary" data-a="close">Close</button>');
     const kept = Math.round((1 - (b.churnQ || 0)) * 100);
-    return modalHTML('<h2>Your customers</h2><div class="tiny muted">' + Math.round(b.custBase || 0).toLocaleString() + ' customers \u00b7 each new one costs about ' + fmt(b.cacQ || 0) + '</div>',
+    /* a company that counts its customers says how many; one that does not says what it sold */
+    return modalHTML('<h2>Your customers</h2><div class="tiny muted">' + (b.custBase ? Math.round(b.custBase).toLocaleString() + ' customers \u00b7 each new one costs about ' + fmt(b.cacQ || 0) : Math.round(b.units || 0).toLocaleString() + ' units sold last quarter') + '</div>',
       ringsHTML([{ico: 'people', label: 'Kept a quarter', v: kept, text: kept + '%'}, {ico: 'star', label: 'Quality', v: b.quality || 0}, {ico: 'target', label: 'Positioning', v: b.positioning === undefined ? 45 : b.positioning, tone: 'var(--info)'}]) +
       /* the Business screen's own three dials: the same inputs, through the same handler */
       '<div style="margin-top:12px">' +
       '<div class="slider"><span>Price</span><input type="range" data-inp="bizprice" min="60" max="160" step="2" value="' + Math.round((b.priceIdx || 1) * 100) + '"><span class="mono" style="text-align:right">' + ((b.priceIdx || 1) * 100).toFixed(0) + '%</span></div>' +
       '<div class="slider"><span>Marketing</span><input type="range" data-inp="bizmark" min="0" max="2000000" step="25000" value="' + (b.marketing || 0) + '"><span class="mono" style="text-align:right">' + fmt(b.marketing || 0) + '</span></div>' +
       '<div class="slider"><span>Quality</span><input type="range" data-inp="bizqual" min="0" max="600000" step="10000" value="' + (b.qualitySpendMonthly || 0) + '"><span class="mono" style="text-align:right">' + fmt(b.qualitySpendMonthly || 0) + '/mo</span></div>' +
+      /* selling on credit is selling to them: the Levers card's own slider */
+      leverSliderHTML(b, 'cred') +
+      '<div class="kv"><span class="muted">Owed by customers</span><span>' + fmt(Math.round(b.recv || 0)) + '</span></div>' +
+      '<div class="kv"><span class="muted">Written off as bad debt this quarter</span><span>' + fmt(b.badDebtQ || 0) + '</span></div>' +
+      (b.keyClient ? '<div class="kv"><span class="muted">Concentration</span><span class="' + (b.keyClient.share > 0.3 ? 'bad' : '') + '">' + esc(b.keyClient.name) + ' · ' + Math.round(b.keyClient.share * 100) + '% of revenue</span></div>' : '') +
+      (b.contracts || []).map(function(c){ return '<div class="kv"><span class="muted">Contract</span><span>' + esc(c.client || 'Client') + ' · ' + c.turns + 'q left</span></div>'; }).join('') +
+      '<div class="kv"><span class="muted">Product lines</span><span>' + (b.products || 1) + '</span></div>' +
       '</div>',
       '<button class="btn" data-a="goto" data-t="work" data-s="business">The business</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
   }
@@ -15285,6 +15366,37 @@ function hotModal(M){
     return modalHTML('<h2>The bank</h2><div class="tiny muted">The conditions on the loan, tested every quarter</div>',
       (rows || '<div class="tiny muted">No covenants.</div>') + '<div class="tiny muted" style="margin-top:8px">A breach is a conversation, and the bank sets its price.</div>',
       '<button class="btn" data-a="goto" data-t="governance" data-s="pack">The covenants</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
+  }
+  if(M.kind === 'stock' || M.kind === 'owner' || M.kind === 'premises'){
+    const b = S.biz;
+    if(!b) return modalHTML('<h2>No company</h2>', '', '<button class="btn primary" data-a="close">Close</button>');
+    const rev = Math.max(1, b.revenue || 0), back = '<button class="btn" data-a="goto" data-t="work" data-s="business">The business</button><button class="btn ghost" data-a="close">Close</button>';
+    if(M.kind === 'stock'){
+      const conf = b.supplierConf === undefined ? 70 : b.supplierConf, owe = b.payable || 0;
+      return modalHTML('<h2>Your stock</h2><div class="tiny muted">' + fmt(Math.round(b.inventory || 0)) + ' on hand · suppliers give you ' + (b.supplierDays || 30) + ' days</div>',
+        ringsHTML([{ico: 'truck', label: 'Supplier confidence', v: conf}]) +
+        '<div style="margin-top:12px">' + leverSliderHTML(b, 'stock') + '</div>' +
+        '<div class="kv"><span class="muted">Owed to suppliers</span><span class="' + (owe > rev * 0.8 ? 'bad' : '') + '">' + fmt(Math.round(owe)) + '</span></div>' +
+        '<div class="kv"><span class="muted">Lost to shrinkage and spoilage this quarter</span><span>' + fmt(b.shrinkQ || 0) + '</span></div>' +
+        '<div style="margin-top:10px"><button class="btn sm" data-a="supplnego">Renegotiate supplier terms</button></div>' +
+        '<div class="tiny muted" style="margin-top:6px">Your suppliers finance most of the stock you sell. Longer terms mean more stock on the shelf without cash; the relationship is what buys you those terms, and it is spent by stretching them.</div>',
+        back, 'style="max-width:460px"');
+    }
+    if(M.kind === 'owner'){
+      const run = (b.cash || 0) > 0 ? ((b.cash || 0) / Math.max(1, (b.opex || 0))).toFixed(1) : '0';
+      return modalHTML('<h2>You, at ' + esc(b.name || 'your company') + '</h2><div class="tiny muted">The company holds ' + fmt(Math.round(b.cash || 0)) + ' · ' + run + ' quarters of overheads</div>',
+        leverSliderHTML(b, 'draw') +
+        '<div class="tiny muted">Profit is an opinion. Cash is a fact: what you take out is what the company no longer has when the quarter goes wrong.</div>',
+        back, 'style="max-width:460px"');
+    }
+    const L = b.lease || {}, tax = b.taxRisk || 0;
+    return modalHTML('<h2>The premises</h2><div class="tiny muted">' + fmt(Math.round(L.rent || 0)) + '/mo · ' + (L.end > 0 ? L.end + 'q left on lease' : 'RENEWAL DUE') + ' · ' + b.locations + ' location' + (b.locations === 1 ? '' : 's') + '</div>',
+      ringsHTML([{ico: 'seal', label: 'Compliance', v: b.compliance || 40}, {ico: 'warn', label: 'Tax exposure', v: tax, tone: tax > 65 ? 'var(--bad)' : tax > 35 ? 'var(--warn)' : 'var(--good)'}, {ico: 'gear', label: 'Automation', v: b.auto || 0, tone: 'var(--info)'}]) +
+      '<div class="kv" style="margin-top:10px"><span class="muted">Insurance</span><span>' + (b.insured === true ? 'Full' : b.insured ? 'Partial' : '<span class="bad">None</span>') + '</span></div>' +
+      (b.incidents || []).map(function(i){ return '<div class="kv"><span class="muted">Lingering</span><span class="bad">' + esc(i.name) + ' (' + i.turns + 'q)</span></div>'; }).join('') +
+      '<div class="row wrap" style="margin-top:10px;gap:6px">' + coverButtonsHTML(b) + '</div>' +
+      '<div class="tiny muted" style="margin-top:8px">Automation raises output per person and improves stock control. Compliance is what an assessment will be judged against.</div>',
+      back, 'style="max-width:460px"');
   }
   if(M.kind === 'applicant'){
     const c = (S.candidates || []).find(function(x){ return x.id === M.id; });
@@ -16997,23 +17109,24 @@ function viewEngine(){
   h += '</div>';
 
   /* ---- working capital levers ---- */
-  h += '<div class="card" style="margin-top:12px"><h3>Levers <span class="tag">take effect next quarter</span></h3>'+
-    '<div class="tiny muted" style="margin-bottom:10px">These are the four decisions that decide whether a profitable business has money. '+
-    'Profit is an opinion. Cash is a fact, and these levers are what turn one into the other.</div>';
-  h += '<div class="slider"><span>Credit terms</span><input type="range" data-inp="bizcred" min="0" max="100" step="5" value="'+Math.round((b.creditTerms||0)*100)+'"><span class="mono" style="text-align:right">'+Math.round((b.creditTerms||0)*90)+' days</span></div>'+
-    '<div class="tiny muted" style="margin:-4px 0 9px 0">Selling on credit raises demand by up to 22%, but the cash arrives later and some of it never arrives at all.</div>';
-  h += '<div class="slider"><span>Stock depth</span><input type="range" data-inp="bizstock" min="0" max="100" step="5" value="'+Math.round((b.stockPolicy===undefined?45:b.stockPolicy)*100)+'"><span class="mono" style="text-align:right">'+((b.stockPolicy===undefined?0.45:b.stockPolicy)<0.25?'Lean':(b.stockPolicy===undefined?0.45:b.stockPolicy)<0.5?'Balanced':(b.stockPolicy===undefined?0.45:b.stockPolicy)<0.75?'Deep':'Very deep')+'</span></div>'+
-    '<div class="tiny muted" style="margin:-4px 0 9px 0">Under-stock and you turn customers away with demand in the room. Over-stock and your cash is on a shelf, shrinking.</div>';
-  h += '<div class="slider"><span>Owner draw</span><input type="range" data-inp="bizdraw" min="0" max="'+Math.max(1000000, Math.round(rev*0.5))+'" step="'+Math.max(50000, Math.round(rev*0.01))+'" value="'+Math.round(b.draw||0)+'"><span class="mono" style="text-align:right">'+fmt(Math.round(b.draw||0))+'</span></div>'+
-    '<div class="tiny muted" style="margin:-4px 0 9px 0">Per quarter, if the company can fund it. Last quarter it paid out '+fmt(b.drawnQ||0)+'.</div>';
-  h += '<div class="row wrap" style="margin-top:4px">'+
-    '<button class="btn sm" data-a="bizinsure"'+(b.insured?' disabled aria-disabled="true" title="'+(b.insured===true?'This company is fully insured already':'It is part-insured; the policy tops up at the next quarter')+'"':'')+'>'+(b.insured===true?'Insured':b.insured?'Part-insured':'Insure ('+fmt(Math.round(Math.max(180000, rev*0.012)))+'/q)')+'</button>'+
-    '<button class="btn sm" data-a="bizacct">Engage an accountant ('+fmt(Math.round(Math.max(120000, rev*0.008)))+'/q)</button>'+
-    '<button class="btn sm" data-a="bizauto">Invest in equipment</button>'+
-    '</div>';
-  h += '<div class="tiny muted" style="margin-top:8px">Automation '+Math.round(b.auto||0)+'/100 — raises output per person and improves stock control. '+
-       'Compliance '+Math.round(b.compliance||40)+'/100 — this is what an assessment will be judged against.</div>';
-  h += '</div>';
+  /* world-first: the levers live where they act - the stock beside the
+     premises, the customers at the door, you, the premises themselves - and
+     here each is a tile that opens the same card. (i) brings the card back. */
+  if(sceneFirst()){
+    h += '<div class="card" style="margin-top:12px"><h3>Levers <span class="tag">take effect next quarter</span></h3>'+
+      '<div class="facerow">'+machineTilesHTML(b)+'</div>'+
+      '<div class="tiny muted prose">Tap a tile, or the thing in the picture: the stock, the customers, yourself, the premises.</div></div>';
+  } else {
+    h += '<div class="card" style="margin-top:12px"><h3>Levers <span class="tag">take effect next quarter</span></h3>'+
+      '<div class="tiny muted" style="margin-bottom:10px">These are the four decisions that decide whether a profitable business has money. '+
+      'Profit is an opinion. Cash is a fact, and these levers are what turn one into the other.</div>';
+    /* the three levers and the three buttons - core's, the cards have the same */
+    h += leverSliderHTML(b,'cred') + leverSliderHTML(b,'stock') + leverSliderHTML(b,'draw');
+    h += '<div class="row wrap" style="margin-top:4px">'+coverButtonsHTML(b)+'</div>';
+    h += '<div class="tiny muted" style="margin-top:8px">Automation '+Math.round(b.auto||0)+'/100 — raises output per person and improves stock control. '+
+         'Compliance '+Math.round(b.compliance||40)+'/100 — this is what an assessment will be judged against.</div>';
+    h += '</div>';
+  }
 
   /* ---- balance sheet + P&L ---- */
   const equip = Math.max(0, b.capex||0);
@@ -17041,6 +17154,8 @@ function viewEngine(){
   h += '</div>';
 
   /* ---- conditions ---- */
+  /* world-first: every line of it is on a card the tiles open */
+  if(sceneFirst()){ h += '</div>'; return h; }
   h += '<div class="card" style="margin-top:12px"><h3>Conditions</h3>';
   const L = b.lease||{};
   h += '<div class="kv"><span class="muted">Premises</span><span>'+fmt(Math.round(L.rent||0))+'/mo · '+(L.end>0? L.end+'q left on lease':'RENEWAL DUE')+'</span></div>';

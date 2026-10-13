@@ -22,7 +22,7 @@
     it is embedded, per the rule that a converted screen does not get its own
     opinion about what a bar looks like.
 */
-import { S, fmt, bar, BIZ_STAGES } from '@ledger/core';
+import { S, UI, fmt, bar, BIZ_STAGES, machineTilesHTML } from '@ledger/core';
 
 /* The four cards are exported separately as well as together.
 
@@ -81,6 +81,17 @@ export function LeversCard() {
      caught. `defaultValue` with a key on the company id gives the same result
      the string version had: initialised from state, owned by the DOM after
      that, and re-initialised when you switch company. */
+  /* world-first: the levers live where they act, and each is a tile here that
+     opens the same card; (i) brings the full card back */
+  if (!UI.details) {
+    return (
+      <div className="card" style={{ marginTop: '12px' }}>
+        <h3>Levers <span className="tag">take effect next quarter</span></h3>
+        <div className="facerow" dangerouslySetInnerHTML={{ __html: machineTilesHTML(b) }} />
+        <div className="tiny muted prose">Tap a tile, or the thing in the picture: the stock, the customers, yourself, the premises.</div>
+      </div>
+    );
+  }
   const k = b.id || b.type;
   const rev = Math.max(1, b.revenue || 0);
   const stock = b.stockPolicy === undefined ? 0.45 : b.stockPolicy;
@@ -198,7 +209,8 @@ export function PositionCard() {
 
 export function ConditionsCard() {
   const b = S.biz;
-  if (!b) return null;
+  /* world-first: every line of it is on a card the Levers tiles open */
+  if (!b || !UI.details) return null;
   const L = b.lease || {};
   const sConf = b.supplierConf === undefined ? 70 : b.supplierConf;
   return (
