@@ -471,7 +471,7 @@
    "36-moments.js: momentSceneSVG",
    "02-derived-state-personal-finance-career.js: bizValue",
    "27-the-pa-and-the-numbers.js: acctRow, delta",
-   "28-votes-and-decisions.js: covenantState"
+   "28-votes-and-decisions.js: covenantState, holdcoName"
   ],
   "externals": []
  }

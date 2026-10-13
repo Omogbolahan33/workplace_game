@@ -201,7 +201,8 @@ function leverGoto(focus, label){
 function leverRow(name, val, note, btn, flag, col){
   return '<div class="lrow" style="border-left-color:'+(col||'var(--line)')+'">'+
     '<div class="between"><b>'+name+'</b><span class="mono '+(flag||'')+'">'+val+'</span></div>'+
-    '<div class="tiny muted" style="margin:2px 0 6px">'+note+'</div>'+
+    /* the why, behind (i): the name, the figure and the move are the row */
+    '<div class="tiny muted prose" style="margin:2px 0 6px">'+note+'</div>'+
     (btn||'')+'</div>';
 }
 /* ---- 1. the dials ---- */
@@ -241,7 +242,7 @@ function leverColSet(b){
       leverGoto('Levers','Change'))
   ];
   return '<div class="card"><h3>Set each quarter <span class="tag">effective next quarter</span></h3>'+
-    '<div class="tiny muted" style="margin-bottom:10px">Dials. Every one of these you can turn tonight and turn back '+
+    '<div class="tiny muted prose" style="margin-bottom:10px">Dials. Every one of these you can turn tonight and turn back '+
     'tomorrow, which is exactly why none of them is where a business is won.</div>'+ rows.join('') +'</div>';
 }
 /* ---- 2. the commitments ---- */
@@ -250,7 +251,7 @@ function leverColCommit(b){
     (((b.commitments||[]).filter(function(c){ return c.status==='building'||c.status==='active'; }).length)
       ? ((b.commitments||[]).filter(function(c){ return c.status==='building'; }).length)+' in flight'
       : 'nothing on')+'</span></h3>';
-  h += '<div class="tiny muted" style="margin-bottom:10px">Lumpy, slow to arrive, and priced so that changing your '+
+  h += '<div class="tiny muted prose" style="margin-bottom:10px">Lumpy, slow to arrive, and priced so that changing your '+
     'mind hurts. You are buying a number you will be stuck with for quarters.</div>';
   /* world-first: what is in flight and each lever you can take on, as tiles
      that open their cards - the commit, the stand-down and the abandon are there */
@@ -328,7 +329,7 @@ function leverColNego(b){
     'A loan they did not agree to. Supplier confidence is '+Math.round(b.supplierConf===undefined?70:b.supplierConf)+'/100.',
     leverGoto('Working capital','Look'), 'warn', 'var(--warn)'));
   let h = '<div class="card"><h3>Negotiate <span class="tag">'+items.length+' open</span></h3>';
-  h += '<div class="tiny muted" style="margin-bottom:10px">These belong to somebody else as much as to you. '+
+  h += '<div class="tiny muted prose" style="margin-bottom:10px">These belong to somebody else as much as to you. '+
     'Nothing here is yours to set; all of it is yours to lose by not turning up.</div>';
   h += items.length ? items.join('')
     : '<div class="tiny muted">Nothing to settle this quarter. Enjoy it while it lasts.</div>';
@@ -372,7 +373,7 @@ function leverColReact(b){
     leverGoto('Team','Look'), 'bad', 'var(--bad)'));
   if(!items.length) return '';
   let h = '<div class="card"><h3>Cannot control <span class="tag">'+items.length+' biting</span></h3>';
-  h += '<div class="tiny muted" style="margin-bottom:10px">Not yours to set, and not yours to keep. '+
+  h += '<div class="tiny muted prose" style="margin-bottom:10px">Not yours to set, and not yours to keep. '+
     'This column appears when one of these starts costing you money and disappears when none of them is.</div>';
   return h + items.join('') + '</div>';
 }

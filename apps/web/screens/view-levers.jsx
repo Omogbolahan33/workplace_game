@@ -40,7 +40,8 @@ export default function ViewLevers() {
         <div dangerouslySetInnerHTML={{ __html: leverColNego(b) }} />
         {reactColumn ? <div dangerouslySetInnerHTML={{ __html: reactColumn }} /> : null}
       </div>
-      <div className="card" style={{ marginTop: '12px' }}>
+      {/* teaching, all of it: shown with the explanations (i) */}
+      <div className="card prose" style={{ marginTop: '12px' }}>
         <h3>How to read this screen</h3>
         <div className="tiny muted" style={{ lineHeight: '1.7' }}>
           One screen, four columns, sorted by how much it costs you to change your mind. The first

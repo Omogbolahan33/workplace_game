@@ -1,5 +1,5 @@
 
-import { ARMS_LENGTH, IC_RATE, WHT_RATE, _gcell, _glabel, clamp, ensureHoldco, entityName, esc, fmt, groupAccounts, groupCovenantStrip, groupCrossDefault, holdcoName, intercoOwed, intercoUpstream } from '@ledger/core';
+import { ARMS_LENGTH, IC_RATE, WHT_RATE, _gcell, _glabel, clamp, ensureHoldco, entityName, esc, fmt, groupAccounts, groupCashInner, groupCovenantStrip, groupCrossDefault, groupPLInner, holdcoName, intercoOwed, intercoUpstream, sceneFirst } from '@ledger/core';
 
 /* Generated from src/16-view-group.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
 export function viewGroup(){
@@ -29,7 +29,10 @@ export function viewGroup(){
         subs.map(function(r){ return _gcell(r[key], strong); }).join('')+
         _gcell(g[key], strong)+'</tr>';
     };
-    h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px">'+
+    /* world-first: the group's quarter as a waterfall, each company's share of it
+       - the table, which scrolls sideways on a phone, with the explanations shown */
+    if(sceneFirst()) h += '<div class="gpic">'+groupPLInner(g, subs)+'</div>';
+    else h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px">'+
       '<tr>'+_glabel('This quarter')+cols+'<th style="text-align:right;padding:4px 7px;border-left:1px solid var(--line2)">Group</th></tr>'+
       line('Revenue','rev')+
       line('Cost of sales','cogs')+
@@ -55,29 +58,34 @@ export function viewGroup(){
   h += '</div>';
 
   /* ---- where the cash and the debt actually sit ---- */
-  h += '<div class="card"><h3>Cash, debt and reserves</h3>'+
-    '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">'+
-    '<tr><td style="padding:4px 7px;color:var(--dim)">Entity</td>'+
-    '<td style="text-align:right;padding:4px 7px;color:var(--dim)">Cash</td>'+
-    '<td style="text-align:right;padding:4px 7px;color:var(--dim)">Debt</td>'+
-    '<td style="text-align:right;padding:4px 7px;color:var(--dim)">Reserves</td>'+
-    '<td style="text-align:right;padding:4px 7px;color:var(--dim)">Yours</td>'+
-    '<td style="text-align:right;padding:4px 7px;color:var(--dim)">Can pay up</td></tr>';
+  h += '<div class="card"><h3>Cash, debt and reserves</h3>';
+  /* world-first: each company as three bars to one scale, what is yours and
+     what it can pay up - the table, which hid its last column, with (i) */
+  if(sceneFirst()) h += '<div class="gpic">'+groupCashInner(g, subs)+'</div>';
+  else {
+    h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">'+
+      '<tr><td style="padding:4px 7px;color:var(--dim)">Entity</td>'+
+      '<td style="text-align:right;padding:4px 7px;color:var(--dim)">Cash</td>'+
+      '<td style="text-align:right;padding:4px 7px;color:var(--dim)">Debt</td>'+
+      '<td style="text-align:right;padding:4px 7px;color:var(--dim)">Reserves</td>'+
+      '<td style="text-align:right;padding:4px 7px;color:var(--dim)">Yours</td>'+
+      '<td style="text-align:right;padding:4px 7px;color:var(--dim)">Can pay up</td></tr>';
 
-  h += '<tr><td style="padding:4px 7px"><b>'+esc(holdcoName())+'</b></td>'+
-    _gcell(g.holdcoCash)+_gcell(g.holdcoDebt)+_gcell(g.holdcoRetained)+
-    '<td style="text-align:right;padding:4px 7px">100%</td><td style="text-align:right;padding:4px 7px;color:var(--dim2)">—</td></tr>';
+    h += '<tr><td style="padding:4px 7px"><b>'+esc(holdcoName())+'</b></td>'+
+      _gcell(g.holdcoCash)+_gcell(g.holdcoDebt)+_gcell(g.holdcoRetained)+
+      '<td style="text-align:right;padding:4px 7px">100%</td><td style="text-align:right;padding:4px 7px;color:var(--dim2)">—</td></tr>';
 
-  subs.forEach(function(r){
-    h += '<tr><td style="padding:4px 7px">'+esc(r.name)+'</td>'+
-      _gcell(r.cash)+_gcell(r.debt)+_gcell(r.retained)+
-      '<td style="text-align:right;padding:4px 7px">'+Math.round(r.own)+'%</td>'+
-      '<td style="text-align:right;padding:4px 7px;'+(r.cap>0?'color:var(--good)':'color:var(--dim2)')+'">'+(r.cap>0?fmt(r.cap):(r.note?'blocked':'—'))+'</td></tr>';
-  });
+    subs.forEach(function(r){
+      h += '<tr><td style="padding:4px 7px">'+esc(r.name)+'</td>'+
+        _gcell(r.cash)+_gcell(r.debt)+_gcell(r.retained)+
+        '<td style="text-align:right;padding:4px 7px">'+Math.round(r.own)+'%</td>'+
+        '<td style="text-align:right;padding:4px 7px;'+(r.cap>0?'color:var(--good)':'color:var(--dim2)')+'">'+(r.cap>0?fmt(r.cap):(r.note?'blocked':'—'))+'</td></tr>';
+    });
 
-  h += '<tr>'+_glabel('Group', true)+_gcell(g.groupCash, true)+_gcell(g.groupDebt, true)+_gcell(g.subRetained + g.holdcoRetained, true)+
-    '<td style="border-top:1px solid var(--line2)"></td><td style="border-top:1px solid var(--line2)"></td></tr>'+
-    '</table></div>';
+    h += '<tr>'+_glabel('Group', true)+_gcell(g.groupCash, true)+_gcell(g.groupDebt, true)+_gcell(g.subRetained + g.holdcoRetained, true)+
+      '<td style="border-top:1px solid var(--line2)"></td><td style="border-top:1px solid var(--line2)"></td></tr>'+
+      '</table></div>';
+  }
 
   h += '<div class="row wrap" style="gap:8px;margin-top:9px">'+
     '<span class="chip '+(g.netCash>=0?'g':'r')+'">'+(g.netCash>=0?'Net cash ':'Net debt ')+fmt(Math.abs(g.netCash))+'</span>'+

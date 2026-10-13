@@ -640,6 +640,31 @@ function companyMeterInner(b){
     ringsHTML([{ico: 'star', label: 'Reputation', v: b.rep || 0, text: Math.round(b.rep || 0) + '/100'}, {ico: 'seal', label: 'Your equity', v: b.equity || 0, text: (b.equity || 0) + '%', tone: 'var(--acc)'},
       {ico: 'shop', label: 'Locations', v: Math.min(100, (b.locations || 1) * 20), text: String(b.locations || 1), tone: 'var(--info)'}]);
 }
+/* The group's quarter as a waterfall and, with more than one company, how
+   much of it each one made; read from the consolidation */
+function groupPLInner(g, subs){
+  const pal = ['#5aa9ff', '#a78bfa', '#2fd47a', '#ff9f43', '#ff5f6d', '#8b9bb0'];
+  const tot = Math.max(1, subs.reduce(function(s, r){ return s + Math.max(0, r.rev || 0); }, 0));
+  return waterfallSVG([{t: 'Revenue', v: g.rev || 0, kind: 'total'}, {t: 'Costs', v: -(g.cogs || 0)}, {t: 'Overheads', v: -(g.opex || 0)}, {t: 'Deprec.', v: -(g.dep || 0)},
+      {t: 'Interest', v: -(g.int || 0)}, {t: 'Tax', v: -(g.tax || 0)}, {t: 'Net', v: g.net || 0, kind: 'total'}], 'The group this quarter') +
+    (subs.length > 1 ? '<div class="tiny muted" style="margin-top:6px">Revenue, by company</div><span class="gfx wfall" role="img" aria-label="' + esc(subs.map(function(r){ return r.name + ' ' + fmt(r.rev || 0); }).join(', ')) + '">' +
+      subs.map(function(r, i){ return '<i style="width:' + (Math.max(0, r.rev || 0) / tot * 100).toFixed(1) + '%;background:' + pal[i % pal.length] + '" title="' + esc(r.name + ' ' + fmt(r.rev || 0)) + '"></i>'; }).join('') + '</span>' +
+      '<div class="row wrap" style="gap:5px">' + subs.map(function(r, i){ return '<span class="chip"><i class="dot" style="background:' + pal[i % pal.length] + '"></i>' + esc(r.name) + ' · net <span class="' + ((r.net || 0) >= 0 ? 'good' : 'bad') + '">' + fmt(r.net || 0) + '</span></span>'; }).join('') + '</div>' : '');
+}
+/* Where the cash, the debt and the reserves sit: each company as three bars
+   to one scale, what you own of it, and what it can pay up to you */
+function groupCashInner(g, subs){
+  const ents = [{name: holdcoName(), cash: g.holdcoCash, debt: g.holdcoDebt, res: g.holdcoRetained, own: 100, cap: null, note: '', you: true}]
+    .concat(subs.map(function(r){ return {name: r.name, cash: r.cash, debt: r.debt, res: r.retained, own: r.own, cap: r.cap, note: r.note}; }));
+  const top = Math.max(1, Math.max.apply(null, ents.map(function(e){ return Math.max(Math.abs(e.cash || 0), Math.abs(e.debt || 0), Math.abs(e.res || 0)); })));
+  /* a negative figure - accumulated losses where reserves should be - is drawn red, not as a smaller good */
+  const line = function(label, v, col){ return '<div class="gline"><span>' + label + '</span><span class="gfx gtrack"><i style="width:' + (Math.min(100, Math.abs(v || 0) / top * 100)).toFixed(1) + '%;background:' + ((v || 0) < 0 ? '#ff5f6d' : col) + '"></i></span><b' + ((v || 0) < 0 ? ' class="bad"' : '') + '>' + fmt(Math.round(v || 0)) + '</b></div>'; };
+  return ents.map(function(e){
+    return '<div class="gent"><div class="between"><b>' + esc(e.name) + '</b><span class="row" style="gap:4px">' + (e.you ? '' : '<span class="chip">' + Math.round(e.own) + '% yours</span>') +
+        (e.cap === null ? '' : e.cap > 0 ? '<span class="chip g">can pay up ' + fmt(e.cap) + '</span>' : e.note ? '<span class="chip r">blocked</span>' : '') + '</span></div>' +
+      line('cash', e.cash, '#2fd47a') + line('debt', e.debt, '#ff5f6d') + line('reserves', e.res, '#f5b301') + '</div>';
+  }).join('');
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){

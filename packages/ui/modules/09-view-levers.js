@@ -11,7 +11,8 @@ export function viewLevers(){
     'The dials, the commitments, the negotiations and the things you cannot control all belong to a business you do not have.</div></div>';
   const react = leverColReact(b);
   return '<div class="levers">'+ leverColSet(b) + leverColCommit(b) + leverColNego(b) + (react||'') +'</div>'+
-    '<div class="card" style="margin-top:12px"><h3>How to read this screen</h3>'+
+    /* teaching, all of it: shown with the explanations (i) */
+    '<div class="card prose" style="margin-top:12px"><h3>How to read this screen</h3>'+
     '<div class="tiny muted" style="line-height:1.7">One screen, four columns, sorted by how much it costs you to change your mind. '+
     'The first column you can turn tonight and turn back tomorrow, which is why it is not where any business is won. '+
     'The second you are stuck with for quarters, and getting out costs more than staying in ever felt like — that is the column that decides things. '+

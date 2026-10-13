@@ -622,3 +622,21 @@ test('the business draws its cash cycle, its position and its demand', async () 
   assert.match(meter, new RegExp('sold ' + Math.round(b.units))); assert.match(meter, new RegExp('can make ' + Math.round(b.capacity))); assert.match(meter, new RegExp('wanted ' + Math.round(b.demand)));
   assert.equal(JSON.stringify(C.S), before, 'drawing the business changed the run');
 });
+
+test('the group is a waterfall and three bars per company; a loss where reserves should be is red', async () => {
+  const C = await world();
+  C.S.fin.cash = 60000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  for (let i = 0; i < 2; i++) playQuarter(C);
+  C.startBiz('retail', 'Ade Stores', 5000000, null);
+  for (let i = 0; i < 2; i++) playQuarter(C);
+  const g = C.groupAccounts(), before = JSON.stringify(C.S);
+  const pl = C.groupPLInner(g, g.rows);
+  assert.match(pl, /class="gfx wfchart"/); assert.match(pl, /Revenue, by company/);
+  for (const r of g.rows) assert.ok(pl.includes(C.esc(r.name)), r.name + ' is missing from the group picture');
+  const cash = C.groupCashInner(g, g.rows);
+  assert.equal((cash.match(/class="gent"/g) || []).length, g.rows.length + 1, 'every entity, the holdco included, is a row of bars');
+  g.rows[0].retained = -1000000;
+  assert.match(C.groupCashInner(g, g.rows), /background:#ff5f6d"><\/i><\/span><b class="bad">/);
+  assert.equal(JSON.stringify(C.S), before, 'drawing the group changed the run');
+});

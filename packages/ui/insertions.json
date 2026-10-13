@@ -79,7 +79,7 @@
    2081,
    4131,
    5027,
-   7386
+   7392
   ]
  },
  "ui/src/05-view-dash.js": {
@@ -127,12 +127,12 @@
   "importLen": 690,
   "exports": [
    691,
-   1949,
-   5658,
-   8757,
-   11377,
-   19015,
-   24848
+   2018,
+   5727,
+   8826,
+   11446,
+   19084,
+   24917
   ]
  },
  "ui/src/10-view-household.js": {
@@ -195,9 +195,9 @@
  },
  "ui/src/16-view-group.js": {
   "importAt": 1,
-  "importLen": 327,
+  "importLen": 369,
   "exports": [
-   328
+   370
   ]
  },
  "ui/src/17-actions.js": {

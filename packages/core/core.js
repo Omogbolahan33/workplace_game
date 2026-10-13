@@ -7125,7 +7125,8 @@ function leverGoto(focus, label){
 function leverRow(name, val, note, btn, flag, col){
   return '<div class="lrow" style="border-left-color:'+(col||'var(--line)')+'">'+
     '<div class="between"><b>'+name+'</b><span class="mono '+(flag||'')+'">'+val+'</span></div>'+
-    '<div class="tiny muted" style="margin:2px 0 6px">'+note+'</div>'+
+    /* the why, behind (i): the name, the figure and the move are the row */
+    '<div class="tiny muted prose" style="margin:2px 0 6px">'+note+'</div>'+
     (btn||'')+'</div>';
 }
 /* ---- 1. the dials ---- */
@@ -7165,7 +7166,7 @@ function leverColSet(b){
       leverGoto('Levers','Change'))
   ];
   return '<div class="card"><h3>Set each quarter <span class="tag">effective next quarter</span></h3>'+
-    '<div class="tiny muted" style="margin-bottom:10px">Dials. Every one of these you can turn tonight and turn back '+
+    '<div class="tiny muted prose" style="margin-bottom:10px">Dials. Every one of these you can turn tonight and turn back '+
     'tomorrow, which is exactly why none of them is where a business is won.</div>'+ rows.join('') +'</div>';
 }
 /* ---- 2. the commitments ---- */
@@ -7174,7 +7175,7 @@ function leverColCommit(b){
     (((b.commitments||[]).filter(function(c){ return c.status==='building'||c.status==='active'; }).length)
       ? ((b.commitments||[]).filter(function(c){ return c.status==='building'; }).length)+' in flight'
       : 'nothing on')+'</span></h3>';
-  h += '<div class="tiny muted" style="margin-bottom:10px">Lumpy, slow to arrive, and priced so that changing your '+
+  h += '<div class="tiny muted prose" style="margin-bottom:10px">Lumpy, slow to arrive, and priced so that changing your '+
     'mind hurts. You are buying a number you will be stuck with for quarters.</div>';
   /* world-first: what is in flight and each lever you can take on, as tiles
      that open their cards - the commit, the stand-down and the abandon are there */
@@ -7252,7 +7253,7 @@ function leverColNego(b){
     'A loan they did not agree to. Supplier confidence is '+Math.round(b.supplierConf===undefined?70:b.supplierConf)+'/100.',
     leverGoto('Working capital','Look'), 'warn', 'var(--warn)'));
   let h = '<div class="card"><h3>Negotiate <span class="tag">'+items.length+' open</span></h3>';
-  h += '<div class="tiny muted" style="margin-bottom:10px">These belong to somebody else as much as to you. '+
+  h += '<div class="tiny muted prose" style="margin-bottom:10px">These belong to somebody else as much as to you. '+
     'Nothing here is yours to set; all of it is yours to lose by not turning up.</div>';
   h += items.length ? items.join('')
     : '<div class="tiny muted">Nothing to settle this quarter. Enjoy it while it lasts.</div>';
@@ -7296,7 +7297,7 @@ function leverColReact(b){
     leverGoto('Team','Look'), 'bad', 'var(--bad)'));
   if(!items.length) return '';
   let h = '<div class="card"><h3>Cannot control <span class="tag">'+items.length+' biting</span></h3>';
-  h += '<div class="tiny muted" style="margin-bottom:10px">Not yours to set, and not yours to keep. '+
+  h += '<div class="tiny muted prose" style="margin-bottom:10px">Not yours to set, and not yours to keep. '+
     'This column appears when one of these starts costing you money and disappears when none of them is.</div>';
   return h + items.join('') + '</div>';
 }
@@ -15019,6 +15020,31 @@ function companyMeterInner(b){
     ringsHTML([{ico: 'star', label: 'Reputation', v: b.rep || 0, text: Math.round(b.rep || 0) + '/100'}, {ico: 'seal', label: 'Your equity', v: b.equity || 0, text: (b.equity || 0) + '%', tone: 'var(--acc)'},
       {ico: 'shop', label: 'Locations', v: Math.min(100, (b.locations || 1) * 20), text: String(b.locations || 1), tone: 'var(--info)'}]);
 }
+/* The group's quarter as a waterfall and, with more than one company, how
+   much of it each one made; read from the consolidation */
+function groupPLInner(g, subs){
+  const pal = ['#5aa9ff', '#a78bfa', '#2fd47a', '#ff9f43', '#ff5f6d', '#8b9bb0'];
+  const tot = Math.max(1, subs.reduce(function(s, r){ return s + Math.max(0, r.rev || 0); }, 0));
+  return waterfallSVG([{t: 'Revenue', v: g.rev || 0, kind: 'total'}, {t: 'Costs', v: -(g.cogs || 0)}, {t: 'Overheads', v: -(g.opex || 0)}, {t: 'Deprec.', v: -(g.dep || 0)},
+      {t: 'Interest', v: -(g.int || 0)}, {t: 'Tax', v: -(g.tax || 0)}, {t: 'Net', v: g.net || 0, kind: 'total'}], 'The group this quarter') +
+    (subs.length > 1 ? '<div class="tiny muted" style="margin-top:6px">Revenue, by company</div><span class="gfx wfall" role="img" aria-label="' + esc(subs.map(function(r){ return r.name + ' ' + fmt(r.rev || 0); }).join(', ')) + '">' +
+      subs.map(function(r, i){ return '<i style="width:' + (Math.max(0, r.rev || 0) / tot * 100).toFixed(1) + '%;background:' + pal[i % pal.length] + '" title="' + esc(r.name + ' ' + fmt(r.rev || 0)) + '"></i>'; }).join('') + '</span>' +
+      '<div class="row wrap" style="gap:5px">' + subs.map(function(r, i){ return '<span class="chip"><i class="dot" style="background:' + pal[i % pal.length] + '"></i>' + esc(r.name) + ' · net <span class="' + ((r.net || 0) >= 0 ? 'good' : 'bad') + '">' + fmt(r.net || 0) + '</span></span>'; }).join('') + '</div>' : '');
+}
+/* Where the cash, the debt and the reserves sit: each company as three bars
+   to one scale, what you own of it, and what it can pay up to you */
+function groupCashInner(g, subs){
+  const ents = [{name: holdcoName(), cash: g.holdcoCash, debt: g.holdcoDebt, res: g.holdcoRetained, own: 100, cap: null, note: '', you: true}]
+    .concat(subs.map(function(r){ return {name: r.name, cash: r.cash, debt: r.debt, res: r.retained, own: r.own, cap: r.cap, note: r.note}; }));
+  const top = Math.max(1, Math.max.apply(null, ents.map(function(e){ return Math.max(Math.abs(e.cash || 0), Math.abs(e.debt || 0), Math.abs(e.res || 0)); })));
+  /* a negative figure - accumulated losses where reserves should be - is drawn red, not as a smaller good */
+  const line = function(label, v, col){ return '<div class="gline"><span>' + label + '</span><span class="gfx gtrack"><i style="width:' + (Math.min(100, Math.abs(v || 0) / top * 100)).toFixed(1) + '%;background:' + ((v || 0) < 0 ? '#ff5f6d' : col) + '"></i></span><b' + ((v || 0) < 0 ? ' class="bad"' : '') + '>' + fmt(Math.round(v || 0)) + '</b></div>'; };
+  return ents.map(function(e){
+    return '<div class="gent"><div class="between"><b>' + esc(e.name) + '</b><span class="row" style="gap:4px">' + (e.you ? '' : '<span class="chip">' + Math.round(e.own) + '% yours</span>') +
+        (e.cap === null ? '' : e.cap > 0 ? '<span class="chip g">can pay up ' + fmt(e.cap) + '</span>' : e.note ? '<span class="chip r">blocked</span>' : '') + '</span></div>' +
+      line('cash', e.cash, '#2fd47a') + line('debt', e.debt, '#ff5f6d') + line('reserves', e.res, '#f5b301') + '</div>';
+  }).join('');
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){
@@ -15182,7 +15208,7 @@ function hotModal(M){
 }
 
 /* -------------------------------------------------------------------------
-   Everything above, exported. 770 names: the simulation's whole surface.
+   Everything above, exported. 772 names: the simulation's whole surface.
    ------------------------------------------------------------------------- */
 export {
   ALL_EVENTS,
@@ -15550,10 +15576,12 @@ export {
   grantPct,
   groupAccounts,
   groupBreaches,
+  groupCashInner,
   groupCovenantStrip,
   groupCrossDefault,
   groupLevel,
   groupOn,
+  groupPLInner,
   groupRoute,
   groupSubs,
   growthBill,

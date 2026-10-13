@@ -39,7 +39,7 @@ import Group from './group.jsx';
 import {
   S, fmt, esc, clamp, _gcell, _glabel, groupAccounts, holdcoName, entityName,
   intercoOwed, intercoUpstream, groupCovenantStrip, groupCrossDefault,
-  WHT_RATE, IC_RATE, ARMS_LENGTH
+  WHT_RATE, IC_RATE, ARMS_LENGTH, UI, groupPLInner, groupCashInner
 } from '@ledger/core';
 
 /* ---- the consolidation table, built the way core builds it -------------- */
@@ -112,10 +112,13 @@ function HoldcoCard({ g, subs }) {
 
       {subs.length ? (
         <>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginTop: '4px' }}
-              dangerouslySetInnerHTML={{ __html: plRows(g, subs) }} />
-          </div>
+          {/* world-first: the group's quarter as a waterfall, each company's share of it */}
+          {!UI.details ? <div className="gpic" dangerouslySetInnerHTML={{ __html: groupPLInner(g, subs) }} /> : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginTop: '4px' }}
+                dangerouslySetInnerHTML={{ __html: plRows(g, subs) }} />
+            </div>
+          )}
 
           <div className="row wrap" style={{ gap: '14px', marginTop: '9px' }}>
             <span className="tiny muted">
@@ -147,10 +150,13 @@ function CashDebtCard({ g, subs }) {
   return (
     <div className="card">
       <h3>Cash, debt and reserves</h3>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}
-          dangerouslySetInnerHTML={{ __html: balanceRows(g, subs) }} />
-      </div>
+      {/* world-first: each company as three bars to one scale, what is yours and what it can pay up */}
+      {!UI.details ? <div className="gpic" dangerouslySetInnerHTML={{ __html: groupCashInner(g, subs) }} /> : (
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}
+            dangerouslySetInnerHTML={{ __html: balanceRows(g, subs) }} />
+        </div>
+      )}
 
       <div className="row wrap" style={{ gap: '8px', marginTop: '9px' }}>
         <span className={'chip ' + (g.netCash >= 0 ? 'g' : 'r')}>
