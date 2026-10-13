@@ -398,6 +398,8 @@ function worldHTML(){
   return '<div class="world home" id="world">'+
     '<div class="world-stage">'+sceneSVG(UI.sceneVH)+'</div>'+
     worldHUD()+
+    /* until a player has tapped the scene once, it says it can be tapped */
+    (S.flags && S.flags.tapped ? '' : '<div class="taphint" aria-hidden="true">Tap anything in the picture</div>')+
     '<div class="world-cap">'+esc(CITY().label)+' \u00b7 '+esc(dateLabel(S.turn))+(era ? ' \u00b7 '+esc(era.name) : '')+'</div>'+
     '</div>';
 }

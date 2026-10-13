@@ -37,6 +37,8 @@ export const ACT = {
       if(t === 'governance') UI.govSub = UI.sub;
     }
     if(e.dataset.b) setActiveBiz(e.dataset.b);
+    /* a tap on the scene: it has been found, the hint can go */
+    if(S && e.closest && e.closest('#scene')) S.flags.tapped = 1;
     UI.focus = e.dataset.f || '';
     UI.modal = null; UI.scrollTop = !UI.focus; render();
   },
@@ -347,7 +349,7 @@ export const ACT = {
      screen keeps the prose one tap off, never deleted */
   details:   e=>{ UI.details = !UI.details; render(); },
   /* a tap on the scene: the card for a person, or for you (VISUAL.md, M11) */
-  hot:       e=>{ UI.modal = {type:'hot', kind:e.dataset.k || 'you', id:e.dataset.c || ''}; render(); },
+  hot:       e=>{ S.flags.tapped = 1; UI.modal = {type:'hot', kind:e.dataset.k || 'you', id:e.dataset.c || ''}; render(); },
   /* the deal is the date's, so pressing it twice deals the same life twice */
   dealtoday: e=>{ _cfg.dealt = todaysLife(); UI.modal = {type:'start'}; render(); },
   undeal:    e=>{ _cfg.dealt = null; UI.modal = {type:'start'}; render(); },

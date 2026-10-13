@@ -329,3 +329,22 @@ test('the scene is a place you can tap: every place is an ordinary control', asy
   assert.match(C.worldHTML(), /<g pointer-events="none">/);
   C.UI.tab = 'overview'; C.UI.sub = '';
 });
+
+test('your staff are at their stations, and each opens their own card', async () => {
+  const C = await world();
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  for (let i = 0; i < 3; i++) C.S.biz.staff.push({ id: 'st' + i, name: 'Staff ' + i, role: 'ops', skill: 5, salary: 90000, morale: 60, trait: null, joined: 0 });
+  C.UI.tab = 'work'; C.UI.sub = 'business';
+  const html = C.worldHTML();
+  const ids = [...html.matchAll(/data-k="staff" data-c="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(ids, ['st0', 'st1', 'st2'], 'not every member of staff can be tapped');
+  const card = C.hotModal({ type: 'hot', kind: 'staff', id: 'st1' });
+  assert.match(card, /data-a="raise" data-i="st1"/); assert.match(card, /data-a="fire" data-i="st1"/);
+  assert.doesNotMatch(card, /· ·/, 'an empty trait left a stray separator');
+  /* until the scene has been tapped once, it says it can be */
+  assert.match(html, /class="taphint"/);
+  C.S.flags.tapped = 1;
+  assert.doesNotMatch(C.worldHTML(), /class="taphint"/);
+  C.UI.tab = 'overview'; C.UI.sub = '';
+});

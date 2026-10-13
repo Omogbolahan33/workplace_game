@@ -901,6 +901,9 @@ const EDITS = [
   { marker: "document.addEventListener('keydown'",
     name: 'keydown — Enter and Space press a place in the scene',
     why: 'a place you can tap is a control without being a <button>; with focus on it, Enter and Space press it as they press a button. Escape is unchanged' },
+  { marker: 'const ACT',
+    name: 'the action table — the scene can be tapped',
+    why: 'hot opens the card a tap on the scene asks for; a tap on the scene, by hot or by goto from inside #scene, marks it found (S.flags.tapped) so the hint goes' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

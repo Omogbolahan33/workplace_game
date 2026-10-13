@@ -66,7 +66,7 @@ function workLook(mode){
   /* capacity is set when a quarter runs; a company that has not had one yet is asked directly */
   const staff = (b.staff || []).length, cap = Math.max(1, b.capacity || bizCapacity(b) || 1);
   const busy = Math.max(0, Math.min(1, (b.units || 0) / cap));
-  return Object.assign(base, {kind: place, type: b.type, stage: stage, name: b.name || 'Your company',
+  return Object.assign(base, {kind: place, type: b.type, stage: stage, name: b.name || 'Your company', staffIds: (b.staff || []).map(function(x){ return x.id; }),
     staff: staff, customers: Math.round(busy * 6), branches: Math.max(0, Math.min(4, (b.locations || 1) - 1)),
     shifts: typeof leverActive === 'function' ? leverActive(b, 'shifts') : false,
     broke: (b.cash || 0) < 0, decline: stage === 'decline', seed: 37 + (b.type || '').length * 5,
@@ -108,7 +108,15 @@ function workSceneSVG(st, vh){
     '<path d="M72 18 v-28 h16 l10 14 v14z" fill="' + shade('#d98c1f', dayK) + '"/><path d="M76 -6 h11 l6 9 h-17z" fill="' + url('glassD') + '"/>' +
     [12, 58, 88].map((cx) => '<circle cx="' + cx + '" cy="22" r="7" fill="#151515"/><circle cx="' + cx + '" cy="22" r="3" fill="#999"/>').join('') + '</g>';
   /* the people: staff in the company's colour, customers in their own */
-  const staffAt = (pts) => pts.slice(0, Math.min(pts.length, st.staff || 0)).forEach((q, i) => add(person(q[0], q[1], {shirt: brand, skin: ['#6b4a32', '#5a3b27', '#7d573b', '#4a3020'][i % 4], scale: q[2] || 1})));
+  /* where each member of staff stands, in the scene's own space (after the
+     zoom), so a tap on them can open their card */
+  st.spots = [];
+  const zoomed = (x, y) => st.kind === 'tower' ? [x, y] : [195 + (x - 195) * 1.22, groundY + (y - groundY) * 1.22];
+  const staffAt = (pts) => pts.slice(0, Math.min(pts.length, st.staff || 0)).forEach((q, i) => {
+    add(person(q[0], q[1], {shirt: brand, skin: ['#6b4a32', '#5a3b27', '#7d573b', '#4a3020'][i % 4], scale: q[2] || 1}));
+    const z = st.kind === 'tower' ? 1 : 1.22, at = zoomed(q[0], q[1]), sc = (q[2] || 1) * z;
+    if ((st.staffIds || [])[i]) st.spots.push({id: st.staffIds[i], x: at[0] - 10 * sc, y: at[1] - 46 * sc, w: 20 * sc, h: 48 * sc});
+  });
   const customersAt = (pts) => pts.slice(0, Math.min(pts.length, st.decline ? Math.min(1, st.customers) : st.customers || 0)).forEach((q, i) =>
     add(person(q[0], q[1], {shirt: ['#e7b931', '#3a7fcf', '#d64a3a', '#2fae6a', '#8e5bd1', '#f08a24'][i % 6], dress: i % 3 === 1, gele: i % 3 === 1 ? '#d4a017' : null, skin: ['#5a3b27', '#7d573b', '#4a3020'][i % 3], scale: q[2] || 1})));
   /* branches: the same sign, further down the street */
