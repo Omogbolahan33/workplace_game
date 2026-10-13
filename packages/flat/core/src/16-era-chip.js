@@ -56,13 +56,20 @@ function eraChipHTML(){
 function threadStrip(){
   const ts = (S.threads||[]).filter(function(t){ return ARCS[t.arc]; });
   if(!ts.length) return '';
+  /* An arc's name is its title; its stages are the functions that write the
+     next beat, so they have no title or text to show and must not be called
+     here. This read st.title || A.name off a function and an arc that has no
+     name, and every open story showed as a blank line. Now: who it is with, as
+     their face (which opens their card), the arc's title, and how far along. */
   return '<div class="card"><h3>Open stories</h3>'+ts.map(function(t){
-    const A = ARCS[t.arc]; const st = A.stages[t.stage] || A.stages[0];
+    const A = ARCS[t.arc], n = A.stages.length, at = Math.min(n, (t.stage||0) + 1);
     const c = t.castId ? castOf(t.castId) : null;
-    return '<div style="border-left:2px solid var(--acc);padding:2px 0 2px 10px;margin-bottom:9px">'+
-      '<div class="between"><b style="font-size:13.5px">'+esc(st.title || A.name)+'</b>'+
+    return '<div class="story">'+
+      (c ? '<button class="facebtn" data-a="hot" data-k="person" data-c="'+esc(c.id)+'" aria-label="'+esc(c.name+', '+A.title)+'">'+castFaceHTML(c)+'</button>' : '')+
+      '<div class="storyb"><div class="between"><b>'+esc(A.title)+'</b>'+
       '<span class="tiny muted">'+(t.next>S.turn ? 'next beat in '+(t.next-S.turn)+'q' : 'waiting on you')+'</span></div>'+
-      '<div class="tiny muted" style="margin-top:3px">'+esc(st.text? String(st.text).slice(0,150) : '')+(c? ' · '+esc(c.name):'')+'</div></div>';
+      '<div class="tiny muted">'+(c ? 'with '+esc(c.name)+' \u00b7 ' : '')+'part '+at+' of '+n+'</div>'+
+      '<span class="gfx storydots">'+A.stages.map(function(_, i){ return '<i class="'+(i < at ? 'on' : '')+'"></i>'; }).join('')+'</span></div></div>';
   }).join('')+foldHTML('About these', 'These continue whether you engage with them or not.')+'</div>';
 }
 

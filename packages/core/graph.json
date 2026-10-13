@@ -85,6 +85,7 @@
    "01-game-state.js: D, S, TX, UI, stepMarket",
    "02-derived-state-personal-finance-career.js: bizValue, budgetMonthly, debtTotal, freedomIndex, hoursLeft, log, netWorth, recompute, stepPersonal, tx",
    "00-cities.js: START_YEAR, clamp, dateLabel, esc, fmt",
+   "41-tap-the-scene.js: sceneFirst",
    "37-what-comes-back.js: roadAheadSVG",
    "05-investments-goods.js: applyEff, flushPending, stepAssets",
    "08-events-reactive-to-people.js: ALL_EVENTS",
@@ -180,7 +181,7 @@
    "01-game-state.js: S, UI",
    "30-eras-you-live-through.js: eraById",
    "00-cities.js: dateLabel, esc, foldHTML",
-   "29-the-cast-who-remembers.js: castOf"
+   "29-the-cast-who-remembers.js: castFaceHTML, castOf"
   ],
   "externals": []
  },

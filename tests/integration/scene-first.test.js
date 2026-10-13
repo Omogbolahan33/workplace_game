@@ -251,3 +251,20 @@ test('the business screen draws working capital, position and demand; (i) brings
   assert.match(C.viewBiz(), /Demand at current price/);
   C.UI.details = false;
 });
+
+test('world-first, Coming back to you is the road alone, Life is gauges and Cash & debt one bar; (i) brings the rows back', async () => {
+  stubDOM();
+  const C = await core();
+  (await ui()).install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.pending.push({ turn: C.S.turn + 2, title: 'The loan comes due', text: 'x', kind: 'bad', eff: {} });
+  C.UI.details = false;
+  assert.doesNotMatch(C.comingBackHTML(), /<h3>Coming back to you<\/h3>/, 'the list repeats the road');
+  assert.ok(C.viewLife().includes(C.lifeInner(C.S.p)));
+  assert.ok(C.viewMoneyPosition().includes(C.worthInner()));
+  C.UI.details = true;
+  assert.match(C.comingBackHTML(), /<h3>Coming back to you<\/h3>/);
+  assert.match(C.viewLife(), /Dependants cost multiplier/);
+  assert.match(C.viewMoneyPosition(), /Possessions \(resale\)/);
+  C.UI.details = false;
+});

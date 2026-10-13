@@ -2,7 +2,9 @@
 
 function viewMoneyPosition(){
   let h = positionStrip();
-  h += '<div class="card" style="margin-top:12px"><h3>Cash &amp; debt</h3>'+
+  /* world-first: what you are worth as one bar of its parts, what you owe under it */
+  if(sceneFirst()) h += '<div class="card" style="margin-top:12px"><h3>Cash &amp; debt</h3><div class="worthpic">'+worthInner()+'</div></div>';
+  else h += '<div class="card" style="margin-top:12px"><h3>Cash &amp; debt</h3>'+
     '<div class="kv"><span class="muted">Cash</span><span>'+fmt(S.fin.cash)+'</span></div>'+
     '<div class="kv"><span class="muted">Hard currency</span><span>'+fmt(S.fin.usdCash*S.mkt.usd)+' ($'+Math.round(S.fin.usdCash).toLocaleString()+')</span></div>'+
     '<div class="kv"><span class="muted">Invested</span><span>'+fmt(S.der.assets)+'</span></div>'+
@@ -419,7 +421,9 @@ function viewCareer(){
 function viewLife(){
   const p = S.p, nd = needs();
   let h = '<div class="grid g2"><div>';
-  h += '<div class="card"><h3>Your life</h3>'+
+  /* world-first: the facts as icons, the four that move as gauges */
+  if(sceneFirst()) h += '<div class="card"><h3>Your life</h3><div class="lifepic">'+lifeInner(p)+'</div></div>';
+  else h += '<div class="card"><h3>Your life</h3>'+
     '<div class="kv"><span class="muted">Age</span><span>'+p.age+'</span></div>'+
     '<div class="kv"><span class="muted">Education</span><span>'+esc(p.edu)+'</span></div>'+
     '<div class="kv"><span class="muted">Relationship</span><span>'+(p.married?('Married'+(p.partner?' to '+esc(p.partner.name):'')):'Single')+'</span></div>'+

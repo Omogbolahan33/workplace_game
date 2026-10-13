@@ -79,7 +79,11 @@ function comingBackHTML(){
   if(!items.length) return '';
   /* the road ahead as a picture first, outside the card so it is never folded
      away: late consequences are the game, and they should always be in sight */
-  return '<div class="roadwrap">'+roadAheadSVG(items)+'</div>'+
+  /* each thing on the road opens what it is, where it came from and when;
+     world-first, that is the whole of it - the list repeats the road, and
+     shows with the explanations (i) */
+  if(sceneFirst()) return '<div class="roadwrap">'+roadAheadSVG(items, true)+'</div>';
+  return '<div class="roadwrap">'+roadAheadSVG(items, true)+'</div>'+
     '<div class="card" style="margin-bottom:12px"><h3>Coming back to you</h3>'+
     items.slice(0, 6).map(function(i){
       const q = i.turn - S.turn;

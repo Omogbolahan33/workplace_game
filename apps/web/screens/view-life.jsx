@@ -27,11 +27,20 @@
   row would drift). The `.kv` rows are ordinary elements, so they are ordinary
   JSX.
 */
-import { S, esc, fmt, statRow, needs, D, PRINCIPLES } from '@ledger/core';
+import { S, UI, esc, fmt, statRow, needs, D, PRINCIPLES, lifeInner } from '@ledger/core';
 import Group from './group.jsx';
 
 function YourLife() {
   const p = S.p;
+  /* world-first: the facts as icons, the four that move as gauges */
+  if (!UI.details) {
+    return (
+      <div className="card">
+        <h3>Your life</h3>
+        <div className="lifepic" dangerouslySetInnerHTML={{ __html: lifeInner(p) }} />
+      </div>
+    );
+  }
   return (
     <div className="card">
       <h3>Your life</h3>

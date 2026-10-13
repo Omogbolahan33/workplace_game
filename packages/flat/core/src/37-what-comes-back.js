@@ -38,7 +38,9 @@ function arrivalsLayer(items){
 }
 /* the road ahead, for the card: this quarter to eight from now, and each thing
    coming back at its quarter */
-function roadAheadSVG(items){
+/* tap: each marker is a control that opens what is coming (the card inside
+   one shows the road without them) */
+function roadAheadSVG(items, tap){
   const W = 390, H = 74, x0 = 22, x1 = 368, step = (x1 - x0) / ROAD_QUARTERS, at = {};
   let s = '<svg class="gfx road" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(items.length + ' thing' + (items.length === 1 ? '' : 's') + ' coming back to you over the next ' + ROAD_QUARTERS + ' quarters') + '">' +
     '<text x="' + x0 + '" y="12" font-family="sans-serif" font-size="10" font-weight="700" letter-spacing=".08em" fill="#8b9bb0">COMING BACK TO YOU</text>';
@@ -49,11 +51,12 @@ function roadAheadSVG(items){
     if (q === 0 || q === 4 || q === ROAD_QUARTERS) s += '<text x="' + x.toFixed(1) + '" y="66" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#8b9bb0">' + (q === 0 ? 'now' : '+' + q + 'q') + '</text>';
   }
   s += '<circle cx="' + x0 + '" cy="44" r="6" fill="#f5b301"/>';   // you are here
-  items.forEach(function(it){
+  items.forEach(function(it, i){
     const q = Math.max(0, Math.min(ROAD_QUARTERS, it.turn - S.turn)), n = at[q] = (at[q] || 0) + 1;
     if (n > 3) return;
     const x = x0 + q * step, y = 32 - (n - 1) * 11;
-    s += '<g><title>' + esc(dateLabel(it.turn) + ': ' + it.title) + '</title>' +
+    s += '<g' + (tap ? ' class="hot" data-a="hot" data-k="coming" data-c="' + i + '" role="button" tabindex="0" aria-label="' + esc(dateLabel(it.turn) + ': ' + it.title) + '"' : '') + '><title>' + esc(dateLabel(it.turn) + ': ' + it.title) + '</title>' +
+      (tap ? '<circle cx="' + x.toFixed(1) + '" cy="' + y + '" r="12" fill="#fff" fill-opacity="0"/>' : '') +
       '<path d="M' + x.toFixed(1) + ' ' + (y + 6) + ' V40" stroke="' + arrivalTone(it.kind) + '" stroke-width="1.4" opacity=".7"/>' +
       '<circle cx="' + x.toFixed(1) + '" cy="' + y + '" r="6.5" fill="#0b1017" stroke="' + arrivalTone(it.kind) + '" stroke-width="2"/>' +
       (it.kind === 'good' ? '<path d="M' + (x - 3).toFixed(1) + ' ' + (y + 1) + 'l2 2 l4 -5" stroke="' + arrivalTone(it.kind) + '" stroke-width="1.6" fill="none"/>'

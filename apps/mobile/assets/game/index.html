@@ -677,6 +677,17 @@ body.terse .prose{display:none}
 .gline b{color:var(--txt);font-weight:600;font-size:12px}
 .gtrack{display:block;height:9px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden}
 .gtrack i{display:block;height:100%;border-radius:5px}
+.lfact{display:inline-flex;align-items:center;gap:5px}
+.lfact .gfx{color:var(--acc);font-size:14px;display:inline-grid}
+.debtbar{margin-top:-2px}
+.story{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.story .facebtn{width:auto;padding:0;flex:none}
+.story .facebtn .cface{width:48px;height:48px}
+.storyb{flex:1;min-width:0}
+.storyb b{font-size:13.5px}
+.storydots{display:flex;gap:4px;margin-top:5px}
+.storydots i{display:block;width:16px;height:5px;border-radius:3px;background:rgba(255,255,255,.12)}
+.storydots i.on{background:var(--acc)}
 .wfchart{width:100%;height:auto;display:block;margin:4px 0 2px}
 .chron{margin-top:4px}
 .lifeline{width:100%;height:auto;display:block;margin:2px 0 10px}
@@ -5325,7 +5336,11 @@ function comingBackHTML(){
   if(!items.length) return '';
   /* the road ahead as a picture first, outside the card so it is never folded
      away: late consequences are the game, and they should always be in sight */
-  return '<div class="roadwrap">'+roadAheadSVG(items)+'</div>'+
+  /* each thing on the road opens what it is, where it came from and when;
+     world-first, that is the whole of it - the list repeats the road, and
+     shows with the explanations (i) */
+  if(sceneFirst()) return '<div class="roadwrap">'+roadAheadSVG(items, true)+'</div>';
+  return '<div class="roadwrap">'+roadAheadSVG(items, true)+'</div>'+
     '<div class="card" style="margin-bottom:12px"><h3>Coming back to you</h3>'+
     items.slice(0, 6).map(function(i){
       const q = i.turn - S.turn;
@@ -6980,13 +6995,20 @@ function eraChipHTML(){
 function threadStrip(){
   const ts = (S.threads||[]).filter(function(t){ return ARCS[t.arc]; });
   if(!ts.length) return '';
+  /* An arc's name is its title; its stages are the functions that write the
+     next beat, so they have no title or text to show and must not be called
+     here. This read st.title || A.name off a function and an arc that has no
+     name, and every open story showed as a blank line. Now: who it is with, as
+     their face (which opens their card), the arc's title, and how far along. */
   return '<div class="card"><h3>Open stories</h3>'+ts.map(function(t){
-    const A = ARCS[t.arc]; const st = A.stages[t.stage] || A.stages[0];
+    const A = ARCS[t.arc], n = A.stages.length, at = Math.min(n, (t.stage||0) + 1);
     const c = t.castId ? castOf(t.castId) : null;
-    return '<div style="border-left:2px solid var(--acc);padding:2px 0 2px 10px;margin-bottom:9px">'+
-      '<div class="between"><b style="font-size:13.5px">'+esc(st.title || A.name)+'</b>'+
+    return '<div class="story">'+
+      (c ? '<button class="facebtn" data-a="hot" data-k="person" data-c="'+esc(c.id)+'" aria-label="'+esc(c.name+', '+A.title)+'">'+castFaceHTML(c)+'</button>' : '')+
+      '<div class="storyb"><div class="between"><b>'+esc(A.title)+'</b>'+
       '<span class="tiny muted">'+(t.next>S.turn ? 'next beat in '+(t.next-S.turn)+'q' : 'waiting on you')+'</span></div>'+
-      '<div class="tiny muted" style="margin-top:3px">'+esc(st.text? String(st.text).slice(0,150) : '')+(c? ' · '+esc(c.name):'')+'</div></div>';
+      '<div class="tiny muted">'+(c ? 'with '+esc(c.name)+' \u00b7 ' : '')+'part '+at+' of '+n+'</div>'+
+      '<span class="gfx storydots">'+A.stages.map(function(_, i){ return '<i class="'+(i < at ? 'on' : '')+'"></i>'; }).join('')+'</span></div></div>';
   }).join('')+foldHTML('About these', 'These continue whether you engage with them or not.')+'</div>';
 }
 
@@ -14697,7 +14719,9 @@ function arrivalsLayer(items){
 }
 /* the road ahead, for the card: this quarter to eight from now, and each thing
    coming back at its quarter */
-function roadAheadSVG(items){
+/* tap: each marker is a control that opens what is coming (the card inside
+   one shows the road without them) */
+function roadAheadSVG(items, tap){
   const W = 390, H = 74, x0 = 22, x1 = 368, step = (x1 - x0) / ROAD_QUARTERS, at = {};
   let s = '<svg class="gfx road" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(items.length + ' thing' + (items.length === 1 ? '' : 's') + ' coming back to you over the next ' + ROAD_QUARTERS + ' quarters') + '">' +
     '<text x="' + x0 + '" y="12" font-family="sans-serif" font-size="10" font-weight="700" letter-spacing=".08em" fill="#8b9bb0">COMING BACK TO YOU</text>';
@@ -14708,11 +14732,12 @@ function roadAheadSVG(items){
     if (q === 0 || q === 4 || q === ROAD_QUARTERS) s += '<text x="' + x.toFixed(1) + '" y="66" font-family="sans-serif" font-size="10" text-anchor="middle" fill="#8b9bb0">' + (q === 0 ? 'now' : '+' + q + 'q') + '</text>';
   }
   s += '<circle cx="' + x0 + '" cy="44" r="6" fill="#f5b301"/>';   // you are here
-  items.forEach(function(it){
+  items.forEach(function(it, i){
     const q = Math.max(0, Math.min(ROAD_QUARTERS, it.turn - S.turn)), n = at[q] = (at[q] || 0) + 1;
     if (n > 3) return;
     const x = x0 + q * step, y = 32 - (n - 1) * 11;
-    s += '<g><title>' + esc(dateLabel(it.turn) + ': ' + it.title) + '</title>' +
+    s += '<g' + (tap ? ' class="hot" data-a="hot" data-k="coming" data-c="' + i + '" role="button" tabindex="0" aria-label="' + esc(dateLabel(it.turn) + ': ' + it.title) + '"' : '') + '><title>' + esc(dateLabel(it.turn) + ': ' + it.title) + '</title>' +
+      (tap ? '<circle cx="' + x.toFixed(1) + '" cy="' + y + '" r="12" fill="#fff" fill-opacity="0"/>' : '') +
       '<path d="M' + x.toFixed(1) + ' ' + (y + 6) + ' V40" stroke="' + arrivalTone(it.kind) + '" stroke-width="1.4" opacity=".7"/>' +
       '<circle cx="' + x.toFixed(1) + '" cy="' + y + '" r="6.5" fill="#0b1017" stroke="' + arrivalTone(it.kind) + '" stroke-width="2"/>' +
       (it.kind === 'good' ? '<path d="M' + (x - 3).toFixed(1) + ' ' + (y + 1) + 'l2 2 l4 -5" stroke="' + arrivalTone(it.kind) + '" stroke-width="1.6" fill="none"/>'
@@ -15742,6 +15767,29 @@ function groupCashInner(g, subs){
         (e.cap === null ? '' : e.cap > 0 ? '<span class="chip g">can pay up ' + fmt(e.cap) + '</span>' : e.note ? '<span class="chip r">blocked</span>' : '') + '</span></div>' +
       line('cash', e.cash, '#2fd47a') + line('debt', e.debt, '#ff5f6d') + line('reserves', e.res, '#f5b301') + '</div>';
   }).join('');
+}
+/* Your life: the facts as icons, the four that move as gauges */
+function lifeInner(p){
+  const mult = (1 + (p.married ? 0.75 : 0) + p.kids * 0.55 + (p.parents > 0 ? 0.30 : 0)).toFixed(2);
+  const fact = function(ico, text){ return '<span class="chip lfact"><span class="gfx">' + worldIco(ico) + '</span>' + esc(text) + '</span>'; };
+  return '<div class="row wrap" style="gap:6px;margin:2px 0 12px">' +
+      fact('calendar', 'age ' + p.age) + fact('cap', p.edu) + fact('heart', p.married ? 'married' + (p.partner ? ' to ' + p.partner.name : '') : 'single') +
+      fact('people', p.kids + (p.kids === 1 ? ' child' : ' children')) + fact('home', p.parents + (p.parents === 1 ? ' parent' : ' parents') + ' living') + fact('coins', 'dependants ×' + mult) + '</div>' +
+    ringsHTML([{ico: 'heart', label: 'Health', v: p.health}, {ico: 'bolt', label: 'Calm', v: 100 - p.stress, note: 'stress ' + Math.round(p.stress)},
+      {ico: 'smile', label: 'Happiness', v: p.happy, tone: 'var(--acc)'}, {ico: 'home', label: 'Family', v: p.family, tone: 'var(--info)'}]);
+}
+/* What you are worth, as one bar made of its parts, and what you owe under it */
+function worthInner(){
+  const parts = [['Cash', S.fin.cash, '#2fd47a'], ['Hard currency', S.fin.usdCash * S.mkt.usd, '#5aa9ff'], ['Invested', S.der.assets, '#a78bfa'],
+    ['Business', S.biz ? S.der.biz : 0, '#f5b301'], ['Possessions', S.der.goods, '#8b9bb0']].filter(function(x){ return x[1] > 0; });
+  const owns = parts.reduce(function(s, x){ return s + x[1]; }, 0), debt = S.der.debt || 0, top = Math.max(1, owns, debt);
+  return '<span class="gfx wfall" role="img" aria-label="' + esc(parts.map(function(x){ return x[0] + ' ' + fmt(Math.round(x[1])); }).join(', ')) + '">' +
+      parts.map(function(x){ return '<i style="width:' + (x[1] / top * 100).toFixed(1) + '%;background:' + x[2] + '"></i>'; }).join('') + '</span>' +
+    (debt > 0 ? '<span class="gfx wfall debtbar" role="img" aria-label="' + esc('Debt ' + fmt(debt)) + '"><i style="width:' + (debt / top * 100).toFixed(1) + '%;background:#ff5f6d"></i></span>' : '') +
+    '<div class="row wrap" style="gap:5px;margin:4px 0 8px">' + parts.map(function(x){
+      return '<span class="chip"><i class="dot" style="background:' + x[2] + '"></i>' + x[0] + ' ' + fmt(Math.round(x[1])) + (x[0] === 'Hard currency' ? ' ($' + Math.round(S.fin.usdCash).toLocaleString() + ')' : '') + '</span>';
+    }).join('') + '</div>' +
+    '<div class="kv"><span><b>Debt</b></span><span class="' + (debt > 0 ? 'bad' : '') + '"><b>' + fmt(debt) + '</b></span></div>';
 }
 /* the card a tap opens: a person, or you */
 function hotModal(M){
@@ -16895,7 +16943,9 @@ function viewMoneyProperty(){
 
 function viewMoneyPosition(){
   let h = positionStrip();
-  h += '<div class="card" style="margin-top:12px"><h3>Cash &amp; debt</h3>'+
+  /* world-first: what you are worth as one bar of its parts, what you owe under it */
+  if(sceneFirst()) h += '<div class="card" style="margin-top:12px"><h3>Cash &amp; debt</h3><div class="worthpic">'+worthInner()+'</div></div>';
+  else h += '<div class="card" style="margin-top:12px"><h3>Cash &amp; debt</h3>'+
     '<div class="kv"><span class="muted">Cash</span><span>'+fmt(S.fin.cash)+'</span></div>'+
     '<div class="kv"><span class="muted">Hard currency</span><span>'+fmt(S.fin.usdCash*S.mkt.usd)+' ($'+Math.round(S.fin.usdCash).toLocaleString()+')</span></div>'+
     '<div class="kv"><span class="muted">Invested</span><span>'+fmt(S.der.assets)+'</span></div>'+
@@ -17312,7 +17362,9 @@ function viewCareer(){
 function viewLife(){
   const p = S.p, nd = needs();
   let h = '<div class="grid g2"><div>';
-  h += '<div class="card"><h3>Your life</h3>'+
+  /* world-first: the facts as icons, the four that move as gauges */
+  if(sceneFirst()) h += '<div class="card"><h3>Your life</h3><div class="lifepic">'+lifeInner(p)+'</div></div>';
+  else h += '<div class="card"><h3>Your life</h3>'+
     '<div class="kv"><span class="muted">Age</span><span>'+p.age+'</span></div>'+
     '<div class="kv"><span class="muted">Education</span><span>'+esc(p.edu)+'</span></div>'+
     '<div class="kv"><span class="muted">Relationship</span><span>'+(p.married?('Married'+(p.partner?' to '+esc(p.partner.name):'')):'Single')+'</span></div>'+

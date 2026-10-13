@@ -665,6 +665,29 @@ function groupCashInner(g, subs){
       line('cash', e.cash, '#2fd47a') + line('debt', e.debt, '#ff5f6d') + line('reserves', e.res, '#f5b301') + '</div>';
   }).join('');
 }
+/* Your life: the facts as icons, the four that move as gauges */
+function lifeInner(p){
+  const mult = (1 + (p.married ? 0.75 : 0) + p.kids * 0.55 + (p.parents > 0 ? 0.30 : 0)).toFixed(2);
+  const fact = function(ico, text){ return '<span class="chip lfact"><span class="gfx">' + worldIco(ico) + '</span>' + esc(text) + '</span>'; };
+  return '<div class="row wrap" style="gap:6px;margin:2px 0 12px">' +
+      fact('calendar', 'age ' + p.age) + fact('cap', p.edu) + fact('heart', p.married ? 'married' + (p.partner ? ' to ' + p.partner.name : '') : 'single') +
+      fact('people', p.kids + (p.kids === 1 ? ' child' : ' children')) + fact('home', p.parents + (p.parents === 1 ? ' parent' : ' parents') + ' living') + fact('coins', 'dependants ×' + mult) + '</div>' +
+    ringsHTML([{ico: 'heart', label: 'Health', v: p.health}, {ico: 'bolt', label: 'Calm', v: 100 - p.stress, note: 'stress ' + Math.round(p.stress)},
+      {ico: 'smile', label: 'Happiness', v: p.happy, tone: 'var(--acc)'}, {ico: 'home', label: 'Family', v: p.family, tone: 'var(--info)'}]);
+}
+/* What you are worth, as one bar made of its parts, and what you owe under it */
+function worthInner(){
+  const parts = [['Cash', S.fin.cash, '#2fd47a'], ['Hard currency', S.fin.usdCash * S.mkt.usd, '#5aa9ff'], ['Invested', S.der.assets, '#a78bfa'],
+    ['Business', S.biz ? S.der.biz : 0, '#f5b301'], ['Possessions', S.der.goods, '#8b9bb0']].filter(function(x){ return x[1] > 0; });
+  const owns = parts.reduce(function(s, x){ return s + x[1]; }, 0), debt = S.der.debt || 0, top = Math.max(1, owns, debt);
+  return '<span class="gfx wfall" role="img" aria-label="' + esc(parts.map(function(x){ return x[0] + ' ' + fmt(Math.round(x[1])); }).join(', ')) + '">' +
+      parts.map(function(x){ return '<i style="width:' + (x[1] / top * 100).toFixed(1) + '%;background:' + x[2] + '"></i>'; }).join('') + '</span>' +
+    (debt > 0 ? '<span class="gfx wfall debtbar" role="img" aria-label="' + esc('Debt ' + fmt(debt)) + '"><i style="width:' + (debt / top * 100).toFixed(1) + '%;background:#ff5f6d"></i></span>' : '') +
+    '<div class="row wrap" style="gap:5px;margin:4px 0 8px">' + parts.map(function(x){
+      return '<span class="chip"><i class="dot" style="background:' + x[2] + '"></i>' + x[0] + ' ' + fmt(Math.round(x[1])) + (x[0] === 'Hard currency' ? ' ($' + Math.round(S.fin.usdCash).toLocaleString() + ')' : '') + '</span>';
+    }).join('') + '</div>' +
+    '<div class="kv"><span><b>Debt</b></span><span class="' + (debt > 0 ? 'bad' : '') + '"><b>' + fmt(debt) + '</b></span></div>';
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){

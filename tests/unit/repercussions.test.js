@@ -62,7 +62,10 @@ test('a choice that schedules a consequence signs it, lists it, and lands it', a
   const listed = C.comingBack().find((i) => i.title === made[0].title);
   assert.ok(listed, 'Coming back to you does not list the consequence the choice just queued');
   assert.equal(listed.from, made[0].from);
-  assert.match(C.comingBackHTML(), /Coming back to you/);
+  /* the overview shows it - world-first as a mark on the road that opens it,
+     with (i) as a row in the list too - by its own title */
+  assert.match(C.comingBackHTML(), /Coming back to you/i);
+  assert.ok(C.comingBackHTML().includes(C.esc(made[0].title)), 'the overview does not show the consequence the choice just queued');
 
   /* and when its quarter comes, it lands and leaves the list */
   const due = made[0].turn;

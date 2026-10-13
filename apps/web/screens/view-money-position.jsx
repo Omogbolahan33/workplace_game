@@ -32,7 +32,7 @@
   `.harness/react-route.js` compares it card for card against core's own
   grouping.
 */
-import { S, fmt, positionStrip } from '@ledger/core';
+import { S, UI, fmt, positionStrip, worthInner } from '@ledger/core';
 import Group from './group.jsx';
 
 export default function ViewMoneyPosition() {
@@ -44,16 +44,23 @@ export default function ViewMoneyPosition() {
       <div dangerouslySetInnerHTML={{ __html: positionStrip() }} />
 
       <Group route="money/position" i={0}>
-      <div className="card" style={{ marginTop: '12px' }}>
-        <h3>Cash &amp; debt</h3>
-        <div className="kv"><span className="muted">Cash</span><span>{fmt(S.fin.cash)}</span></div>
-        <div className="kv">
-          <span className="muted">Hard currency</span>
-          <span>{fmt(S.fin.usdCash * S.mkt.usd)} (${Math.round(S.fin.usdCash).toLocaleString()})</span>
+      {/* world-first: what you are worth as one bar of its parts, what you owe under it */}
+      {!UI.details ? (
+        <div className="card" style={{ marginTop: '12px' }}>
+          <h3>Cash &amp; debt</h3>
+          <div className="worthpic" dangerouslySetInnerHTML={{ __html: worthInner() }} />
         </div>
-        <div className="kv"><span className="muted">Invested</span><span>{fmt(S.der.assets)}</span></div>
-        {S.biz && (
-          <div className="kv"><span className="muted">Business value</span><span>{fmt(S.der.biz)}</span></div>
+      ) : (
+        <div className="card" style={{ marginTop: '12px' }}>
+          <h3>Cash &amp; debt</h3>
+          <div className="kv"><span className="muted">Cash</span><span>{fmt(S.fin.cash)}</span></div>
+          <div className="kv">
+            <span className="muted">Hard currency</span>
+            <span>{fmt(S.fin.usdCash * S.mkt.usd)} (${Math.round(S.fin.usdCash).toLocaleString()})</span>
+          </div>
+          <div className="kv"><span className="muted">Invested</span><span>{fmt(S.der.assets)}</span></div>
+          {S.biz && (
+            <div className="kv"><span className="muted">Business value</span><span>{fmt(S.der.biz)}</span></div>
         )}
         <div className="kv"><span className="muted">Possessions (resale)</span><span>{fmt(S.der.goods)}</span></div>
         <div className="kv">
@@ -61,6 +68,7 @@ export default function ViewMoneyPosition() {
           <span className={S.der.debt > 0 ? 'bad' : ''}><b>{fmt(S.der.debt)}</b></span>
         </div>
       </div>
+      )}
 
       <div className="card" style={{ marginTop: '12px' }}>
         <h3>Borrow <span className="tag">credit {Math.round(S.fin.credit)}/100</span></h3>

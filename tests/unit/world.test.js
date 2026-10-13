@@ -640,3 +640,24 @@ test('the group is a waterfall and three bars per company; a loss where reserves
   assert.match(C.groupCashInner(g, g.rows), /background:#ff5f6d"><\/i><\/span><b class="bad">/);
   assert.equal(JSON.stringify(C.S), before, 'drawing the group changed the run');
 });
+
+test('an open story says what it is, with whom and how far along; the road opens what is coming', async () => {
+  const C = await world();
+  C.S.threads = [{ id: 't1', arc: 'thecousin', stage: 1, next: C.S.turn + 3, castId: C.S.cast[0].id, data: {} }];
+  const strip = C.threadStrip();
+  assert.match(strip, /<b>The Cousin<\/b>/, 'the story has no title');
+  assert.match(strip, /part 2 of 3/);
+  assert.match(strip, new RegExp('data-a="hot" data-k="person" data-c="' + C.S.cast[0].id + '"'));
+  C.S.pending.push({ turn: C.S.turn + 2, title: 'The loan comes due', text: 'x', kind: 'bad', eff: {} });
+  const road = C.roadAheadSVG(C.comingBack(), true);
+  assert.match(road, /data-a="hot" data-k="coming" data-c="0"/);
+  assert.doesNotMatch(C.roadAheadSVG(C.comingBack()), /data-a="hot"/, 'the road inside a card should not open cards');
+});
+
+test('your life is icons and gauges; what you are worth is one bar of its parts', async () => {
+  const C = await world();
+  const life = C.lifeInner(C.S.p);
+  assert.match(life, new RegExp('age ' + C.S.p.age)); assert.match(life, /Health/); assert.match(life, /Calm/);
+  const worth = C.worthInner();
+  assert.match(worth, /Cash /); assert.match(worth, /<b>Debt<\/b>/);
+});
