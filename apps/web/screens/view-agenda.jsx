@@ -7,10 +7,10 @@
   not disagree about where a row takes you. So the row is React and the button is
   embedded; what converts is the card, the ordering and the per-row accent.
 
-  The sort is `order[a.lv] || 2` — fires first, then warnings, then anything that
+  The sort is core's `agendaRank` — fires first, then warnings, then anything that
   did not say. It is kept exactly, including the fact that it sorts in place.
 */
-import { agendaItems, NEXT_DEST, subLabel, nextBtn } from '@ledger/core';
+import { UI, agendaItems, agendaRank, agendaSorted, agendaTilesHTML, NEXT_DEST, subLabel, nextBtn } from '@ledger/core';
 
 const TONE = { bad: 'var(--bad)', warn: 'var(--warn)' };
 
@@ -29,9 +29,19 @@ export default function ViewAgenda() {
   if (!items.length) return null;
 
   /* fire before warning before untagged, as the string version did */
-  const order = { bad: 0, warn: 1 };
-  items.sort((a, b) => (order[a.lv] || 2) - (order[b.lv] || 2));
+  /* agendaRank, because `order[a.lv] || 2` read a fire's rank of 0 as falsy */
+  items.sort((a, b) => agendaRank(a.lv) - agendaRank(b.lv));
   const top = TONE[items[0].lv] || TONE.warn;
+
+  /* world-first: each is a tile, its sentence and its button on its card */
+  if (!UI.details) {
+    return (
+      <div className="card" style={{ borderLeft: '3px solid ' + top }}>
+        <h3>Waiting on you</h3>
+        <div className="facerow" dangerouslySetInnerHTML={{ __html: agendaTilesHTML(agendaSorted()) }} />
+      </div>
+    );
+  }
 
   return (
     <div className="card" style={{ borderLeft: '3px solid ' + top }}>

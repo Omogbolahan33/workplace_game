@@ -28,7 +28,7 @@ export default function ViewCommitments() {
   return (
     <div className="card">
       <h3>Commitments <span className="tag">{building.length ? building.length + ' in flight' : 'none in flight'}</span></h3>
-      <div className="tiny muted" style={{ marginBottom: '10px' }}>
+      <div className="tiny muted prose" style={{ marginBottom: '10px' }}>
         Everything here is already decided. It costs money the whole time it is arriving, and it cannot be
         unmade for free. The dials are further down the screen; this is the part you are stuck with.
       </div>

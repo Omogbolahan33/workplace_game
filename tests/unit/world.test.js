@@ -661,3 +661,20 @@ test('your life is icons and gauges; what you are worth is one bar of its parts'
   const worth = C.worthInner();
   assert.match(worth, /Cash /); assert.match(worth, /<b>Debt<\/b>/);
 });
+
+test('waiting on you puts fires first, and each is a tile whose card has the sentence and the button', async () => {
+  const C = await world();
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  C.S.biz.demand = 500; C.S.biz.capacity = 100; C.S.biz.cash = -300000;
+  const items = C.agendaSorted();
+  assert.ok(items.length >= 2, 'the fixture raised nothing');
+  const ranks = items.map((it) => C.agendaRank(it.lv));
+  assert.deepEqual(ranks, ranks.slice().sort((a, b) => a - b), 'a warning sorted ahead of a fire: ' + items.map((i) => i.lv).join(','));
+  assert.equal(items[0].lv, 'bad');
+  const tiles = C.agendaTilesHTML(items);
+  assert.equal((tiles.match(/data-k="agenda"/g) || []).length, items.length);
+  const card = C.agendaCardHTML(0);
+  assert.ok(card.includes(C.esc(items[0].text)), 'the card does not carry the sentence');
+  assert.match(card, /data-a="(goto|doact)"/, 'the card does not carry the button');
+});

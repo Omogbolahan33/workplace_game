@@ -268,3 +268,23 @@ test('world-first, Coming back to you is the road alone, Life is gauges and Cash
   assert.match(C.viewMoneyPosition(), /Possessions \(resale\)/);
   C.UI.details = false;
 });
+
+test('waiting on you is tiles world-first and rows with (i), fires first in both', async () => {
+  stubDOM();
+  const C = await core();
+  (await ui()).install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  C.S.biz.demand = 500; C.S.biz.capacity = 100; C.S.biz.cash = -300000;
+  C.UI.details = false;
+  const tiles = C.viewAgenda();
+  assert.ok(tiles.includes(C.agendaTilesHTML(C.agendaSorted())));
+  assert.match(tiles, /border-left:3px solid var\(--bad\)/, 'the card wears a warning\'s colour while a fire is waiting');
+  C.UI.details = true;
+  const rows = C.viewAgenda();
+  assert.match(rows, /Take me there|Do it/);
+  /* the first row is a fire */
+  assert.match(rows.split('</h3>')[1], /^<div style="border-left:2px solid var\(--bad\)/);
+  C.UI.details = false;
+});

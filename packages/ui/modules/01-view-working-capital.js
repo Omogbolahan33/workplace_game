@@ -63,7 +63,8 @@ export function viewCommitments(){
   const fx = committedFixedQ(b);
   let h = '<div class="card"><h3>Commitments <span class="tag">'+
     (building.length ? building.length+' in flight' : 'none in flight')+'</span></h3>';
-  h += '<div class="tiny muted" style="margin-bottom:10px">Everything here is already decided. '+
+  /* the why, behind (i): what is owed and what is in flight are the card */
+  h += '<div class="tiny muted prose" style="margin-bottom:10px">Everything here is already decided. '+
     'It costs money the whole time it is arriving, and it cannot be unmade for free. '+
     'The dials are further down the screen; this is the part you are stuck with.</div>';
   h += '<div class="kv"><span class="muted">Owed next quarter, whatever you sell</span>'+

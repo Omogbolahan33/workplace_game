@@ -1,4 +1,5 @@
 {
+ "AGENDA_LOOK": "core.js",
  "ALL_EVENTS": "core.js",
  "AMBITIONS": "core.js",
  "AMBITION_ICO": "core.js",
@@ -123,7 +124,12 @@
  "advanceQuarter": "core.js",
  "advanceRows": "core.js",
  "afterThreadChoice": "core.js",
+ "agendaCardHTML": "core.js",
  "agendaItems": "core.js",
+ "agendaRank": "core.js",
+ "agendaSorted": "core.js",
+ "agendaTilesHTML": "core.js",
+ "agendaWho": "core.js",
  "agoLabel": "core.js",
  "allocateOutlets": "core.js",
  "ambitionHTML": "core.js",

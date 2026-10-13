@@ -15082,6 +15082,43 @@ function worthInner(){
     }).join('') + '</div>' +
     '<div class="kv"><span><b>Debt</b></span><span class="' + (debt > 0 ? 'bad' : '') + '"><b>' + fmt(debt) + '</b></span></div>';
 }
+/* Waiting on you, as tiles: what each thing is, in an icon and a few words,
+   red when it is a fire and amber when it is a warning, and who it is about;
+   the sentence and the button are on its card. The order is the agenda's
+   own - fires first - so a tile and its card are the same row. */
+/* [icon, the tile's word or two, the card's title] */
+const AGENDA_LOOK = {lease: ['key', 'Lease up', 'Your lease is up'], condition: ['wrench', 'Run down', 'A unit is run down'], unassigned: ['people', 'Unstaffed unit', 'Nobody on a unit'],
+  renewal: ['note', 'Renewal', 'A contract is up for renewal'], margin: ['coins', 'No margin', 'Working for nothing'], tender: ['tag', 'Tender', 'A tender is closing'],
+  morale: ['smile', 'Morale', 'Morale is breaking'], underpaid: ['coins', 'Underpaid', 'Paid below market'], gm: ['case', 'No manager', 'No general manager'],
+  cover: ['people', 'Understaffed', 'Understaffed'], capacity: ['up', 'Demand', 'Demand outruns you'], nostaff: ['hire', 'Just you', 'Only you work here'],
+  insolvent: ['warn', 'No cash', 'Cash-negative'], hmorale: ['smile', 'Home morale', 'Household morale'], hpay: ['coins', 'Home pay', 'Household pay'],
+  hnanny: ['home', 'Idle nanny', 'A nanny, no children'], hdeclared: ['seal', 'Undeclared', 'Undeclared benefit'], hsuspicion: ['lock', 'Missing money', 'Money going missing']};
+/* fires, then warnings, then anything that did not say. This read
+   order[lv] || 2, and a fire's rank is 0 - falsy - so fires sorted with the
+   untagged, after every warning: the card led with a warning, wore its amber,
+   and put "cash-negative" last. */
+function agendaRank(lv){ return lv === 'bad' ? 0 : lv === 'warn' ? 1 : 2; }
+function agendaSorted(){
+  const items = agendaItems();
+  items.sort(function(a, b){ return agendaRank(a.lv) - agendaRank(b.lv); });
+  return items.slice(0, 8);
+}
+function agendaWho(it){ const i = String(it.text).indexOf(' — '); return i > 0 ? String(it.text).slice(0, i) : ''; }
+function agendaTilesHTML(items){
+  return items.map(function(it, i){
+    const L = AGENDA_LOOK[it.kind] || ['spark', 'Needs you', 'Needs you'], tone = it.lv === 'bad' ? 'var(--bad)' : 'var(--warn)';
+    return '<button class="facebtn" data-a="hot" data-k="agenda" data-c="' + i + '" aria-label="' + esc(it.text) + '"><span class="gfx hring" style="--p:100;--c:' + tone + '"><em>' + worldIco(L[0]) + '</em></span>' +
+      '<span>' + esc(L[1]) + '</span><small>' + esc(agendaWho(it) || (it.lv === 'bad' ? 'urgent' : 'soon')) + '</small></button>';
+  }).join('');
+}
+function agendaCardHTML(i){
+  const it = agendaSorted()[+i];
+  if(!it) return modalHTML('<h2>Done</h2>', '<div class="tiny muted">That no longer needs you.</div>', '<button class="btn primary" data-a="close">Close</button>');
+  const L = AGENDA_LOOK[it.kind] || ['spark', 'Needs you', 'Needs you'], d = NEXT_DEST[it.kind] || {tab: 'work', sub: 'business', focus: ''};
+  return modalHTML('<h2>' + esc(L[2]) + '</h2><div class="tiny muted">' + (agendaWho(it) ? esc(agendaWho(it)) + ' · ' : '') + esc(subLabel(d.tab, d.sub)) + '</div>',
+    '<div class="clause" style="border-color:' + (it.lv === 'bad' ? 'rgba(255,95,109,.45)' : 'rgba(255,159,67,.45)') + '">' + esc(it.text) + '</div>',
+    nextBtn({act: it.act || '', id: it.id || '', biz: it.biz || '', tab: d.tab, sub: d.sub, focus: d.focus || ''}, false) + '<button class="btn ghost" data-a="close">Close</button>', 'style="max-width:440px"');
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){
@@ -15199,6 +15236,7 @@ function hotModal(M){
     return clauseCardHTML(S.biz, M.id);
   }
   if(M.kind === 'quarter') return quarterCardHTML(M.id);
+  if(M.kind === 'agenda') return agendaCardHTML(M.id);
   if(M.kind === 'deal') return dealCardHTML(M.id);
   if(M.kind === 'offer') return offerCardHTML(M.id);
   if(M.kind === 'commit'){
@@ -15245,9 +15283,10 @@ function hotModal(M){
 }
 
 /* -------------------------------------------------------------------------
-   Everything above, exported. 774 names: the simulation's whole surface.
+   Everything above, exported. 780 names: the simulation's whole surface.
    ------------------------------------------------------------------------- */
 export {
+  AGENDA_LOOK,
   ALL_EVENTS,
   AMBITIONS,
   AMBITION_ICO,
@@ -15372,7 +15411,12 @@ export {
   advanceQuarter,
   advanceRows,
   afterThreadChoice,
+  agendaCardHTML,
   agendaItems,
+  agendaRank,
+  agendaSorted,
+  agendaTilesHTML,
+  agendaWho,
   agoLabel,
   allocateOutlets,
   ambitionHTML,

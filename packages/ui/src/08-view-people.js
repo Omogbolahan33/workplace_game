@@ -60,9 +60,12 @@ function viewPeople(){
 function viewAgenda(){
   const items = agendaItems();
   if(!items.length) return '';
-  const order = {bad:0, warn:1};
-  items.sort(function(a,b){ return (order[a.lv]||2)-(order[b.lv]||2); });
+  /* fires first: agendaRank(), because order[lv]||2 read a fire's 0 as falsy */
+  items.sort(function(a,b){ return agendaRank(a.lv)-agendaRank(b.lv); });
   let h = '<div class="card" style="border-left:3px solid '+(items[0].lv==='bad'?'var(--bad)':'var(--warn)')+'"><h3>Waiting on you</h3>';
+  /* world-first: each is a tile - what it is, whether it is a fire, who it is
+     about - and the sentence and the button are on its card */
+  if(sceneFirst()) return h + '<div class="facerow">'+agendaTilesHTML(agendaSorted())+'</div></div>';
   items.slice(0,8).forEach(function(it){
     const c = it.lv==='bad'?'var(--bad)':'var(--warn)';
     const d = NEXT_DEST[it.kind] || { tab:'work', sub:'business', focus:'' };
