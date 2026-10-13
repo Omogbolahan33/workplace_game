@@ -468,6 +468,7 @@
    "29-the-cast-who-remembers.js: castFaceHTML, castTileHTML, lifeRingsHTML, relationWord",
    "32-the-world.js: ringsHTML, worldIco",
    "22-everyday-life-vignette.js: modalHTML",
+   "36-moments.js: momentSceneSVG",
    "28-votes-and-decisions.js: covenantState"
   ],
   "externals": []

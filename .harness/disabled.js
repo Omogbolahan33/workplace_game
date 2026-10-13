@@ -212,14 +212,26 @@ escapes.forEach(r => {
 M.UI.tab = 'money'; M.UI.sub = 'deals';
 expand('money/deals');
 const dealsRoot = panel(M.routeView());
-const refused = Array.from(dealsRoot.querySelectorAll('button[data-a="takedeal"][disabled]'));
+/* world-first, each deal is a picture on the sheet and its Commit is on the
+   card the picture opens: the claim is the same there - the shortfall is text
+   beside the refused button - so the cards are read too, and the picture must
+   say "short" before it is tapped */
+const dealCards = Array.from(dealsRoot.querySelectorAll('[data-a="hot"][data-k="deal"]')).map(t => {
+  const d = (S.deals || []).find(x => String(x.id) === t.dataset.c);
+  ck(!d || S.fin.cash >= d.capital || /short /.test(t.textContent),
+    'the picture of "' + (d ? d.name : t.dataset.c) + '" does not say you cannot afford it before it is tapped');
+  return panel(M.hotModal({ type: 'hot', kind: 'deal', id: t.dataset.c }));
+});
+const refused = Array.from(dealsRoot.querySelectorAll('button[data-a="takedeal"][disabled]'))
+  .concat(...dealCards.map(c => Array.from(c.querySelectorAll('button[data-a="takedeal"][disabled]'))));
 console.log('refused deals     : ' + refused.length + ' of ' +
-            dealsRoot.querySelectorAll('button[data-a="takedeal"]').length + ' on a fresh run');
+            (dealsRoot.querySelectorAll('button[data-a="takedeal"]').length + dealCards.length) + ' on a fresh run' +
+            (dealCards.length ? ' (' + dealCards.length + ' behind their pictures)' : ''));
 ck(refused.length > 0, 'no deal is refused on a fresh Fresh Graduate run, so this check saw nothing - ' +
   'the fixture changed under it');
 refused.forEach(b => {
   const d = (S.deals || []).find(x => String(x.id) === b.dataset.d);
-  const row = b.closest('.mrow');
+  const row = b.closest('.mrow') || b.closest('.row');
   const chip = row && Array.from(row.querySelectorAll('.chip')).find(c => /^short /.test(c.textContent.trim()));
   ck(!!chip, 'the refused Commit on "' + (d ? d.name : b.dataset.d) + '" says why only in its title: a phone shows ' +
     'nothing, so the shortfall has to be text in the row');

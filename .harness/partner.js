@@ -190,8 +190,10 @@ console.log('sound people out  : modal typeId ' + pm.typeId + ' · ' + pm.offers
    and counting prose reported five buttons when there are three. */
 const shakes = (require('fs').readFileSync(require('path').join(__dirname, 'check.js'), 'utf8')
   .match(/>Shake hands</g) || []).length;
-ck(shakes === 3, 'there are ' + shakes + ' "Shake hands" buttons in the file and this gate clicks three — ' +
-   'a fourth would ship untested, which is how the second one stayed broken');
+/* four since the scene-first Deals screen: the offer's own card, opened from
+   the offerer's face, carries one too - and section 7 clicks it */
+ck(shakes === 4, 'there are ' + shakes + ' "Shake hands" buttons in the file and this gate clicks four — ' +
+   'a fifth would ship untested, which is how the second one stayed broken');
 console.log('shake hands      : ' + shakes + ' buttons in the file · this gate clicks all of them');
 
 /* ---------------- 5. declining consumes the offer ---------------------- */
@@ -208,7 +210,11 @@ console.log('declining        : 2 offers → 1, the right one');
 /* ---------------- 6. the card's button names a real action ------------- */
 M.getS().offers = [M.genPartnerOffer()];
 M.UI.tab = 'money'; M.UI.sub = 'deals';
-const card = String(M.viewDeals());
+/* scene-first the offer is a face on the sheet and its handshake is on the
+   card the face opens: both are read, and the claim is the same for both */
+const sheet = String(M.viewDeals());
+const faceOf = /data-a="hot" data-k="offer" data-c="([^"]+)"/.exec(sheet);
+const card = sheet + (faceOf ? String(M.hotModal({ type: 'hot', kind: 'offer', id: faceOf[1] })) : '');
 ck(card.indexOf('data-a="takepartner"') >= 0, 'the Deals card still offers no way to shake hands');
 ck(card.indexOf('data-a="acceptpartner"') < 0,
    'the Deals card still calls acceptpartner — the handler for a different feature');
@@ -217,7 +223,7 @@ console.log('card             : emits takepartner, not acceptpartner');
 
 /* and the offers card only shows while there is a company to bring them into */
 M.getS().biz = null;
-ck(String(M.viewDeals()).indexOf('data-a="takepartner"') < 0,
+ck(!/data-a="takepartner"|data-k="offer"/.test(String(M.viewDeals())),
    'the partnership card offers a handshake with no company to shake it on');
 
 
@@ -301,6 +307,8 @@ async function clickE2E() {
     const o = genPartnerOffer();
     o.ask = 'wants a board seat';
     S.offers = [o];
+    /* first the sheet's own row, with the explanations shown (i) */
+    UI.details = true;
     UI.tab = 'money'; UI.sub = 'deals'; UI.focus = '';
     render();
     return { name: o.name, equity: o.equity, capital: Math.round(o.capital) };
@@ -314,6 +322,33 @@ async function clickE2E() {
     const ok = page.locator('button[data-a="okconfirm"]');
     if (await ok.count() === 0) errs.push('clicking Shake hands opened no confirmation');
     else await ok.first().click();
+  }
+
+  /* the fourth Shake hands: scene-first, the offerer is a face on the sheet,
+     and the handshake is on the card the face opens */
+  const second = await page.evaluate(() => {
+    UI.modal = null; UI.details = false;
+    const o = genPartnerOffer();
+    S.offers = [o];
+    render();
+    return o.name;
+  });
+  const face = page.locator('#main button[data-a="hot"][data-k="offer"]');
+  if (await face.count() === 0) errs.push('scene-first, the offer is not a face on the Deals screen');
+  else {
+    await face.first().click();
+    const inCard = page.locator('#modalHost button[data-a="takepartner"]');
+    if (await inCard.count() === 0) errs.push('the offer\'s card shows no Shake hands button');
+    else {
+      await inCard.first().click();
+      const ok3 = page.locator('button[data-a="okconfirm"]');
+      if (await ok3.count() === 0) errs.push('Shake hands on the offer\'s card opened no confirmation');
+      else await ok3.first().click();
+      const r = await page.evaluate((n) => ({ joined: (S.biz.shares || []).some(h => !h.you && h.name === n), left: (S.offers || []).length }), second);
+      if (!r.joined) errs.push('a real click on the offer\'s card did not bring ' + second + ' into the company');
+      if (r.left !== 0) errs.push('a real click on the offer\'s card left the offer on the table');
+      console.log('card handshake   : face → card → Shake hands → confirm → ' + second + (r.joined ? ' in the register' : ' NOT in the register'));
+    }
   }
 
   const after = await page.evaluate(() => {

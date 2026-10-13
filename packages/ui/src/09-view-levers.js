@@ -248,7 +248,11 @@ function viewDeals(){
     'Nobody is going to hold an opportunity open while you think about it for a year.');
   const ds = S.deals||[];
   if(!ds.length) h += '<div class="tiny muted">Nothing on the table this quarter. Check back.</div>';
-  h += ds.map(function(d){
+  /* world-first: each deal is a picture of where it happens, with whoever
+     brought it standing in it; the picture opens its card - the terms, what it
+     is, Commit and Pass. (i) brings the rows back. */
+  else if(sceneFirst()) h += '<div class="dealgrid">'+dealTilesHTML(ds)+'</div>';
+  if(!sceneFirst()) h += ds.map(function(d){
     return '<div class="mrow">'+
       '<div class="between"><b>'+esc(d.name)+'</b><span class="row wrap" style="gap:4px;justify-content:flex-end">'+
         '<span class="chip">'+d.turns+' quarter'+(d.turns===1?'':'s')+'</span>'+
@@ -287,7 +291,9 @@ function viewDeals(){
     'Deals introduced by people who like you are more common and no safer. Being introduced is not the same as being protected.')+
     '</div>';
   h += '<div class="card" style="margin-top:12px"><h3>Partnership offers</h3>';
-  if(S.biz && S.offers && S.offers.length){
+  if(S.biz && S.offers && S.offers.length && sceneFirst()){
+    h += '<div class="facerow">'+offerFacesHTML(S.offers)+'</div>';
+  } else if(S.biz && S.offers && S.offers.length){
     h += S.offers.map(function(o,i){
       return '<div style="border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:9px">'+
         '<div class="between"><b>'+esc(o.name)+'</b><span class="chip p">'+o.equity+'% for '+fmt(o.capital)+'</span></div>'+

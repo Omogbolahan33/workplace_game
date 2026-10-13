@@ -144,3 +144,27 @@ test('the Levers screen leads with tiles: the dials are the machine, the commitm
   assert.match(C.leverColCommit(b), /data-a="levershift"/);
   C.UI.details = false;
 });
+
+test('the deals on the table are pictures and the partnership offers faces; (i) brings the rows back', async () => {
+  stubDOM();
+  const C = await core();
+  (await ui()).install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  C.S.deals = [C.genDeal(), C.genDeal()];
+  C.S.offers = [{ id: 'of1', name: 'Segun Ibrahim', equity: 31, capital: 6900000, bg: 'family money', skill: 'tech', ask: 'a seat' }];
+
+  C.UI.details = false;
+  const v = C.viewDeals();
+  assert.deepEqual([...v.matchAll(/class="dealtile" data-a="hot" data-k="deal" data-c="([^"]+)"/g)].map((m) => m[1]), C.S.deals.map((d) => d.id));
+  assert.match(v, /data-k="offer" data-c="of1"/);
+  assert.doesNotMatch(v, /data-a="takedeal"|data-a="takepartner"/, 'the rows are still on the sheet');
+  assert.match(C.hotModal({ type: 'hot', kind: 'offer', id: 'of1' }), /data-a="takepartner" data-i="of1"/);
+
+  C.UI.details = true;
+  const full = C.viewDeals();
+  assert.match(full, /data-a="takedeal"/); assert.match(full, /data-a="takepartner" data-i="of1"/);
+  assert.doesNotMatch(full, /class="dealtile"/);
+  C.UI.details = false;
+});

@@ -646,6 +646,15 @@ body.terse .prose{display:none}
 .facebtn .cface .cbadge,.facebtn .cface .cfelt,.facebtn .cface .cstory{width:20px;height:20px;font-size:12px}
 .facebtn>svg{width:50px;height:50px}
 .facebtn span{max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dealgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:6px 0 4px}
+.dealtile{display:flex;flex-direction:column;align-items:stretch;text-align:left;padding:0;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--panel2);color:var(--txt);cursor:pointer}
+.dealtile:hover,.dealtile:focus-visible{border-color:rgba(245,179,1,.55)}
+.dealtile .dpic{display:block;line-height:0}
+.dealtile .dpic svg{width:100%;height:auto;display:block}
+.dealtile b{padding:7px 9px 0;font-size:13px}
+.dealtile .dvia{padding:1px 9px 0;font-size:11px;color:var(--info)}
+.dealtile .dshort{margin:3px 9px 0;align-self:flex-start;font-size:10.5px;padding:1px 7px;border-radius:999px;background:rgba(245,179,1,.14);color:var(--warn)}
+.dealtile .dmeta{padding:2px 9px 8px;font-size:11px;color:var(--dim)}
 .facebtn .hring{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;
   background:conic-gradient(var(--c) calc(var(--p) * 1%),rgba(255,255,255,.13) 0);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
 .facebtn .hring em{font-style:normal;width:39px;height:39px;border-radius:50%;background:var(--panel2);display:grid;place-items:center;font-size:20px;color:var(--acc)}

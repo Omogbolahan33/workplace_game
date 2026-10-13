@@ -251,7 +251,10 @@ const REACH = [
   ['viewDeals', 'deals on the table, an offer, and one commitment',
     /Abuja pharmacy chain · |via Bode/, 'a deal somebody introduced'],
   ['viewDeals', 'deals on the table, an offer, and one commitment',
-    /Ngozi Adeyemi|Shake hands/, 'a partnership offer'],
+    /* world-first the offer is a face: their first name with the stake under
+       it (the commitment line also says "Ngozi", so the name alone would prove
+       nothing) */
+    /Ngozi Adeyemi|Shake hands|Ngozi\s*20% · /, 'a partnership offer'],
   ['viewDeals', 'deals on the table, an offer, and one commitment',
     /resolves |committed/, 'a commitment already running'],
   ['viewDeals', 'deals on the table, an offer, and one commitment',

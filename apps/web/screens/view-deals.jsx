@@ -29,7 +29,7 @@
 */
 import Group from './group.jsx';
 import {
-  S, fmt, dateLabel
+  S, UI, fmt, dateLabel, dealTilesHTML, offerFacesHTML
 } from '@ledger/core';
 
 function OnTheTableCard() {
@@ -45,7 +45,9 @@ function OnTheTableCard() {
         </div>
       </details>
       {!ds.length ? <div className="tiny muted">Nothing on the table this quarter. Check back.</div> : null}
-      {ds.map((d) => {
+      {/* world-first: each deal is a picture that opens its card; (i) brings the rows back */}
+      {!UI.details && ds.length ? <div className="dealgrid" dangerouslySetInnerHTML={{ __html: dealTilesHTML(ds) }} /> : null}
+      {!UI.details ? null : ds.map((d) => {
         const short = S.fin.cash < d.capital;
         return (
           <div key={d.id} className="mrow">
@@ -141,7 +143,7 @@ function PartnershipOffersCard() {
   return (
     <div className="card" style={{ marginTop: '12px' }}>
       <h3>Partnership offers</h3>
-      {offers.length ? offers.map((o) => (
+      {offers.length && !UI.details ? <div className="facerow" dangerouslySetInnerHTML={{ __html: offerFacesHTML(offers) }} /> : offers.length ? offers.map((o) => (
         <div key={o.id} style={{ border: '1px solid var(--line)', borderRadius: '10px', padding: '11px', marginBottom: '9px' }}>
           <div className="between"><b>{o.name}</b><span className="chip p">{o.equity}% for {fmt(o.capital)}</span></div>
           <div className="tiny muted" style={{ margin: '5px 0' }}>

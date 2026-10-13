@@ -513,3 +513,23 @@ test('each commitment is a tile that opens its card, with the one move it allows
   /* a commitment that has gone says so instead of breaking */
   assert.match(C.commitCardHTML(b, 'nothing-here'), /already arrived/);
 });
+
+test('a deal is a picture of where it happens, with whoever brought it; its card has Commit and Pass', async () => {
+  const C = await world();
+  C.S.deals = C.DEAL_TYPES.map((T) => Object.assign(C.genDeal(), { type: T.id, name: T.name, desc: T.desc }));
+  const before = JSON.stringify(C.S);
+  const tiles = C.dealTilesHTML(C.S.deals);
+  assert.deepEqual([...tiles.matchAll(/data-k="deal" data-c="([^"]+)"/g)].map((m) => m[1]), C.S.deals.map((d) => d.id));
+  for (const T of C.DEAL_TYPES) assert.ok(C.DEAL_MOMENTS[T.id], T.id + ' has nowhere to happen');
+  /* the introducer is in the picture as themselves */
+  const d = C.S.deals.find((x) => x.castId);
+  if (d) assert.equal(C.dealMoment(d).cast.id, d.castId);
+  /* the card carries the row's buttons, the refusal on a short Commit included */
+  const card = C.dealCardHTML(C.S.deals[0].id);
+  assert.match(card, new RegExp('data-a="takedeal" data-d="' + C.S.deals[0].id + '"')); assert.match(card, /data-a="passdeal"/);
+  C.S.fin.cash = 0;
+  assert.match(C.dealCardHTML(C.S.deals[0].id), /disabled aria-disabled="true" title="Needs/);
+  C.S.fin.cash = JSON.parse(before).fin.cash;
+  assert.equal(JSON.stringify(C.S), before, 'drawing the deals changed the run');
+  assert.match(C.dealCardHTML('gone'), /off the table/);
+});

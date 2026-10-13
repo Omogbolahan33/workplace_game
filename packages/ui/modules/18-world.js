@@ -93,13 +93,14 @@ export function worldTiles(host){
     /* a tile of several moves - a person, a slot - names the move and whose it is */
     if(ctx && ctx.matches('.ctile, .stile') && named) title = (b.getAttribute('aria-label') || b.textContent || '').trim() + ' \u00b7 ' + named.textContent.trim().split(' ')[0];
     /* a face or a tile on the sheet: its name is its first line, its figure the second */
-    const face = b.classList.contains('facebtn');
-    if(face) title = ((b.querySelector(':scope > span:not(.hring)') || b).textContent || '').trim();
+    const face = b.classList.contains('facebtn') || b.classList.contains('dealtile');
+    if(face) title = ((b.querySelector(':scope > b') || b.querySelector(':scope > span:not(.hring):not(.dpic)') || b).textContent || '').trim();
     if(title.length > 30) title = title.slice(0, 29) + '…';
     const costEl = ctx ? Array.prototype.slice.call(ctx.querySelectorAll('.chip')).find(function(c){ return /₦|\d+h\b/.test(c.textContent || ''); }) : null;
     const said = (b.textContent || '').trim();
-    const small = face ? b.querySelector('small') : null;
-    const cost = small ? (small.textContent || '').trim() : /₦/.test(said) ? said.replace(/^[^₦]*/, '').replace(/[()]/g, '') : costEl ? costEl.textContent.trim() : '';
+    const small = face ? b.querySelector('small, .dmeta') : null;
+    /* a deal's line ends with its stake, which is the figure a tile shows */
+    const cost = small ? ((small.textContent || '').split('\u00b7').pop() || '').trim() : /₦/.test(said) ? said.replace(/^[^₦]*/, '').replace(/[()]/g, '') : costEl ? costEl.textContent.trim() : '';
     const t = document.createElement('button');
     t.type = 'button';
     t.className = 'wtile' + (b.disabled ? ' off' : '');

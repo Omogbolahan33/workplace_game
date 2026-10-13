@@ -315,6 +315,64 @@ function commitCardHTML(b, id){
     '<div class="tiny muted" style="margin-top:8px">A term, not a setting: changing your mind is priced to hurt.</div>',
     back, 'style="max-width:460px"');
 }
+/* A deal is somebody bringing you a bet with a date on it. Each kind is
+   drawn as where it happens - the bank for a bridge loan, the market for
+   stock, the airport for an import, the land - with whoever introduced it standing in it,
+   in their own colours. Read from the deal; the picture draws nothing new. */
+const DEAL_MOMENTS = {flip: ['street', 'cast', 'letter'], place: ['office', 'cast investor', 'letter'], distress: ['market', 'cast', 'boxes'],
+  bridge: ['bank', 'cast', 'cash letter'], arbitrage: ['airport', 'cast', 'boxes suitcase'], landbank: ['land', 'cast', 'sand'],
+  franchise: ['office', 'cast', 'cert'], equity: ['market', 'cast', 'gen boxes']};
+function dealMoment(d){
+  const row = DEAL_MOMENTS[d.type] || ['bank', 'cast', 'cash'];
+  const cast = d.castId ? (S.cast || []).find(function(c){ return c.id === d.castId; }) || null : null;
+  return {place: row[0], sign: '', who: row[1].split(' ').map(function(w){ return w === 'cast' && !cast ? 'investor' : w; }), props: row[2].split(' '), cast: cast, title: ''};
+}
+/* the deals on the table as pictures: each opens its card */
+function dealTilesHTML(ds){
+  return ds.map(function(d){
+    return '<button class="dealtile" data-a="hot" data-k="deal" data-c="' + esc(d.id) + '" aria-label="' + esc(d.name + ', upside ' + Math.round(d.ret * 100) + '%, ' + Math.round((1 - d.risk) * 100) + '% work out, ' + fmt(d.capital)) + '">' +
+      '<span class="gfx dpic">' + momentSceneSVG(dealMoment(d), 220) + '</span>' +
+      '<b>' + esc(d.name) + '</b>' + (d.via ? '<span class="dvia">via ' + esc(d.via) + '</span>' : '') +
+      /* what you cannot afford says so before you tap it */
+      (S.fin.cash < d.capital ? '<span class="dshort">short ' + fmt(Math.round(d.capital - S.fin.cash)) + '</span>' : '') +
+      '<span class="dmeta"><span class="good">+' + Math.round(d.ret * 100) + '%</span> · ' + Math.round((1 - d.risk) * 100) + '% work out · ' + fmt(d.capital) + '</span></button>';
+  }).join('');
+}
+/* a deal's card: the picture, the terms, what it is, and Commit or Pass -
+   the row's own buttons, the refusal on a short Commit included */
+function dealCardHTML(id){
+  const d = (S.deals || []).find(function(x){ return x.id === id; });
+  if(!d) return modalHTML('<h2>Gone</h2>', '<div class="tiny muted">That deal is off the table.</div>', '<button class="btn primary" data-a="close">Close</button>');
+  const short = S.fin.cash < d.capital;
+  return modalHTML('<h2>' + esc(d.name) + '</h2><div class="tiny muted">' + d.turns + ' quarter' + (d.turns === 1 ? '' : 's') + (d.via ? ' · introduced by ' + esc(d.via) : '') + ' · expires ' + dateLabel(d.expires) + '</div>',
+    '<div class="moment">' + momentSceneSVG(dealMoment(d), 240) + '</div>' +
+    ringsHTML([{ico: 'trend', label: 'Upside', v: Math.min(100, d.ret * 100), text: '+' + Math.round(d.ret * 100) + '%', tone: 'var(--good)'}, {ico: 'target', label: 'Work out', v: (1 - d.risk) * 100, text: Math.round((1 - d.risk) * 100) + '%'}]) +
+    '<div class="tiny muted" style="margin-top:8px">' + esc(d.desc) + '</div>' +
+    '<div class="row wrap" style="margin-top:12px;gap:6px">' +
+      (short ? '<span class="chip y">short ' + fmt(Math.round(d.capital - S.fin.cash)) + '</span>' : '') +
+      '<button class="btn sm primary" data-a="takedeal" data-d="' + esc(d.id) + '"' + (short ? ' disabled aria-disabled="true" title="Needs ' + fmt(d.capital) + ' · you have ' + fmt(S.fin.cash) + ' · short ' + fmt(Math.round(d.capital - S.fin.cash)) + ' · pass it and it is gone"' : '') + '>Commit ' + fmt(d.capital) + '</button>' +
+      '<button class="btn sm" data-a="passdeal" data-d="' + esc(d.id) + '">Pass</button></div>' +
+    '<div class="tiny muted" style="margin-top:8px">The odds are honest averages, not promises. Being introduced is not the same as being protected.</div>',
+    '<button class="btn" data-a="goto" data-t="money" data-s="deals">The deals</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
+}
+/* the people offering to go into business with you, as faces: the stake as the ring */
+function offerFacesHTML(offers){
+  return offers.map(function(o){
+    return '<button class="facebtn" data-a="hot" data-k="offer" data-c="' + esc(o.id) + '" aria-label="' + esc(o.name + ', ' + o.equity + '% for ' + fmt(o.capital)) + '">' +
+      faceBadgeSVG(o.name, o.equity || 0, '#6b4fbf') + '<span>' + esc(String(o.name).split(' ')[0]) + '</span><small>' + o.equity + '% · ' + fmt(o.capital) + '</small></button>';
+  }).join('');
+}
+function offerCardHTML(id){
+  const o = (S.offers || []).find(function(x){ return x.id === id; });
+  if(!o) return modalHTML('<h2>Gone</h2>', '<div class="tiny muted">They have taken their money elsewhere.</div>', '<button class="btn primary" data-a="close">Close</button>');
+  return modalHTML('<h2>' + esc(o.name) + '</h2><div class="tiny muted">' + o.equity + '% of the company for ' + fmt(o.capital) + '</div>',
+    '<div class="moment">' + momentSceneSVG({place: 'office', sign: '', who: ['investor'], props: ['cash'], cast: null, title: ''}, 240) + '</div>' +
+    '<div class="tiny muted" style="margin-top:8px">' + esc(o.bg) + '. Brings <b>' + esc(o.skill) + '</b>. ' + esc(o.ask) + '.</div>' +
+    '<div class="row wrap" style="margin-top:12px;gap:6px"><button class="btn sm primary" data-a="takepartner" data-i="' + esc(o.id) + '">Shake hands</button>' +
+    '<button class="btn sm ghost" data-a="declineoffer" data-i="' + esc(o.id) + '">Not now</button></div>' +
+    '<div class="tiny muted" style="margin-top:8px">A partner takes a permanent share of everything. Choose the person, not the money.</div>',
+    '<button class="btn" data-a="goto" data-t="money" data-s="deals">The deals</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){
@@ -427,6 +485,8 @@ function hotModal(M){
       '<div class="tiny muted" style="margin-top:8px">Automation raises output per person and improves stock control. Compliance is what an assessment will be judged against.</div>',
       back, 'style="max-width:460px"');
   }
+  if(M.kind === 'deal') return dealCardHTML(M.id);
+  if(M.kind === 'offer') return offerCardHTML(M.id);
   if(M.kind === 'commit'){
     if(!S.biz) return modalHTML('<h2>No company</h2>', '', '<button class="btn primary" data-a="close">Close</button>');
     return commitCardHTML(S.biz, M.id);
