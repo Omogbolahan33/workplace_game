@@ -1,7 +1,8 @@
 /*
   How visual is the game? The first screen of every route, measured.
 
-    node tools/visual.mjs            the table, and the mean
+    node tools/visual.mjs            the table, and the means, for a fresh run
+                                     and for a fixed mid-game world
     node tools/visual.mjs --json     the same, as JSON
 
   The target is a game that is mostly picture - the scene, icons, gauges, bars -
@@ -91,25 +92,61 @@ const measure = (scrollY) => p.evaluate((scrollY) => {
 }, scrollY);
 const pct = (g, t) => g + t ? Math.round(g / (g + t) * 1000) / 10 : 0;
 
-const rows = [];
-for (const [t, s] of routes) {
-  await p.evaluate(([t, s]) => { UI.modal = null; UI.tab = t; UI.sub = s; window.scrollTo(0, 0); render(); window.scrollTo(0, 0); }, [t, s]);
-  await p.waitForTimeout(450);
-  const height = await p.evaluate(() => document.documentElement.scrollHeight);
-  let gfx = 0, text = 0, first = null;
-  for (let y = 0; y < height; y += 844) {
-    const m = await measure(y);
-    gfx += m.gfx; text += m.text;
-    if (first === null) first = pct(m.gfx, m.text);
+/* every route, one screenful at a time */
+async function measureRoutes(){
+  const rows = [];
+  for (const [t, s] of routes) {
+    await p.evaluate(([t, s]) => { UI.modal = null; UI.tab = t; UI.sub = s; window.scrollTo(0, 0); render(); window.scrollTo(0, 0); }, [t, s]);
+    await p.waitForTimeout(450);
+    const height = await p.evaluate(() => document.documentElement.scrollHeight);
+    let gfx = 0, text = 0, first = null;
+    for (let y = 0; y < height; y += 844) {
+      const m = await measure(y);
+      gfx += m.gfx; text += m.text;
+      if (first === null) first = pct(m.gfx, m.text);
+    }
+    rows.push({ route: t + (s ? '/' + s : ''), visual: pct(gfx, text), first: first, screens: Math.ceil(height / 844) });
   }
-  rows.push({ route: t + (s ? '/' + s : ''), visual: pct(gfx, text), first: first, screens: Math.ceil(height / 844) });
+  return rows;
 }
+/* Two worlds. A fresh run is the first thing a player sees, but most of the
+   game is played in the middle of one, and a fresh run has no company, no
+   staff, no board and nobody looking for work - so the screens that fill up
+   with play were measured empty. The mid-game world is fixed: one seed, a
+   company, six quarters answered with the first option, a hire into the
+   company and one into the house, and a board. */
+const fresh = await measureRoutes();
+await p.evaluate(() => {
+  newGame({ name: 'Tunde', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  S.flags.fm = 1; S.fin.cash = 30000000;
+  startBiz('food', 'Mama T Kitchen', 4000000, null);
+  for (let q = 0; q < 6; q++) {
+    advanceQuarter();
+    const m = UI.modal;
+    if (m && m.type === 'event' && m.ev && m.ev.opts && m.ev.opts.length) {
+      resolveOption(m.ev, m.ev.opts[0]);
+      const th = m.thread || m.ev.thread;
+      if (th && (S.threads || []).indexOf(th) >= 0) afterThreadChoice(th, m.ev.opts[0]);
+    }
+    UI.modal = null;
+    if (q === 1 && (S.candidates || []).length) hire(S.candidates[0]);
+    if (q === 2) { if (!S.houseCands) refreshHouseCands(); const c = (S.houseCands || [])[0]; if (c) { hireHouse(c, c.ask || c.salary, 'you'); S.houseCands = S.houseCands.filter((x) => x !== c); } }
+  }
+  ensureGov(S.biz); grantPct(S.biz, 22, { name: 'Lekki Ventures', kind: 'vc' }); formBoard(S.biz, {});
+  const t = document.querySelector('#toastHost'); if (t) t.innerHTML = '';
+});
+const mid = await measureRoutes();
 await b.close();
 
-const avg = (k) => Math.round(rows.reduce((a, r) => a + r[k], 0) / rows.length * 10) / 10;
-if (json) console.log(JSON.stringify({ page: avg('visual'), first: avg('first'), rows }, null, 1));
+const avg = (rows, k) => Math.round(rows.reduce((a, r) => a + r[k], 0) / rows.length * 10) / 10;
+if (json) console.log(JSON.stringify({ fresh: { page: avg(fresh, 'visual'), first: avg(fresh, 'first'), rows: fresh },
+  mid: { page: avg(mid, 'visual'), first: avg(mid, 'first'), rows: mid } }, null, 1));
 else {
-  console.log('route'.padEnd(22) + 'whole page'.padStart(11) + 'first screen'.padStart(14) + '  screens');
-  for (const r of rows) console.log(r.route.padEnd(22) + (r.visual + '%').padStart(11) + (r.first + '%').padStart(14) + String(r.screens).padStart(9));
-  console.log('\nvisual, mean of ' + rows.length + ' routes: whole page ' + avg('visual') + '% · first screen ' + avg('first') + '%');
+  console.log(''.padEnd(22) + 'fresh run'.padStart(25) + 'mid-game'.padStart(30));
+  console.log('route'.padEnd(22) + ('whole page'.padStart(11) + 'first screen'.padStart(14) + '  screens').repeat(2));
+  const cols = (r) => (r.visual + '%').padStart(11) + (r.first + '%').padStart(14) + String(r.screens).padStart(9);
+  fresh.forEach((r, i) => console.log(r.route.padEnd(22) + cols(r) + cols(mid[i])));
+  console.log('\nvisual, mean of ' + fresh.length + ' routes:');
+  console.log('  fresh run   whole page ' + avg(fresh, 'visual') + '% · first screen ' + avg(fresh, 'first') + '%');
+  console.log('  mid-game    whole page ' + avg(mid, 'visual') + '% · first screen ' + avg(mid, 'first') + '%');
 }
