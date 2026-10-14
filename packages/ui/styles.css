@@ -665,6 +665,7 @@ body.terse .prose{display:none}
 .storydots{display:flex;gap:4px;margin-top:5px}
 .storydots i{display:block;width:16px;height:5px;border-radius:3px;background:rgba(255,255,255,.12)}
 .storydots i.on{background:var(--acc)}
+.trackchart{width:100%;height:auto;display:block;margin:2px 0 4px}
 .wfchart{width:100%;height:auto;display:block;margin:4px 0 2px}
 .chron{margin-top:4px}
 .lifeline{width:100%;height:auto;display:block;margin:2px 0 10px}

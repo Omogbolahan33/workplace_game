@@ -18,9 +18,12 @@ function viewOutlets(){
   const b = S.biz; if(!b) return '';
   const T = BIZ.find(function(x){return x.id===b.type;});
   let h = '<div class="card"><h3>Units <span class="tag">'+outletCount(b)+' \u00b7 '+fmt(Math.round(outletRent(b)*S.cumInfl/b.startInfl))+'/q rent</span></h3>';
-  h += '<div class="tiny muted" style="margin-bottom:10px">Each unit has its own lease, its own condition and its own staff. '+
+  h += '<div class="tiny muted prose" style="margin-bottom:10px">Each unit has its own lease, its own condition and its own staff. '+
     'Condition decays with trade and can be held up with maintenance spend. Neglected units quietly lose you the customers standing in them.</div>';
-  (b.outlets||[]).forEach(function(o){
+  /* world-first: each unit a tile, condition as the ring, opening the card
+     that holds its four moves - the same card a branch down the street opens */
+  if(sceneFirst()) h += '<div class="facerow">'+outletTilesHTML(b)+'</div>';
+  else (b.outlets||[]).forEach(function(o){
     const cm = CITIES.find(function(c){ return c.id===(o.city||S.city); }) || CITY();
     const cond = o.cond===undefined?80:o.cond;
     const condCol = cond>=65?'var(--good)':cond>=40?'var(--warn)':'var(--bad)';

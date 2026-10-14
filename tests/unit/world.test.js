@@ -697,3 +697,33 @@ test('the engine room draws its trouble: one picture per kind, opening the card 
   assert.match(html, /data-a="hot" data-k="customers"/, 'being owed does not open the customers');
   assert.equal(JSON.stringify(C.S), before, 'drawing the trouble changed the run');
 });
+
+test('each unit is a branch down the street that opens its card, with the four moves of its row', async () => {
+  const C = await world();
+  C.S.fin.cash = 40000000;
+  C.startBiz('retail', 'Ade Stores', 4000000, null);
+  const b = C.S.biz;
+  b.outlets.push(Object.assign({}, b.outlets[0], { id: 'o-b2', name: 'Ade Stores — Ikeja', end: 1 }));
+  b.locations = 2;
+  C.UI.tab = 'work'; C.UI.sub = 'business';
+  const html = C.worldHTML();
+  assert.match(html, /data-a="hot" data-k="outlet" data-c="o-b2"/, 'the branch down the street cannot be tapped');
+  const card = C.outletCardHTML('o-b2');
+  assert.ok(card.includes(C.outletButtonsHTML(b, b.outlets[1])), 'the card does not carry the row\'s moves');
+  for (const a of ['rentnego', 'upgradeoutlet', 'maintainoutlet', 'closeoutlet']) assert.match(card, new RegExp('data-a="' + a + '" data-o="o-b2"'), a + ' is not on the card');
+  assert.match(C.outletTilesHTML(b), /RENEWAL DUE|lease/);
+  assert.match(C.outletCardHTML('gone'), /closed/);
+  C.UI.tab = 'overview'; C.UI.sub = '';
+});
+
+test('the track record is revenue and profit as bars, profit on its own scale', async () => {
+  const C = await world();
+  const hh = [{ turn: 1, revenue: 6500000, profit: 380000 }, { turn: 2, revenue: 7000000, profit: -120000 }];
+  const svg = C.trackChartSVG(hh);
+  assert.equal((svg.match(/<rect /g) || []).length, 4);
+  assert.match(svg, /fill="#ff5f6d"/, 'a loss quarter is not red');
+  /* a profit a twentieth of revenue is still drawn tall enough to see */
+  const heights = [...svg.matchAll(/height="([\d.]+)" rx="2" fill="#2fd47a"/g)].map((m) => +m[1]);
+  assert.ok(heights[0] > 10, 'profit is drawn at revenue scale and vanishes');
+  assert.equal(C.trackChartSVG([]), '');
+});

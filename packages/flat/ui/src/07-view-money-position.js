@@ -346,7 +346,9 @@ function viewBiz(){
   h += '<div class="card" style="margin-top:12px"><h3>Track record</h3>';
   const hh = b.history.slice(-8).reverse();
   if(!hh.length) h += '<div class="tiny muted">No quarters closed yet.</div>';
-  hh.forEach(function(x){
+  /* world-first: the quarters as bars, oldest to newest - revenue, and profit beside it */
+  else if(sceneFirst()) h += trackChartSVG(hh.slice().reverse());
+  if(!sceneFirst()) hh.forEach(function(x){
     h += '<div class="kv"><span class="muted">'+dateLabel(x.turn)+'</span><span>'+fmt(x.revenue)+' rev · <span class="'+(x.profit>=0?'good':'bad')+'">'+fmt(x.profit)+'</span></span></div>';
   });
   h += '</div>';

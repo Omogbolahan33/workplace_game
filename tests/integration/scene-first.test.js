@@ -309,3 +309,23 @@ test('world-first the engine room is pictures of its trouble; (i) brings the sen
   assert.match(C.viewEngine(), /cash-negative/);
   C.UI.details = false;
 });
+
+test('the units are tiles and the track record a chart; (i) brings the rows back', async () => {
+  stubDOM();
+  const C = await core();
+  (await ui()).install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.fin.cash = 40000000;
+  C.startBiz('retail', 'Ade Stores', 4000000, null);
+  for (let i = 0; i < 3; i++) { C.advanceQuarter(); C.UI.modal = null; }
+  const b = C.S.biz;
+  C.UI.details = false;
+  assert.ok(C.viewOutlets().includes(C.outletTilesHTML(b)));
+  assert.doesNotMatch(C.viewOutlets(), /data-a="maintainoutlet"/);
+  assert.match(C.viewOutlets(), /data-a="openoutlet"/, 'opening a unit went with the rows');
+  assert.match(C.viewBiz(), /class="gfx trackchart"/);
+  C.UI.details = true;
+  assert.match(C.viewOutlets(), /data-a="maintainoutlet"/);
+  assert.doesNotMatch(C.viewBiz(), /trackchart/);
+  C.UI.details = false;
+});

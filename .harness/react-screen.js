@@ -677,9 +677,17 @@ Date.now = () => FROZEN_AT;
          fixture reached nothing" would fail the gate for the grouping working
          exactly as the game's own grouping does. */
       const own = read(M[name]());
+      /* world-first a screen's rows can be tiles whose controls are on the card
+         each opens - the same core card in both renderers. The branch is still
+         reached if it is one tap away, so the cards behind the screen's tiles
+         are read with it; the comparison above is of the screen itself. */
+      const behind = (String(M[name]()).match(/data-a="hot" data-k="[^"]+"(?: data-c="[^"]*")?/g) || []).map((t) => {
+        const k = /data-k="([^"]+)"/.exec(t)[1], c = /data-c="([^"]*)"/.exec(t);
+        try { return read(M.hotModal({ type: 'hot', kind: k, id: c ? c[1] : undefined })).body; } catch (e) { return ''; }
+      }).join(' ');
       for (const [rname, rstate, re, label] of REACH) {
         if (rname !== name || rstate !== state.name) continue;
-        if (!re.test(own.body)) {
+        if (!re.test(own.body) && !re.test(behind)) {
           bad.push(name + ' · ' + state.name + ': this fixture was supposed to reach ' + label +
             ', and the screen does not show it - the comparison is weaker than it looks');
         }

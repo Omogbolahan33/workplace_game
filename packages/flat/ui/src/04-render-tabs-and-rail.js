@@ -99,7 +99,7 @@ function applyDisclosure(){
     /* ...nor a picture: folding is for text in the way, and a card that is a
        drawing - a waterfall, the cash cycle, what it owns and owes, the demand
        meter, the register, a life - is the thing the screen is for */
-    if(card.querySelector('.wfchart,.wccycle,.posbars,.dmeter,.regpic,.lifeline,.gpic')) return;
+    if(card.querySelector('.wfchart,.wccycle,.posbars,.dmeter,.regpic,.lifeline,.gpic,.trackchart')) return;
     const label = (h3.textContent||'').trim().slice(0,40);
     const ck = tab+'|'+n+'|'+label;
     /* first two stay open - or, with the explanations folded away (the

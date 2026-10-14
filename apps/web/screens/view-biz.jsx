@@ -31,7 +31,7 @@
 */
 import {
   S, fmt, esc, pct, bar, BIZ, TRAITS, bizValue, startBizCost, priceBand,
-  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML, UI, staffStripBody, applicantFacesHTML, companyMeterInner
+  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML, UI, staffStripBody, applicantFacesHTML, companyMeterInner, trackChartSVG
 } from '@ledger/core';
 
 /* --------------------------------------------------------------------------
@@ -393,6 +393,9 @@ export function BizTrackRecordCard() {
       <h3>Track record</h3>
       {!hh.length ? (
         <div className="tiny muted">No quarters closed yet.</div>
+      ) : !UI.details ? (
+        /* world-first: the quarters as bars, oldest to newest */
+        <div style={{ display: 'contents' }} dangerouslySetInnerHTML={{ __html: trackChartSVG(hh.slice().reverse()) }} />
       ) : (
         hh.map((x, i) => (
           <div className="kv" key={i}>

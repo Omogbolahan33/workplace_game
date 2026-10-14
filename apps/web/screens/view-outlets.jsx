@@ -12,7 +12,7 @@
   and so does each city's `Open a unit`, whose cost differs by the city's rent
   multiplier. The three numbers share one function here, so they cannot drift.
 */
-import { S, fmt, bar, CITY, CITIES, BIZ, outletCount, outletRent, outletStaff } from '@ledger/core';
+import { S, fmt, bar, CITY, CITIES, BIZ, outletCount, outletRent, outletStaff, UI, outletTilesHTML } from '@ledger/core';
 
 export default function ViewOutlets() {
   const b = S.biz;
@@ -36,12 +36,14 @@ export default function ViewOutlets() {
       <h3>
         Units <span className="tag">{outletCount(b)} · {fmt(Math.round(outletRent(b) * S.cumInfl / b.startInfl))}/q rent</span>
       </h3>
-      <div className="tiny muted" style={{ marginBottom: '10px' }}>
+      <div className="tiny muted prose" style={{ marginBottom: '10px' }}>
         Each unit has its own lease, its own condition and its own staff. Condition decays with trade and can be
         held up with maintenance spend. Neglected units quietly lose you the customers standing in them.
       </div>
 
-      {outlets.map((o) => {
+      {/* world-first: each unit a tile that opens its card, as a branch down the street does */}
+      {!UI.details ? <div className="facerow" dangerouslySetInnerHTML={{ __html: outletTilesHTML(b) }} /> : null}
+      {!UI.details ? null : outlets.map((o) => {
         const cm = CITIES.find((c) => c.id === (o.city || S.city)) || CITY();
         const cond = o.cond === undefined ? 80 : o.cond;
         const col = condColour(cond);

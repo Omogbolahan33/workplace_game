@@ -1,6 +1,6 @@
 
 
-import { ASSETS, BIZ, CAREER, CITY, D, PRINCIPLES, S, TRAITS, applicantFacesHTML, bar, bizTypeTileHTML, bizValue, buyoutExternal, clamp, companyMeterInner, dateLabel, esc, expandCost, fmt, foldHTML, hoursBudget, hoursLeft, lifeInner, marketSalary, needs, ownerTime, pct, positionStrip, priceBand, sceneFirst, sleepDebt, staffMonthly, staffStripHTML, startBizCost, statRow, weeklyFreeHours, worthInner } from '@ledger/core';
+import { ASSETS, BIZ, CAREER, CITY, D, PRINCIPLES, S, TRAITS, applicantFacesHTML, bar, bizTypeTileHTML, bizValue, buyoutExternal, clamp, companyMeterInner, dateLabel, esc, expandCost, fmt, foldHTML, hoursBudget, hoursLeft, lifeInner, marketSalary, needs, ownerTime, pct, positionStrip, priceBand, sceneFirst, sleepDebt, staffMonthly, staffStripHTML, startBizCost, statRow, trackChartSVG, weeklyFreeHours, worthInner } from '@ledger/core';
 import { viewMoneyBudget, viewMoneyProperty } from './06-view-money-budget.js';
 
 /* Generated from src/07-view-money-position.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
@@ -350,7 +350,9 @@ export function viewBiz(){
   h += '<div class="card" style="margin-top:12px"><h3>Track record</h3>';
   const hh = b.history.slice(-8).reverse();
   if(!hh.length) h += '<div class="tiny muted">No quarters closed yet.</div>';
-  hh.forEach(function(x){
+  /* world-first: the quarters as bars, oldest to newest - revenue, and profit beside it */
+  else if(sceneFirst()) h += trackChartSVG(hh.slice().reverse());
+  if(!sceneFirst()) hh.forEach(function(x){
     h += '<div class="kv"><span class="muted">'+dateLabel(x.turn)+'</span><span>'+fmt(x.revenue)+' rev · <span class="'+(x.profit>=0?'good':'bad')+'">'+fmt(x.profit)+'</span></span></div>';
   });
   h += '</div>';

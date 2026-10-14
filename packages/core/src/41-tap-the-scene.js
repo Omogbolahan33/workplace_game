@@ -81,6 +81,8 @@ function workTaps(st){
     (st.cspots || []).forEach(function(c){ out.push(hotZone(c.x, c.y, Math.max(16, c.w), Math.max(30, c.h), 'Your customers: price, marketing, quality', {a: 'hot', k: 'customers'})); });
     /* your staff, at their stations, over the premises: each opens their card */
     (st.spots || []).forEach(function(sp){ out.push(hotZone(sp.x, sp.y, Math.max(16, sp.w), Math.max(30, sp.h), 'Your staff', {a: 'hot', k: 'staff', c: sp.id})); });
+    /* the units down the street: each opens its own card */
+    (st.branchspots || []).forEach(function(sp){ out.push(hotZone(sp.x, sp.y, sp.w, sp.h, 'Your unit down the street', {a: 'hot', k: 'outlet', c: sp.id})); });
     /* the stock beside it, and you */
     if(st.stockspot) out.push(hotZone(st.stockspot.x, st.stockspot.y, Math.max(24, st.stockspot.w), Math.max(24, st.stockspot.h), 'Your stock and your suppliers', {a: 'hot', k: 'stock'}));
     if(st.mespot) out.push(hotZone(st.mespot.x, st.mespot.y, st.mespot.w, st.mespot.h, 'You: what you take out of the company', {a: 'hot', k: 'owner'}));
@@ -755,6 +757,60 @@ function diagTilesHTML(diag){
       : '<div class="dealtile diagtile"' + tone + '>' + pic + words + '</div>';
   }).join('');
 }
+/* A unit's four moves - renew, extend, maintain, close - in one place: the
+   Units card's row and the card opened from the street, the refusal on a
+   short Extend included */
+function outletButtonsHTML(b, o){
+  const upCost = Math.round((o.fitout || 3000000) * 0.55 * (o.size || 1) * S.cumInfl);
+  return (o.end <= 1 ? '<button class="btn xs primary" data-a="rentnego" data-o="' + o.id + '">Negotiate the renewal</button>' : '') +
+    '<button class="btn xs" data-a="upgradeoutlet" data-o="' + o.id + '"' + (b.cash < upCost ? ' disabled aria-disabled="true" title="Needs ' + fmt(upCost) + ' in the company · it has ' + fmt(b.cash) + ' · short ' + fmt(Math.round(upCost - b.cash)) + '"' : '') + '>Extend (' + fmt(upCost) + ')</button>' +
+    '<button class="btn xs" data-a="maintainoutlet" data-o="' + o.id + '">Maintain</button>' +
+    ((b.outlets || []).length > 1 ? '<button class="btn xs bad" data-a="closeoutlet" data-o="' + o.id + '">Close unit</button>' : '');
+}
+/* the units as tiles: condition as the ring, the lease under the name */
+function outletTilesHTML(b){
+  return (b.outlets || []).map(function(o){
+    const cond = o.cond === undefined ? 80 : o.cond, tone = cond >= 65 ? 'var(--good)' : cond >= 40 ? 'var(--warn)' : 'var(--bad)';
+    const short = String(o.name).replace(/^.* — /, '');
+    return '<button class="facebtn" data-a="hot" data-k="outlet" data-c="' + esc(o.id) + '" aria-label="' + esc(o.name + ', condition ' + Math.round(cond)) + '"><span class="gfx hring" style="--p:' + Math.round(cond) + ';--c:' + tone + '"><em>' + worldIco('shop') + '</em></span>' +
+      '<span>' + esc(short) + '</span><small>' + (o.end > 0 ? 'lease ' + o.end + 'q' : 'RENEWAL DUE') + '</small></button>';
+  }).join('');
+}
+function outletCardHTML(id){
+  const b = S.biz, o = b ? (b.outlets || []).find(function(x){ return x.id === id; }) : null;
+  if(!o) return modalHTML('<h2>Not here</h2>', '<div class="tiny muted">That unit has closed.</div>', '<button class="btn primary" data-a="close">Close</button>');
+  const cm = CITIES.find(function(c){ return c.id === (o.city || S.city); }) || CITY(), cond = o.cond === undefined ? 80 : o.cond, st = outletStaff(b, o.id);
+  return modalHTML('<h2>' + esc(o.name) + '</h2><div class="tiny muted">' + esc(cm.label) + ' · size ' + (o.size || 1) + '</div>',
+    ringsHTML([{ico: 'wrench', label: 'Condition', v: cond}, {ico: 'calendar', label: 'Lease', v: Math.min(100, Math.max(0, o.end || 0) / 8 * 100), text: o.end > 0 ? o.end + 'q' : 'due', tone: o.end > 1 ? 'var(--info)' : 'var(--bad)'},
+      {ico: 'people', label: 'Staff here', v: Math.min(100, st.length * 25), text: String(st.length), tone: 'var(--acc)'}]) +
+    '<div class="kv" style="margin-top:10px"><span class="muted">Rent</span><span>' + fmt(Math.round((o.rent || 0) * S.cumInfl / b.startInfl)) + '/mo' + (o.hikes ? ' · ' + o.hikes + ' increase' + (o.hikes > 1 ? 's' : '') : '') + '</span></div>' +
+    '<div class="row wrap" style="margin-top:12px;gap:5px">' + outletButtonsHTML(b, o) + '</div>' +
+    '<div class="tiny muted" style="margin-top:8px">Condition decays with trade; neglected units quietly lose you the customers standing in them.</div>',
+    '<button class="btn" data-a="goto" data-t="work" data-s="business">The business</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:440px"');
+}
+/* the track record as a chart: revenue as one row of bars, profit as a row
+   under it on its own scale - a profit a twentieth of revenue is invisible
+   drawn against it - green above its line, red below it */
+function trackChartSVG(hh){
+  if(!hh.length) return '';
+  const W = 390, n = hh.length, bw = (W - 8) / n, R0 = 14, RH = 58, P0 = R0 + RH + 18, PH = 46;
+  const rHi = Math.max(1, Math.max.apply(null, hh.map(function(x){ return x.revenue || 0; })));
+  const pAbs = Math.max(1, Math.max.apply(null, hh.map(function(x){ return Math.abs(x.profit || 0); })));
+  const anyLoss = hh.some(function(x){ return (x.profit || 0) < 0; }), pMid = anyLoss ? P0 + PH / 2 : P0 + PH;
+  const short = function(v){ const a = Math.abs(v), sg = v < 0 ? '\u2212' : ''; return sg + (a >= 1e9 ? (a / 1e9).toFixed(1) + 'b' : a >= 1e6 ? (a / 1e6).toFixed(1) + 'm' : Math.round(a / 1e3) + 'k'); };
+  const H = P0 + PH + 22;
+  return '<svg class="gfx trackchart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(hh.map(function(x){ return dateLabel(x.turn) + ' revenue ' + fmt(x.revenue) + ', profit ' + fmt(x.profit); }).join('; ')) + '">' +
+    '<text x="4" y="10" font-size="9" fill="#f5b301">revenue</text><text x="4" y="' + (P0 - 6) + '" font-size="9" fill="#2fd47a">profit</text>' +
+    '<path d="M0 ' + pMid + ' H' + W + '" stroke="rgba(255,255,255,.2)"/>' +
+    hh.map(function(x, i){
+      const x0 = 4 + i * bw, r = x.revenue || 0, p = x.profit || 0, rh = r / rHi * RH, ph = Math.abs(p) / pAbs * (anyLoss ? PH / 2 : PH), cx = x0 + bw / 2, w = bw * .62;
+      return '<rect x="' + (cx - w / 2).toFixed(1) + '" y="' + (R0 + RH - rh).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + Math.max(1, rh).toFixed(1) + '" rx="2" fill="#f5b301" opacity=".85"/>' +
+        '<rect x="' + (cx - w / 2).toFixed(1) + '" y="' + (p >= 0 ? pMid - ph : pMid).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + Math.max(1, ph).toFixed(1) + '" rx="2" fill="' + (p >= 0 ? '#2fd47a' : '#ff5f6d') + '"/>' +
+        '<text x="' + cx.toFixed(1) + '" y="' + (p >= 0 ? pMid - ph - 3 : pMid + ph + 9).toFixed(1) + '" font-size="7.5" text-anchor="middle" fill="#dfe6ee">' + short(p) + '</text>' +
+        '<text x="' + cx.toFixed(1) + '" y="' + (H - 6) + '" font-size="8.5" text-anchor="middle" fill="#9aa7b6">' + esc(dateLabel(x.turn).replace(/^(Q\d) \d\d(\d\d)$/, "$1 '$2")) + '</text>';
+    }).join('') +
+    '<text x="' + (W - 4) + '" y="10" font-size="9" text-anchor="end" fill="#9aa7b6">' + short(rHi) + ' peak</text></svg>';
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){
@@ -872,6 +928,7 @@ function hotModal(M){
     return clauseCardHTML(S.biz, M.id);
   }
   if(M.kind === 'quarter') return quarterCardHTML(M.id);
+  if(M.kind === 'outlet') return outletCardHTML(M.id);
   if(M.kind === 'agenda') return agendaCardHTML(M.id);
   if(M.kind === 'deal') return dealCardHTML(M.id);
   if(M.kind === 'offer') return offerCardHTML(M.id);

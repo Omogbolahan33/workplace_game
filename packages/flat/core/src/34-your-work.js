@@ -73,6 +73,8 @@ function workLook(mode){
   const busy = Math.max(0, Math.min(1, (b.units || 0) / cap));
   return Object.assign(base, {kind: place, type: b.type, stage: stage, name: b.name || 'Your company', staffIds: (b.staff || []).map(function(x){ return x.id; }),
     staff: staff, customers: Math.round(busy * 6), branches: Math.max(0, Math.min(4, (b.locations || 1) - 1)),
+    /* the units beyond the first, in order: the branches down the street */
+    branchIds: (b.outlets || []).slice(1, 5).map(function(o){ return o.id; }),
     shifts: typeof leverActive === 'function' ? leverActive(b, 'shifts') : false,
     broke: (b.cash || 0) < 0, decline: stage === 'decline', seed: 37 + (b.type || '').length * 5,
     /* the stock on hand, as deep as the policy keeps it; and a supplier at the
@@ -151,7 +153,13 @@ function workSceneSVG(st, vh){
     st.stockspot = {x: a[0], y: b[1], w: b[0] - a[0], h: a[1] - b[1] + 2 * z};
   };
   /* branches: the same sign, further down the street */
-  const branches = () => { for (let i = 0; i < (st.branches || 0); i++) { const bx = box([6 + i * 52, groundY - 2], 40, 14, 30 + (i % 2) * 8, '#e3d8c2', {flat: '#cdbd9c'}); add(bx.parts.join('') + sign(bx, 3, 20, 34, 7, st.name, brand) + door(bx, 14, 12, 18, '#2a2f36')); } };
+  /* each one recorded where it stands, for the tap that opens that unit */
+  st.branchspots = [];
+  /* the zone is the branch's front wall, from its sign down to the pavement -
+     the box's footprint runs behind the main building, and a zone that size
+     overlapped the premises and its people */
+  const branches = () => { for (let i = 0; i < (st.branches || 0); i++) { const bh = 30 + (i % 2) * 8, bx = box([6 + i * 52, groundY - 2], 40, 14, bh, '#e3d8c2', {flat: '#cdbd9c'}); add(bx.parts.join('') + sign(bx, 3, 20, 34, 7, st.name, brand) + door(bx, 14, 12, 18, '#2a2f36'));
+    const id = (st.branchIds || [])[i]; if (id) { const a = zoomed(bx.fA[0], bx.fA[1]), c = zoomed(bx.fC[0], bx.fC[1]); st.branchspots.push({id: id, x: Math.min(a[0], c[0]), y: Math.min(a[1], c[1]), w: Math.abs(c[0] - a[0]), h: Math.abs(a[1] - c[1])}); } } };
   let me = {x: 300, y: 270};
   /* the rival's place, across the street at the back: its height is the size of
      their business, its sign theirs, and they are outside it when they are
