@@ -31,7 +31,7 @@
 */
 import {
   S, fmt, esc, pct, bar, BIZ, TRAITS, bizValue, startBizCost, priceBand,
-  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML, UI, staffStripBody, applicantFacesHTML, companyMeterInner, trackChartSVG, holderFacesHTML, extHolders
+  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML, UI, staffStripBody, applicantFacesHTML, companyMeterInner, trackChartSVG, holderFacesHTML, extHolders, opsTilesHTML
 } from '@ledger/core';
 
 /* --------------------------------------------------------------------------
@@ -141,55 +141,60 @@ export function OperationsCard() {
   return (
     <div className="card" style={{ marginTop: '12px' }}>
       <h3>Operations</h3>
-      <div className="slider">
-        <span>Price</span>
-        <input key={'price' + k} type="range" data-inp="bizprice" min="60" max="160" step="2"
-          defaultValue={Math.round(b.priceIdx * 100)} />
-        <span className="mono" style={{ textAlign: 'right' }}>{(b.priceIdx * 100).toFixed(0)}%</span>
-      </div>
-      <div className="tiny muted" style={{ margin: '-4px 0 10px 0' }}>
-        Demand elasticity for this sector is {T.elasticity.toFixed(1)}.{' '}
-        {T.elasticity > 1.3 ? 'Customers are price-sensitive here.' : 'Customers here are relatively insensitive to price.'}
-        <br />Your positioning (<b>{Math.round(b.positioning === undefined ? 45 : b.positioning)}/100</b>) earns you a band of{' '}
-        <b>{Math.round(band.lo * 100)}–{Math.round(band.hi * 100)}%</b> of list. Inside it, price behaves as above.
-        Outside it, you are making a claim this business has not earned.
-        {mem > 0.15 ? (
-          <>
-            <br /><span className="warn">
-              The market has learned to wait for your discounts ({Math.round(mem * 100)}%). Putting the price
-              back up will cost more than the cuts ever bought.
-            </span>
-          </>
-        ) : null}
-      </div>
+      {/* world-first: price, marketing and quality as gauges opening the customers' card */}
+      {!UI.details ? <div className="facerow" dangerouslySetInnerHTML={{ __html: opsTilesHTML(b) }} /> : (
+        <>
+          <div className="slider">
+            <span>Price</span>
+            <input key={'price' + k} type="range" data-inp="bizprice" min="60" max="160" step="2"
+              defaultValue={Math.round(b.priceIdx * 100)} />
+            <span className="mono" style={{ textAlign: 'right' }}>{(b.priceIdx * 100).toFixed(0)}%</span>
+          </div>
+          <div className="tiny muted" style={{ margin: '-4px 0 10px 0' }}>
+            Demand elasticity for this sector is {T.elasticity.toFixed(1)}.{' '}
+            {T.elasticity > 1.3 ? 'Customers are price-sensitive here.' : 'Customers here are relatively insensitive to price.'}
+            <br />Your positioning (<b>{Math.round(b.positioning === undefined ? 45 : b.positioning)}/100</b>) earns you a band of{' '}
+            <b>{Math.round(band.lo * 100)}–{Math.round(band.hi * 100)}%</b> of list. Inside it, price behaves as above.
+            Outside it, you are making a claim this business has not earned.
+            {mem > 0.15 ? (
+              <>
+                <br /><span className="warn">
+                  The market has learned to wait for your discounts ({Math.round(mem * 100)}%). Putting the price
+                  back up will cost more than the cuts ever bought.
+                </span>
+              </>
+            ) : null}
+          </div>
 
-      <div className="slider">
-        <span>Marketing</span>
-        <input key={'mark' + k} type="range" data-inp="bizmark" min="0" max="2000000" step="25000"
-          defaultValue={b.marketing} />
-        <span className="mono" style={{ textAlign: 'right' }}>{fmt(b.marketing)}</span>
-      </div>
-      <div className="tiny muted" style={{ margin: '-4px 0 10px 0' }}>
-        You are buying customers, not demand. Each one currently costs about <b>{fmt(b.cacQ || 0)}</b> to
-        acquire, and that rises as you fish out the market. You keep <b>{Math.round((1 - (b.churnQ || 0)) * 100)}%</b> of
-        them a quarter
-        {b.referredQ > 0 ? ', and ' : '.'}
-        {b.referredQ > 0 ? <b>{Math.round(b.referredQ)}</b> : null}
-        {b.referredQ > 0 ? ' more arrived because somebody told them to.' : null}
-        {b.rivalCut > 0.14 ? <> <span className="warn">Your rival has matched your price.</span></> : null}
-      </div>
+          <div className="slider">
+            <span>Marketing</span>
+            <input key={'mark' + k} type="range" data-inp="bizmark" min="0" max="2000000" step="25000"
+              defaultValue={b.marketing} />
+            <span className="mono" style={{ textAlign: 'right' }}>{fmt(b.marketing)}</span>
+          </div>
+          <div className="tiny muted" style={{ margin: '-4px 0 10px 0' }}>
+            You are buying customers, not demand. Each one currently costs about <b>{fmt(b.cacQ || 0)}</b> to
+            acquire, and that rises as you fish out the market. You keep <b>{Math.round((1 - (b.churnQ || 0)) * 100)}%</b> of
+            them a quarter
+            {b.referredQ > 0 ? ', and ' : '.'}
+            {b.referredQ > 0 ? <b>{Math.round(b.referredQ)}</b> : null}
+            {b.referredQ > 0 ? ' more arrived because somebody told them to.' : null}
+            {b.rivalCut > 0.14 ? <> <span className="warn">Your rival has matched your price.</span></> : null}
+          </div>
 
-      <div className="slider">
-        <span>Quality</span>
-        <input key={'qual' + k} type="range" data-inp="bizqual" min="0" max="600000" step="10000"
-          defaultValue={b.qualitySpendMonthly || 0} />
-        <span className="mono" style={{ textAlign: 'right' }}>{fmt(b.qualitySpendMonthly || 0)}/mo</span>
-      </div>
-      <div className="tiny muted" style={{ margin: '-4px 0 10px 0' }}>
-        Current product quality: <b>{Math.round(b.quality)}</b>/100. Quality is a process, not a purchase — it
-        takes about five quarters of sustained spend to move it, and a bigger business has to spend more just
-        to hold the line.
-      </div>
+          <div className="slider">
+            <span>Quality</span>
+            <input key={'qual' + k} type="range" data-inp="bizqual" min="0" max="600000" step="10000"
+              defaultValue={b.qualitySpendMonthly || 0} />
+            <span className="mono" style={{ textAlign: 'right' }}>{fmt(b.qualitySpendMonthly || 0)}/mo</span>
+          </div>
+          <div className="tiny muted" style={{ margin: '-4px 0 10px 0' }}>
+            Current product quality: <b>{Math.round(b.quality)}</b>/100. Quality is a process, not a purchase — it
+            takes about five quarters of sustained spend to move it, and a bigger business has to spend more just
+            to hold the line.
+          </div>
+        </>
+      )}
 
       {b.pendingDefects > 0 ? (
         <div className="tutorial bad" style={{ borderColor: 'rgba(255,95,109,.4)', color: '#ffb3b8', background: 'rgba(255,95,109,.08)' }}>

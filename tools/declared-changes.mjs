@@ -933,7 +933,7 @@ const EDITS = [
     why: 'castStripHTML() in the world-first view, the full tiles with the explanations shown; every action is one tap away on the face' },
   { marker: 'function viewBiz(){',
     name: 'viewBiz — world-first, the staff table is a strip of badges',
-    why: 'staffStripHTML() in the world-first view, the full table with the explanations shown; raise and let go are one tap away on the badge. The candidates are faces too (applicantFacesHTML), the same people queuing outside in the picture; the full offer cards with the explanations shown. The company card\'s six rows are one meter - sold, can make, wanted - and three gauges (companyMeterInner), and the track record is a chart (trackChartSVG); the largest outside holder and the minorities cards are one row of faces, the buy-outs on each holder\'s card (holderFacesHTML)' },
+    why: 'staffStripHTML() in the world-first view, the full table with the explanations shown; raise and let go are one tap away on the badge. The candidates are faces too (applicantFacesHTML), the same people queuing outside in the picture; the full offer cards with the explanations shown. The company card\'s six rows are one meter - sold, can make, wanted - and three gauges (companyMeterInner), and the track record is a chart (trackChartSVG); the largest outside holder and the minorities cards are one row of faces, the buy-outs on each holder\'s card (holderFacesHTML); Operations\' three sliders are three gauges opening the customers\' card, where the sliders and what their notes said now are (opsTilesHTML)' },
   { marker: 'function castStripHTML(cast)', addition: true,
     name: 'castStripHTML — the cast strip in its card',
     why: 'the string sheet takes the whole card; the React screen draws the card element itself around castStripBody(), so both put the same card in the section' },
@@ -1183,6 +1183,15 @@ const EDITS = [
   { marker: 'function holderCardHTML(id)', addition: true,
     name: 'holderCardHTML — an outside holder\'s card',
     why: 'stake and trust as gauges, what they paid and any preference, what they want, and the buy-outs: the largest holder\'s own (Buy them out) and every outside holder together, with the shortfall on a refused one; the way to the register and the board' },
+  { marker: 'function opsTilesHTML(b)', addition: true,
+    name: 'opsTilesHTML — price, marketing and quality as gauges',
+    why: 'the price against the band your positioning earns, what a customer costs against how many you keep, the quality you have; each opens the customers\' card with the three sliders' },
+  { marker: 'const BIZ_ICO', addition: true,
+    name: 'BIZ_ICO — what each kind of company is drawn as, small',
+    why: 'a shop, a meal, a truck, a laptop, a leaf, a crane, a brush, a factory, a briefcase, the sun' },
+  { marker: 'function portfolioBar(){',
+    name: 'portfolioBar — world-first, each company is a tile',
+    why: 'the kind of business as its icon, green when it makes money and red when it is in trouble, its revenue - the same switchbiz control the chip was, gold-edged when it is the company on screen; the valuation sentence is behind (i)' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

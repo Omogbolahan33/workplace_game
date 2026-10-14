@@ -708,6 +708,7 @@ div.diagtile{cursor:default;padding-bottom:8px}
 .facebtn .hring{width:50px;height:50px;border-radius:50%;display:grid;place-items:center;
   background:conic-gradient(var(--c) calc(var(--p) * 1%),rgba(255,255,255,.13) 0);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
 .facebtn .hring em{font-style:normal;width:39px;height:39px;border-radius:50%;background:var(--panel2);display:grid;place-items:center;font-size:20px;color:var(--acc)}
+.facebtn.on{border-color:rgba(245,179,1,.7);background:rgba(245,179,1,.08)}
 .facebtn small{max-width:70px;margin-top:-3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:var(--dim)}
 .covrow{padding:8px 0;border-bottom:1px solid var(--line)}
 .covbar{position:relative;display:block;height:10px;border-radius:5px;background:rgba(255,255,255,.08);margin:7px 0 4px}

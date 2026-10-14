@@ -201,6 +201,8 @@
    "00-cities.js: clamp, esc, fmt, foldHTML, pct",
    "03-startbizcost-one-price-for-every-picker.js: bizById, bizList, marketSalary, outletCount, staffCover, startBizCost",
    "17-negotiation.js: startNego",
+   "41-tap-the-scene.js: sceneFirst",
+   "32-the-world.js: worldIco",
    "26-governance-register-board.js: ensureGov, freeSeats, openResolutions",
    "22-everyday-life-vignette.js: modalHTML",
    "04-bizcapacity.js: hasGM, houseSalaryFor, outletStaff"
@@ -463,7 +465,7 @@
    "01-game-state.js: S, UI",
    "09-resolving-decisions.js: comingBack",
    "37-what-comes-back.js: ROAD_QUARTERS, roadAheadSVG",
-   "04-bizcapacity.js: cccOf, houseRoleAvail, houseSalaryFor, outletStaff",
+   "04-bizcapacity.js: cccOf, houseRoleAvail, houseSalaryFor, outletStaff, priceBand",
    "03-startbizcost-one-price-for-every-picker.js: bizList, commitBreak, commitDropCost, leverOf, marketSalary, staffMonthly, traitOf",
    "26-governance-register-board.js: archOf, boardOf, buyoutExternal, canShotgun, chairIsYours, chairOf, deedOf, dirVotes, extHolders, liquidationWaterfall, seatEntitlement, yourPct",
    "29-the-cast-who-remembers.js: castFaceHTML, castTileHTML, lifeRingsHTML, relationWord",

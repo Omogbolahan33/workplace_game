@@ -151,11 +151,25 @@ function renewContract(b, c){
   });
 }
 /* ------------------------------- The group ---------------------------------- */
+/* what each kind of company is drawn as, small */
+const BIZ_ICO = {retail: 'shop', food: 'meal', logi: 'truck', tech: 'laptop', agri: 'leaf', estate: 'crane', creative: 'brush', mfg: 'factory', proserv: 'briefs', energy: 'sun'};
 function portfolioBar(){
   const list = bizList();
   let h = '<div class="card"><div class="between"><h3 style="margin:0">Your companies</h3>'+
     '<span class="tiny muted">'+(list.length?list.length+' of 4':'None yet')+'</span></div>';
-  if(list.length){
+  if(list.length && sceneFirst()){
+    /* world-first: each company a tile - what kind of business it is, green
+       when it makes money and red when it is in trouble, its revenue - the
+       same switch as the chip, which is the company on screen when it is gold */
+    h += '<div class="facerow" style="margin:9px 0 2px">'+list.map(function(b){
+      const on = S.biz && S.biz.id===b.id;
+      const warn = (b.cash<0) || (b.diag||[]).some(function(d){ return d.level==='bad'; });
+      const m = (b.profit||0)/Math.max(1, b.revenue||0), tone = warn ? 'var(--bad)' : (b.profit||0) >= 0 ? 'var(--good)' : 'var(--warn)';
+      return '<button class="facebtn'+(on?' on':'')+'" data-a="switchbiz" data-b="'+b.id+'" aria-label="'+esc(b.name+', '+fmt(b.revenue)+' revenue'+(warn?', in trouble':''))+'">'+
+        '<span class="gfx hring" style="--p:'+Math.round(Math.max(8, Math.min(100, 50 + m*250)))+';--c:'+tone+'"><em>'+worldIco(BIZ_ICO[b.type]||'shop')+'</em></span>'+
+        '<span>'+esc(String(b.name).split(' ').slice(0,2).join(' '))+'</span><small>'+fmt(b.revenue)+'</small></button>';
+    }).join('')+'</div>';
+  } else if(list.length){
     h += '<div class="row wrap" style="gap:6px;margin:9px 0">';
     list.forEach(function(b){
       const on = S.biz && S.biz.id===b.id;
@@ -165,6 +179,8 @@ function portfolioBar(){
         ' <span class="tiny muted">'+fmt(b.revenue)+'</span></button>';
     });
     h += '</div>';
+  }
+  if(list.length){
     let rev=0, prof=0, staff=0, out=0;
     list.forEach(function(b){ rev+=b.revenue||0; prof+=b.profit||0; staff+=(b.staff||[]).length; out+=outletCount(b); });
     h += '<div class="grid g4" style="margin-top:4px">'+
@@ -173,7 +189,7 @@ function portfolioBar(){
       '<div><div class="tiny muted">Staff</div><div class="mid">'+staff+'</div></div>'+
       '<div><div class="tiny muted">Units</div><div class="mid">'+out+'</div></div>'+
       '</div>';
-    h += '<div class="tiny muted" style="margin-top:8px">Combined valuation '+fmt(bizValueTotal())+'. '+
+    h += '<div class="tiny muted prose" style="margin-top:8px">Combined valuation '+fmt(bizValueTotal())+'. '+
       'You are spread across '+list.length+' compan'+(list.length===1?'y':'ies')+
       (list.length>1? ' \u2014 your personal attention is divided, and a business without a general manager suffers most from it.':'.')+'</div>';
     let extMax=0, emptySeats=0, tabled=0;

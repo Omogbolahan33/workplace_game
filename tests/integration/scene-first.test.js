@@ -348,3 +348,24 @@ test('world-first the outside holders are one row of faces; (i) brings the holde
   assert.match(full, /Largest outside holder/); assert.match(full, /data-a="buyoutminority"/);
   C.UI.details = false;
 });
+
+test('world-first each company is a tile with the same switch; operations is three gauges; (i) brings both back', async () => {
+  stubDOM();
+  const C = await core();
+  (await ui()).install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.fin.cash = 60000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  C.startBiz('tech', 'Paystack Two', 6000000, null);
+  C.UI.details = false;
+  const bar = C.portfolioBar();
+  const ids = [...bar.matchAll(/class="facebtn[^"]*" data-a="switchbiz" data-b="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(ids.sort(), C.bizList().map((b) => b.id).sort(), 'not every company is a tile that switches to it');
+  assert.match(bar, /class="facebtn on" data-a="switchbiz" data-b="/);
+  assert.ok(C.viewBiz().includes(C.opsTilesHTML(C.S.biz)));
+  assert.doesNotMatch(C.viewBiz(), /data-inp="bizprice"/, 'the price slider is still on the sheet');
+  C.UI.details = true;
+  assert.match(C.portfolioBar(), /class="btn sm primary" data-a="switchbiz"/);
+  assert.match(C.viewBiz(), /data-inp="bizprice"/);
+  C.UI.details = false;
+});

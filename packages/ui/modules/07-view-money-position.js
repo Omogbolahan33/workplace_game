@@ -1,6 +1,6 @@
 
 
-import { ASSETS, BIZ, CAREER, CITY, D, PRINCIPLES, S, TRAITS, applicantFacesHTML, bar, bizTypeTileHTML, bizValue, buyoutExternal, clamp, companyMeterInner, dateLabel, esc, expandCost, extHolders, fmt, foldHTML, holderFacesHTML, hoursBudget, hoursLeft, lifeInner, marketSalary, needs, ownerTime, pct, positionStrip, priceBand, sceneFirst, sleepDebt, staffMonthly, staffStripHTML, startBizCost, statRow, trackChartSVG, weeklyFreeHours, worthInner } from '@ledger/core';
+import { ASSETS, BIZ, CAREER, CITY, D, PRINCIPLES, S, TRAITS, applicantFacesHTML, bar, bizTypeTileHTML, bizValue, buyoutExternal, clamp, companyMeterInner, dateLabel, esc, expandCost, extHolders, fmt, foldHTML, holderFacesHTML, hoursBudget, hoursLeft, lifeInner, marketSalary, needs, opsTilesHTML, ownerTime, pct, positionStrip, priceBand, sceneFirst, sleepDebt, staffMonthly, staffStripHTML, startBizCost, statRow, trackChartSVG, weeklyFreeHours, worthInner } from '@ledger/core';
 import { viewMoneyBudget, viewMoneyProperty } from './06-view-money-budget.js';
 
 /* Generated from src/07-view-money-position.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
@@ -231,25 +231,30 @@ export function viewBiz(){
   h += '</div>';
   // operations controls
   h += '<div class="card" style="margin-top:12px"><h3>Operations</h3>';
-  h += '<div class="slider"><span>Price</span><input type="range" data-inp="bizprice" min="60" max="160" step="2" value="'+Math.round(b.priceIdx*100)+'"><span class="mono" style="text-align:right">'+(b.priceIdx*100).toFixed(0)+'%</span></div>';
-  const _band = priceBand(b), _mem = b.discountMemory||0;
-  h += '<div class="tiny muted" style="margin:-4px 0 10px 0">Demand elasticity for this sector is '+T.elasticity.toFixed(1)+'. '+
-    (T.elasticity>1.3?'Customers are price-sensitive here.':'Customers here are relatively insensitive to price.')+
-    '<br>Your positioning (<b>'+Math.round(b.positioning===undefined?45:b.positioning)+'/100</b>) earns you a band of '+
-    '<b>'+Math.round(_band.lo*100)+'&ndash;'+Math.round(_band.hi*100)+'%</b> of list. Inside it, price behaves as above. '+
-    'Outside it, you are making a claim this business has not earned.'+
-    (_mem>0.15?'<br><span class="warn">The market has learned to wait for your discounts ('+Math.round(_mem*100)+'%). '+
-      'Putting the price back up will cost more than the cuts ever bought.</span>':'')+'</div>';
-  h += '<div class="slider"><span>Marketing</span><input type="range" data-inp="bizmark" min="0" max="2000000" step="25000" value="'+b.marketing+'"><span class="mono" style="text-align:right">'+fmt(b.marketing)+'</span></div>';
-  h += '<div class="tiny muted" style="margin:-4px 0 10px 0">You are buying customers, not demand. '+
-    'Each one currently costs about <b>'+fmt(b.cacQ||0)+'</b> to acquire, and that rises as you fish out the market. '+
-    'You keep <b>'+Math.round((1-(b.churnQ||0))*100)+'%</b> of them a quarter'+
-    (b.referredQ>0 ? ', and <b>'+Math.round(b.referredQ)+'</b> more arrived because somebody told them to.' : '.')+
-    (b.rivalCut>0.14 ? ' <span class="warn">Your rival has matched your price.</span>' : '')+'</div>';
-  h += '<div class="slider"><span>Quality</span><input type="range" data-inp="bizqual" min="0" max="600000" step="10000" value="'+(b.qualitySpendMonthly||0)+'"><span class="mono" style="text-align:right">'+fmt(b.qualitySpendMonthly||0)+'/mo</span></div>';
-  h += '<div class="tiny muted" style="margin:-4px 0 10px 0">Current product quality: <b>'+Math.round(b.quality)+'</b>/100. '+
-    'Quality is a process, not a purchase &mdash; it takes about five quarters of sustained spend to move it, '+
-    'and a bigger business has to spend more just to hold the line.</div>';
+  /* world-first: price, marketing and quality as gauges opening the customers'
+     card, which holds the three sliders and what their notes said */
+  if(sceneFirst()) h += '<div class="facerow">'+opsTilesHTML(b)+'</div>';
+  else {
+    h += '<div class="slider"><span>Price</span><input type="range" data-inp="bizprice" min="60" max="160" step="2" value="'+Math.round(b.priceIdx*100)+'"><span class="mono" style="text-align:right">'+(b.priceIdx*100).toFixed(0)+'%</span></div>';
+    const _band = priceBand(b), _mem = b.discountMemory||0;
+    h += '<div class="tiny muted" style="margin:-4px 0 10px 0">Demand elasticity for this sector is '+T.elasticity.toFixed(1)+'. '+
+      (T.elasticity>1.3?'Customers are price-sensitive here.':'Customers here are relatively insensitive to price.')+
+      '<br>Your positioning (<b>'+Math.round(b.positioning===undefined?45:b.positioning)+'/100</b>) earns you a band of '+
+      '<b>'+Math.round(_band.lo*100)+'&ndash;'+Math.round(_band.hi*100)+'%</b> of list. Inside it, price behaves as above. '+
+      'Outside it, you are making a claim this business has not earned.'+
+      (_mem>0.15?'<br><span class="warn">The market has learned to wait for your discounts ('+Math.round(_mem*100)+'%). '+
+        'Putting the price back up will cost more than the cuts ever bought.</span>':'')+'</div>';
+    h += '<div class="slider"><span>Marketing</span><input type="range" data-inp="bizmark" min="0" max="2000000" step="25000" value="'+b.marketing+'"><span class="mono" style="text-align:right">'+fmt(b.marketing)+'</span></div>';
+    h += '<div class="tiny muted" style="margin:-4px 0 10px 0">You are buying customers, not demand. '+
+      'Each one currently costs about <b>'+fmt(b.cacQ||0)+'</b> to acquire, and that rises as you fish out the market. '+
+      'You keep <b>'+Math.round((1-(b.churnQ||0))*100)+'%</b> of them a quarter'+
+      (b.referredQ>0 ? ', and <b>'+Math.round(b.referredQ)+'</b> more arrived because somebody told them to.' : '.')+
+      (b.rivalCut>0.14 ? ' <span class="warn">Your rival has matched your price.</span>' : '')+'</div>';
+    h += '<div class="slider"><span>Quality</span><input type="range" data-inp="bizqual" min="0" max="600000" step="10000" value="'+(b.qualitySpendMonthly||0)+'"><span class="mono" style="text-align:right">'+fmt(b.qualitySpendMonthly||0)+'/mo</span></div>';
+    h += '<div class="tiny muted" style="margin:-4px 0 10px 0">Current product quality: <b>'+Math.round(b.quality)+'</b>/100. '+
+      'Quality is a process, not a purchase &mdash; it takes about five quarters of sustained spend to move it, '+
+      'and a bigger business has to spend more just to hold the line.</div>';
+  }
   if(b.pendingDefects > 0)
     h += '<div class="tutorial bad" style="border-color:rgba(255,95,109,.4);color:#ffb3b8;background:rgba(255,95,109,.08)">'+
       '<b>'+Math.round(b.pendingDefects)+' defective units are already out there.</b> They were shipped at this quality '+

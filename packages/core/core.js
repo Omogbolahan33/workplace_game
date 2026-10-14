@@ -6774,11 +6774,25 @@ function renewContract(b, c){
   });
 }
 /* ------------------------------- The group ---------------------------------- */
+/* what each kind of company is drawn as, small */
+const BIZ_ICO = {retail: 'shop', food: 'meal', logi: 'truck', tech: 'laptop', agri: 'leaf', estate: 'crane', creative: 'brush', mfg: 'factory', proserv: 'briefs', energy: 'sun'};
 function portfolioBar(){
   const list = bizList();
   let h = '<div class="card"><div class="between"><h3 style="margin:0">Your companies</h3>'+
     '<span class="tiny muted">'+(list.length?list.length+' of 4':'None yet')+'</span></div>';
-  if(list.length){
+  if(list.length && sceneFirst()){
+    /* world-first: each company a tile - what kind of business it is, green
+       when it makes money and red when it is in trouble, its revenue - the
+       same switch as the chip, which is the company on screen when it is gold */
+    h += '<div class="facerow" style="margin:9px 0 2px">'+list.map(function(b){
+      const on = S.biz && S.biz.id===b.id;
+      const warn = (b.cash<0) || (b.diag||[]).some(function(d){ return d.level==='bad'; });
+      const m = (b.profit||0)/Math.max(1, b.revenue||0), tone = warn ? 'var(--bad)' : (b.profit||0) >= 0 ? 'var(--good)' : 'var(--warn)';
+      return '<button class="facebtn'+(on?' on':'')+'" data-a="switchbiz" data-b="'+b.id+'" aria-label="'+esc(b.name+', '+fmt(b.revenue)+' revenue'+(warn?', in trouble':''))+'">'+
+        '<span class="gfx hring" style="--p:'+Math.round(Math.max(8, Math.min(100, 50 + m*250)))+';--c:'+tone+'"><em>'+worldIco(BIZ_ICO[b.type]||'shop')+'</em></span>'+
+        '<span>'+esc(String(b.name).split(' ').slice(0,2).join(' '))+'</span><small>'+fmt(b.revenue)+'</small></button>';
+    }).join('')+'</div>';
+  } else if(list.length){
     h += '<div class="row wrap" style="gap:6px;margin:9px 0">';
     list.forEach(function(b){
       const on = S.biz && S.biz.id===b.id;
@@ -6788,6 +6802,8 @@ function portfolioBar(){
         ' <span class="tiny muted">'+fmt(b.revenue)+'</span></button>';
     });
     h += '</div>';
+  }
+  if(list.length){
     let rev=0, prof=0, staff=0, out=0;
     list.forEach(function(b){ rev+=b.revenue||0; prof+=b.profit||0; staff+=(b.staff||[]).length; out+=outletCount(b); });
     h += '<div class="grid g4" style="margin-top:4px">'+
@@ -6796,7 +6812,7 @@ function portfolioBar(){
       '<div><div class="tiny muted">Staff</div><div class="mid">'+staff+'</div></div>'+
       '<div><div class="tiny muted">Units</div><div class="mid">'+out+'</div></div>'+
       '</div>';
-    h += '<div class="tiny muted" style="margin-top:8px">Combined valuation '+fmt(bizValueTotal())+'. '+
+    h += '<div class="tiny muted prose" style="margin-top:8px">Combined valuation '+fmt(bizValueTotal())+'. '+
       'You are spread across '+list.length+' compan'+(list.length===1?'y':'ies')+
       (list.length>1? ' \u2014 your personal attention is divided, and a business without a general manager suffers most from it.':'.')+'</div>';
     let extMax=0, emptySeats=0, tabled=0;
@@ -15253,6 +15269,21 @@ function holderCardHTML(id){
     '<div class="tiny muted" style="margin-top:8px">They own a share of this and they did not build it. You can have the whole company back, in cash, today, at a premium.</div>',
     '<button class="btn" data-a="tab" data-t="gov">The register and the board</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
 }
+/* Operations, world-first: price, marketing and quality as three gauges,
+   each opening the customers' card that holds their sliders - the price
+   against the band your positioning earns, what a customer costs against how
+   many you keep, the quality you have against the hundred you could */
+function opsTilesHTML(b){
+  const band = priceBand(b), px = b.priceIdx || 1, kept = Math.round((1 - (b.churnQ || 0)) * 100);
+  const inBand = px >= band.lo && px <= band.hi;
+  const tile = function(ico, v, tone, name, what){
+    return '<button class="facebtn" data-a="hot" data-k="customers" aria-label="' + esc(name + ': ' + what) + '"><span class="gfx hring" style="--p:' + Math.round(Math.max(0, Math.min(100, v))) + ';--c:' + tone + '"><em>' + worldIco(ico) + '</em></span>' +
+      '<span>' + esc(name) + '</span><small>' + esc(what) + '</small></button>';
+  };
+  return tile('tag', (px - .6) * 100, inBand ? 'var(--good)' : px > band.hi ? 'var(--bad)' : 'var(--warn)', 'Price', Math.round(px * 100) + '% of ' + Math.round(band.lo * 100) + '\u2013' + Math.round(band.hi * 100)) +
+    tile('horn', kept, kept >= 60 ? 'var(--good)' : kept >= 35 ? 'var(--warn)' : 'var(--bad)', 'Marketing', 'keep ' + kept + '%') +
+    tile('star', b.quality || 0, (b.quality || 0) >= 60 ? 'var(--good)' : (b.quality || 0) >= 35 ? 'var(--warn)' : 'var(--bad)', 'Quality', Math.round(b.quality || 0) + '/100');
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){
@@ -15307,6 +15338,11 @@ function hotModal(M){
       '<div class="slider"><span>Price</span><input type="range" data-inp="bizprice" min="60" max="160" step="2" value="' + Math.round((b.priceIdx || 1) * 100) + '"><span class="mono" style="text-align:right">' + ((b.priceIdx || 1) * 100).toFixed(0) + '%</span></div>' +
       '<div class="slider"><span>Marketing</span><input type="range" data-inp="bizmark" min="0" max="2000000" step="25000" value="' + (b.marketing || 0) + '"><span class="mono" style="text-align:right">' + fmt(b.marketing || 0) + '</span></div>' +
       '<div class="slider"><span>Quality</span><input type="range" data-inp="bizqual" min="0" max="600000" step="10000" value="' + (b.qualitySpendMonthly || 0) + '"><span class="mono" style="text-align:right">' + fmt(b.qualitySpendMonthly || 0) + '/mo</span></div>' +
+      /* what the Operations card said under its sliders, in a line each */
+      '<div class="tiny muted" style="margin:-2px 0 8px">Your positioning earns a band of <b>' + Math.round(priceBand(b).lo * 100) + '\u2013' + Math.round(priceBand(b).hi * 100) + '%</b> of list; outside it you are making a claim the business has not earned.' +
+        ((b.discountMemory || 0) > 0.15 ? ' <span class="warn">The market has learned to wait for your discounts (' + Math.round(b.discountMemory * 100) + '%).</span>' : '') +
+        ((b.referredQ || 0) > 0 ? ' ' + Math.round(b.referredQ) + ' arrived because somebody told them to.' : '') +
+        ((b.rivalCut || 0) > 0.14 ? ' <span class="warn">Your rival has matched your price.</span>' : '') + '</div>' +
       /* selling on credit is selling to them: the Levers card's own slider */
       leverSliderHTML(b, 'cred') +
       '<div class="kv"><span class="muted">Owed by customers</span><span>' + fmt(Math.round(b.recv || 0)) + '</span></div>' +
@@ -15419,7 +15455,7 @@ function hotModal(M){
 }
 
 /* -------------------------------------------------------------------------
-   Everything above, exported. 789 names: the simulation's whole surface.
+   Everything above, exported. 791 names: the simulation's whole surface.
    ------------------------------------------------------------------------- */
 export {
   AGENDA_LOOK,
@@ -15433,6 +15469,7 @@ export {
   BID_BUYERS,
   BIZ,
   BIZ_EVENTS,
+  BIZ_ICO,
   BIZ_STAGES,
   BOARD_ARCHETYPES,
   BUDGET_KEYS,
@@ -15932,6 +15969,7 @@ export {
   openOutlet,
   openResolution,
   openResolutions,
+  opsTilesHTML,
   optHint,
   optLabel,
   optionDilution,

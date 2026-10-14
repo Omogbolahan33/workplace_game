@@ -37,8 +37,17 @@ for(const t of ['dash','people','deals','work','gov','group','invest','money','l
 }
 console.log('sliders per tab:', JSON.stringify(found));
 
+/* The business's three sliders: on the Work screen with the explanations
+   shown, and world-first on the customers' card the scene and the Operations
+   gauges open. Wherever they are, the claims are the same - a drag persists
+   through a render, the state moves, the label is live, focus survives. */
+function workSliders(){
+  M.UI.modal = null; M.UI.tab='work'; M.UI.scrollTop=true; M.render();
+  if(!DOC.querySelector('#main input[data-inp="bizprice"]')){ M.UI.modal = { type:'hot', kind:'customers' }; M.render(); }
+  console.log('business sliders on: '+(DOC.querySelector('#main input[data-inp="bizprice"]') ? 'the Work screen' : "the customers' card"));
+}
 // --- work-tab sliders ---
-M.UI.tab='work'; M.UI.scrollTop=true; M.render();
+workSliders();
 for(const name of ['bizprice','bizmark','bizqual']){
   const el = q(name);
   if(!el){ bad.push('missing slider: '+name); continue; }
@@ -85,7 +94,7 @@ if(el4){
 
 
 // --- budget sliders on the Money tab ---
-M.UI.tab='money'; M.UI.scrollTop=true; M.render();
+M.UI.modal = null; M.UI.tab='money'; M.UI.scrollTop=true; M.render();
 const buds=[...DOC.querySelectorAll('#main input[data-inp="budget"]')];
 console.log('budget sliders on money tab:', buds.length);
 let budok=0;
@@ -101,7 +110,7 @@ buds.forEach(function(el){
 console.log('budget sliders whose state updated:', budok+'/'+buds.length);
 
 // --- focus survives a re-render (keyboard use) ---
-M.UI.tab='work'; M.UI.scrollTop=true; M.render();
+workSliders();
 const f1 = q('bizprice');
 if(f1){
   f1.focus();

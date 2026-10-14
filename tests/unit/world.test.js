@@ -753,3 +753,18 @@ test('outside holders stand by the register and are faces on the sheet; each car
   assert.equal(JSON.stringify(C.S), before, 'looking at the holders changed the run');
   C.UI.tab = 'overview'; C.UI.sub = '';
 });
+
+test('operations is three gauges opening the customers card, which says what the slider notes said', async () => {
+  const C = await world();
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  const b = C.S.biz;
+  const tiles = C.opsTilesHTML(b);
+  assert.equal((tiles.match(/data-a="hot" data-k="customers"/g) || []).length, 3);
+  const card = C.hotModal({ type: 'hot', kind: 'customers' });
+  for (const k of ['bizprice', 'bizmark', 'bizqual']) assert.match(card, new RegExp('data-inp="' + k + '"'));
+  assert.match(card, /Your positioning earns a band of/);
+  b.rivalCut = 0.2; b.discountMemory = 0.3;
+  const warned = C.hotModal({ type: 'hot', kind: 'customers' });
+  assert.match(warned, /Your rival has matched your price/); assert.match(warned, /wait for your discounts/);
+});
