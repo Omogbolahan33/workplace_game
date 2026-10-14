@@ -288,3 +288,24 @@ test('waiting on you is tiles world-first and rows with (i), fires first in both
   assert.match(rows.split('</h3>')[1], /^<div style="border-left:2px solid var\(--bad\)/);
   C.UI.details = false;
 });
+
+test('world-first the engine room is pictures of its trouble; (i) brings the sentences back as rows', async () => {
+  stubDOM();
+  const C = await core();
+  (await ui()).install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  const b = C.S.biz;
+  b.cash = -200000; b.diag = C.bizDiag(b);
+  C.UI.details = false;
+  /* each drawing has its own ids, so two renders never match byte for byte:
+     the claim is one picture per kind of trouble, every sentence under one */
+  const room = C.viewEngine();
+  assert.equal((room.match(/class="dealtile diagtile"/g) || []).length, new Set(b.diag.slice(0, 7).map((d) => d.key)).size);
+  for (const d of b.diag.slice(0, 7)) assert.ok(room.includes(C.esc(d.text)), d.text + ' is not on the screen');
+  C.UI.details = true;
+  assert.doesNotMatch(C.viewEngine(), /diagtile/);
+  assert.match(C.viewEngine(), /cash-negative/);
+  C.UI.details = false;
+});

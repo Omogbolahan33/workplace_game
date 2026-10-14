@@ -124,15 +124,15 @@
  },
  "ui/src/09-view-levers.js": {
   "importAt": 1,
-  "importLen": 690,
+  "importLen": 705,
   "exports": [
-   691,
-   2018,
-   5727,
-   8826,
-   11446,
-   19084,
-   24917
+   706,
+   2033,
+   5742,
+   8841,
+   11461,
+   19380,
+   25213
   ]
  },
  "ui/src/10-view-household.js": {

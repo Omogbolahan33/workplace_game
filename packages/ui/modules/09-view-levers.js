@@ -1,5 +1,5 @@
 
-import { BIZ, BIZ_STAGES, CITIES, CITY, S, STAFF_ROLES, TRAITS, bar, contractBidOptions, coverButtonsHTML, dateLabel, dealTilesHTML, esc, fmt, foldHTML, hasGM, leverColCommit, leverColNego, leverColReact, leverColSet, leverSliderHTML, machineTilesHTML, offerFacesHTML, outletCount, outletRent, outletStaff, portfolioBar, positionInner, sceneFirst, staffMonthly, startBizCost } from '@ledger/core';
+import { BIZ, BIZ_STAGES, CITIES, CITY, S, STAFF_ROLES, TRAITS, bar, contractBidOptions, coverButtonsHTML, dateLabel, dealTilesHTML, diagTilesHTML, esc, fmt, foldHTML, hasGM, leverColCommit, leverColNego, leverColReact, leverColSet, leverSliderHTML, machineTilesHTML, offerFacesHTML, outletCount, outletRent, outletStaff, portfolioBar, positionInner, sceneFirst, staffMonthly, startBizCost } from '@ledger/core';
 import { viewBiz, viewCareer, viewLife } from './07-view-money-position.js';
 import { viewAgenda } from './08-view-people.js';
 import { viewHousehold } from './10-view-household.js';
@@ -154,7 +154,11 @@ export function viewEngine(){
        '<span class="tiny muted">Quarter '+(b.quarters||0)+' of trading</span></div>'+
        '<div class="tiny muted" style="margin-top:6px">'+esc(st.note)+'</div>';
   const diag = b.diag || [];
-  if(diag.length){
+  if(diag.length && sceneFirst()){
+    /* world-first: each kind of trouble drawn as what it looks like, its
+       sentences under it, opening the card where it is fixed */
+    h += '<hr class="sep"><div class="dealgrid diaggrid">'+diagTilesHTML(diag.slice(0,7))+'</div>';
+  } else if(diag.length){
     h += '<hr class="sep">';
     diag.slice(0,7).forEach(function(d){
       const c = d.level==='bad'?'var(--bad)':'var(--warn)';

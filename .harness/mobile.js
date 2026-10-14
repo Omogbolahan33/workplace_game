@@ -78,6 +78,11 @@ function serve() {
         if (!b.width && !b.height) return;
         if (b.right > W + 0.5 || b.left < -0.5) {
           if (el.closest('.tabs,.subs,table')) return;      // deliberately scrollable
+          /* a shape inside a drawing: the <svg> clips its content to its own
+             box, and that box is measured here like any element - so a picture
+             cropped to its people (its viewBox narrowed) cannot overflow by
+             what it does not show */
+          if (el.ownerSVGElement) return;
           o.over.push(el.tagName.toLowerCase() + '.' + (el.className || '').toString().slice(0, 30));
         }
       });

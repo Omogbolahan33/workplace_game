@@ -22,7 +22,7 @@
     it is embedded, per the rule that a converted screen does not get its own
     opinion about what a bar looks like.
 */
-import { S, UI, fmt, bar, BIZ_STAGES, machineTilesHTML, positionInner } from '@ledger/core';
+import { S, UI, fmt, bar, BIZ_STAGES, machineTilesHTML, positionInner, diagTilesHTML } from '@ledger/core';
 
 /* The four cards are exported separately as well as together.
 
@@ -47,7 +47,13 @@ export function EngineRoomCard() {
           <span className="tiny muted">Quarter {b.quarters || 0} of trading</span>
         </div>
         <div className="tiny muted" style={{ marginTop: '6px' }}>{st.note}</div>
-        {diag.length ? (
+        {diag.length && !UI.details ? (
+          /* world-first: each kind of trouble drawn as what it looks like, opening the card where it is fixed */
+          <>
+            <hr className="sep" />
+            <div className="dealgrid diaggrid" dangerouslySetInnerHTML={{ __html: diagTilesHTML(diag.slice(0, 7)) }} />
+          </>
+        ) : diag.length ? (
           <>
             <hr className="sep" />
             {diag.slice(0, 7).map((d, i) => (

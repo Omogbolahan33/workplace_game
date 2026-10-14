@@ -15119,6 +15119,36 @@ function agendaCardHTML(i){
     '<div class="clause" style="border-color:' + (it.lv === 'bad' ? 'rgba(255,95,109,.45)' : 'rgba(255,159,67,.45)') + '">' + esc(it.text) + '</div>',
     nextBtn({act: it.act || '', id: it.id || '', biz: it.biz || '', tab: d.tab, sub: d.sub, focus: d.focus || ''}, false) + '<button class="btn ghost" data-a="close">Close</button>', 'style="max-width:440px"');
 }
+/* What is wrong with the business, as what it looks like: each thing the
+   engine room sees, drawn as the moment it is - the supplier at your premises
+   with the invoice, the landlord at the door, the official at the revenue
+   office - its sentences under it. Where the fix is on a card (the stock,
+   the customers, the premises, you), the picture opens that card. Read from
+   the engine room's own diagnostics; one picture per kind of trouble. */
+const DIAG_MOMENTS = {recv: ['work', 'customer', 'letter', 'customers'], pay: ['work', 'supplier', 'boxes letter', 'stock'], inv: ['work', '', 'boxes', 'stock'],
+  people: ['work', 'staff staff', 'letter', ''], conc: ['office', 'client', 'letter', 'customers'], cost: ['work', 'landlord', 'letter', 'premises'],
+  cash: ['bank', '', 'letter', 'owner'], tax: ['office:REVENUE SERVICE', 'official', 'letter', 'premises'], ops: ['work', 'crowd', '', 'customers']};
+const DIAG_FIX = {customers: 'your customers', stock: 'your stock', premises: 'the premises', owner: 'what you take out'};
+function diagTilesHTML(diag){
+  const groups = [];
+  diag.forEach(function(d){
+    const g = groups.find(function(x){ return x.key === d.key; });
+    if(g){ g.items.push(d); if(d.level === 'bad') g.bad = true; } else groups.push({key: d.key, items: [d], bad: d.level === 'bad'});
+  });
+  return groups.map(function(g){
+    const row = DIAG_MOMENTS[g.key] || ['work', '', '', ''], at = row[0].split(':'), fix = row[3];
+    let svg = momentSceneSVG({place: at[0], sign: at[1] || '', who: row[1] ? row[1].split(' ') : [], props: row[2] ? row[2].split(' ') : [], cast: null, title: ''}, 200);
+    /* at your premises the moment is its people, so the picture is cropped to
+       them: the whole stall from across the street made a supplier, a
+       customer and the landlord look the same */
+    if(at[0] === 'work') svg = svg.replace(/viewBox="0 0 390 (\d+(?:\.\d+)?)"/, function(_, h){ const H = +h; return 'viewBox="88 ' + (H * .4).toFixed(0) + ' 270 ' + (H * .6).toFixed(0) + '"'; });
+    const pic = '<span class="gfx dpic">' + svg + '</span>';
+    const words = g.items.map(function(d){ return '<span class="dline">' + esc(d.text) + '</span>'; }).join('');
+    const tone = ' style="border-color:' + (g.bad ? 'rgba(255,95,109,.55)' : 'rgba(255,159,67,.45)') + '"';
+    return fix ? '<button class="dealtile diagtile" data-a="hot" data-k="' + fix + '" aria-label="' + esc(g.items.map(function(d){ return d.text; }).join(' ') + ' Open ' + DIAG_FIX[fix]) + '"' + tone + '>' + pic + words + '<span class="dmeta">open ' + DIAG_FIX[fix] + ' ›</span></button>'
+      : '<div class="dealtile diagtile"' + tone + '>' + pic + words + '</div>';
+  }).join('');
+}
 /* the card a tap opens: a person, or you */
 function hotModal(M){
   if(M.kind === 'person'){
@@ -15283,7 +15313,7 @@ function hotModal(M){
 }
 
 /* -------------------------------------------------------------------------
-   Everything above, exported. 780 names: the simulation's whole surface.
+   Everything above, exported. 783 names: the simulation's whole surface.
    ------------------------------------------------------------------------- */
 export {
   AGENDA_LOOK,
@@ -15319,6 +15349,8 @@ export {
   D,
   DEAL_MOMENTS,
   DEAL_TYPES,
+  DIAG_FIX,
+  DIAG_MOMENTS,
   DIFFS,
   DOOR_QUEUES,
   DRAWS,
@@ -15571,6 +15603,7 @@ export {
   defaultPlan,
   delta,
   deltaOf,
+  diagTilesHTML,
   diffListHTML,
   diligenceTarget,
   dirStance,

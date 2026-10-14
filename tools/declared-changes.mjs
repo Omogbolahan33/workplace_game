@@ -260,7 +260,7 @@ const EDITS = [
     why: 'three outlet buttons were disabled on company cash with no figure attached' },
   { marker: 'function viewEngine()',
     name: 'viewEngine — insuring an insured company says it is already insured',
-    why: 'the button was disabled in its own success state, which read as broken rather than done. World-first, the Levers card is four tiles - the stock, the customers, you, the premises - each opening the card the same thing opens in the picture, with the levers, the cover buttons and every line of Conditions on them (leverSliderHTML, coverButtonsHTML: the markup the card had); Conditions is not drawn; Position is what the company owns against what it owes and the quarter as a waterfall (positionInner); (i) brings the cards back' },
+    why: 'the button was disabled in its own success state, which read as broken rather than done. World-first, the Levers card is four tiles - the stock, the customers, you, the premises - each opening the card the same thing opens in the picture, with the levers, the cover buttons and every line of Conditions on them (leverSliderHTML, coverButtonsHTML: the markup the card had); Conditions is not drawn; Position is what the company owns against what it owes and the quarter as a waterfall (positionInner); the engine room\'s diagnostics are pictures of what each looks like (diagTilesHTML); (i) brings the cards back' },
   { marker: 'function viewDeals()',
     name: 'viewDeals — committing to a deal says the gap, and that the deal expires',
     why: 'a disabled Commit looked like a dead deal rather than one you cannot afford yet' },
@@ -1153,6 +1153,15 @@ const EDITS = [
   { marker: 'function viewCommitments(){',
     name: 'viewCommitments — its introduction is behind (i)',
     why: 'the opening paragraph is teaching; what is owed next quarter and what is in flight stay' },
+  { marker: 'const DIAG_MOMENTS', addition: true,
+    name: 'DIAG_MOMENTS — what each kind of trouble looks like',
+    why: 'the supplier with the invoice, the customer with the IOU, the landlord at the door, the official at the revenue office, the staff with a letter, the bank, the crowd - in the moments\' vocabulary - and the card where it is fixed' },
+  { marker: 'const DIAG_FIX', addition: true,
+    name: 'DIAG_FIX — the card each fix is on, said',
+    why: 'your customers, your stock, the premises, what you take out' },
+  { marker: 'function diagTilesHTML(diag)', addition: true,
+    name: 'diagTilesHTML — the engine room\'s trouble, drawn',
+    why: 'one picture per kind of trouble with its sentences under it, red-edged for a fire; it opens the card where the fix is, when there is one' },
 ].filter(e => e.marker !== 'PRINT-ALL');
 
 function statementsOf(script) {

@@ -148,7 +148,11 @@ function viewEngine(){
        '<span class="tiny muted">Quarter '+(b.quarters||0)+' of trading</span></div>'+
        '<div class="tiny muted" style="margin-top:6px">'+esc(st.note)+'</div>';
   const diag = b.diag || [];
-  if(diag.length){
+  if(diag.length && sceneFirst()){
+    /* world-first: each kind of trouble drawn as what it looks like, its
+       sentences under it, opening the card where it is fixed */
+    h += '<hr class="sep"><div class="dealgrid diaggrid">'+diagTilesHTML(diag.slice(0,7))+'</div>';
+  } else if(diag.length){
     h += '<hr class="sep">';
     diag.slice(0,7).forEach(function(d){
       const c = d.level==='bad'?'var(--bad)':'var(--warn)';

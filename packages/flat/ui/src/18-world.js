@@ -72,8 +72,9 @@ function worldTiles(host){
      closed keeps its buttons off the page, and a tile must still offer them */
   const src = document.createElement('div');
   src.innerHTML = routeViewInner();
+  /* a picture of trouble opens a card the machine's tiles already open: not a move of its own */
   const btns = Array.prototype.slice.call(src.querySelectorAll('button[data-a]')).filter(function(b){
-    return !NAV.test(b.dataset.a);
+    return !NAV.test(b.dataset.a) && !b.classList.contains('diagtile');
   }).slice(0, 16);
   if(!btns.length){ return; }
   const head = document.createElement('div');

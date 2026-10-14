@@ -678,3 +678,22 @@ test('waiting on you puts fires first, and each is a tile whose card has the sen
   assert.ok(card.includes(C.esc(items[0].text)), 'the card does not carry the sentence');
   assert.match(card, /data-a="(goto|doact)"/, 'the card does not carry the button');
 });
+
+test('the engine room draws its trouble: one picture per kind, opening the card where it is fixed', async () => {
+  const C = await world();
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  for (let i = 0; i < 3; i++) playQuarter(C);
+  const b = C.S.biz;
+  b.payable = Math.max(1, b.revenue) * 1.2; b.recv = Math.max(1, b.revenue) * 1.3; b.taxRisk = 80; b.cash = -200000;
+  b.diag = C.bizDiag(b);
+  const before = JSON.stringify(C.S);
+  const html = C.diagTilesHTML(b.diag);
+  const keys = [...new Set(b.diag.map((d) => d.key))];
+  assert.equal((html.match(/class="dealtile diagtile"/g) || []).length, keys.length, 'not one picture per kind of trouble');
+  for (const d of b.diag) assert.ok(html.includes(C.esc(d.text)), 'a diagnostic is missing: ' + d.text);
+  for (const k of keys) assert.ok(C.DIAG_MOMENTS[k], k + ' has no picture');
+  assert.match(html, /data-a="hot" data-k="stock"/, 'owing suppliers does not open the stock');
+  assert.match(html, /data-a="hot" data-k="customers"/, 'being owed does not open the customers');
+  assert.equal(JSON.stringify(C.S), before, 'drawing the trouble changed the run');
+});
