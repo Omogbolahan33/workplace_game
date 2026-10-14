@@ -98,6 +98,8 @@ function boardTaps(st){
     out.push(goZone(36, gy - 66, 250, 170, 'The board', 'governance', 'board'));
     out.push(goZone(280, gy - 138, 84, 98, 'The register: who owns what', 'governance', 'register'));
     if(st.lender) out.push(hotZone(284, gy - 40, 36, 92, 'The bank\'s man: the covenants', {a: 'hot', k: 'bank'}));
+    /* the holders standing by the register: each opens their card */
+    (st.standing || []).forEach(function(h, i){ const x = 372 - i * 22, y = gy + 40 - i * 3; out.push(hotZone(x - 11, y - 74, 22, 76, h.name + ', ' + Math.round(h.pct) + '% of the company', {a: 'hot', k: 'holder', c: h.id})); });
     /* each director at the table opens their card; your own seat opens yours */
     const seats = st.seats || [], n = seats.length;
     seats.forEach(function(s, i){
@@ -118,8 +120,9 @@ function sceneFirst(){ return !UI.details; }
 function staffBadgeSVG(s){ return faceBadgeSVG(s.name, s.morale || 0, '#1f6fb2'); }
 /* anyone, small: a reading as the ring, their initials inside, the colour of
    what they are to you */
-function faceBadgeSVG(name, v, fill){
-  const m = Math.max(0, Math.min(100, v)), C = 2 * Math.PI * 19, col = m > 60 ? '#2fd47a' : m > 35 ? '#ff9f43' : '#ff5f6d';
+/* ring: a colour of its own, for a reading that is not good or bad - a stake */
+function faceBadgeSVG(name, v, fill, ring){
+  const m = Math.max(0, Math.min(100, v)), C = 2 * Math.PI * 19, col = ring || (m > 60 ? '#2fd47a' : m > 35 ? '#ff9f43' : '#ff5f6d');
   const ini = String(name || '?').split(' ').map(function(w){ return w[0] || ''; }).join('').slice(0, 2).toUpperCase();
   return '<svg class="gfx" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="19" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="3"/>' +
     '<circle cx="22" cy="22" r="19" fill="none" stroke="' + col + '" stroke-width="3" stroke-dasharray="' + (C * m / 100).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 22 22)"/>' +
@@ -798,7 +801,7 @@ function trackChartSVG(hh){
   const pAbs = Math.max(1, Math.max.apply(null, hh.map(function(x){ return Math.abs(x.profit || 0); })));
   const anyLoss = hh.some(function(x){ return (x.profit || 0) < 0; }), pMid = anyLoss ? P0 + PH / 2 : P0 + PH;
   const short = function(v){ const a = Math.abs(v), sg = v < 0 ? '\u2212' : ''; return sg + (a >= 1e9 ? (a / 1e9).toFixed(1) + 'b' : a >= 1e6 ? (a / 1e6).toFixed(1) + 'm' : Math.round(a / 1e3) + 'k'); };
-  const H = P0 + PH + 22;
+  const H = P0 + PH + 32;
   return '<svg class="gfx trackchart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="' + esc(hh.map(function(x){ return dateLabel(x.turn) + ' revenue ' + fmt(x.revenue) + ', profit ' + fmt(x.profit); }).join('; ')) + '">' +
     '<text x="4" y="10" font-size="9" fill="#f5b301">revenue</text><text x="4" y="' + (P0 - 6) + '" font-size="9" fill="#2fd47a">profit</text>' +
     '<path d="M0 ' + pMid + ' H' + W + '" stroke="rgba(255,255,255,.2)"/>' +
@@ -810,6 +813,33 @@ function trackChartSVG(hh){
         '<text x="' + cx.toFixed(1) + '" y="' + (H - 6) + '" font-size="8.5" text-anchor="middle" fill="#9aa7b6">' + esc(dateLabel(x.turn).replace(/^(Q\d) \d\d(\d\d)$/, "$1 '$2")) + '</text>';
     }).join('') +
     '<text x="' + (W - 4) + '" y="10" font-size="9" text-anchor="end" fill="#9aa7b6">' + short(rHi) + ' peak</text></svg>';
+}
+/* The people who own part of your company without sitting at its table:
+   faces on the sheet - the stake as the ring - and standing in the boardroom
+   by the register. Each opens their card: what they hold and paid, how much
+   they trust you, what they want, and the buy-outs - the largest holder's
+   own, and the minorities' together. */
+function holderFacesHTML(b){
+  return extHolders(b).slice().sort(function(a, c){ return (c.pct || 0) - (a.pct || 0); }).map(function(h){
+    return '<button class="facebtn" data-a="hot" data-k="holder" data-c="' + esc(h.id) + '" aria-label="' + esc(h.name + ', ' + Math.round(h.pct || 0) + '%') + '">' +
+      faceBadgeSVG(h.name, Math.min(100, (h.pct || 0) * 2), '#6b4fbf', '#a78bfa') + '<span>' + esc(String(h.name).split(' ')[0]) + '</span><small>' + pct((h.pct || 0) / 100, 1) + '</small></button>';
+  }).join('');
+}
+function holderCardHTML(id){
+  const b = S.biz, h = b ? extHolders(b).find(function(x){ return x.id === id; }) : null;
+  if(!h) return modalHTML('<h2>Not a holder</h2>', '<div class="tiny muted">They no longer own any of it.</div>', '<button class="btn primary" data-a="close">Close</button>');
+  const largest = b.partner && b.partner.id === h.id;
+  const bg = h.bg || (h.kind === 'partner' ? 'came in at the founding' : 'came in on a later round');
+  const ask = h.ask || ((h.pct || 0) >= 25 ? 'holds enough to require a seat and a say' : 'holds a minority and knows it');
+  const q = buyoutExternal(b, 1.30), short = S.fin.cash < q.cost;
+  return modalHTML('<h2>' + esc(h.name) + '</h2><div class="tiny muted">' + esc(h.cls || 'Ordinary') + ' · ' + esc(h.roundLabel || h.kindName || h.kind || 'investor') + (largest ? ' · largest outside holder' : '') + '</div>',
+    ringsHTML([{ico: 'seal', label: 'Stake', v: h.pct || 0, text: pct((h.pct || 0) / 100, 1), tone: 'var(--purple)'}, {ico: 'hands', label: 'Trust', v: h.trust === undefined ? 50 : h.trust}]) +
+    '<div class="kv" style="margin-top:10px"><span class="muted">Paid in</span><span>' + fmt(h.paid || 0) + (h.pref > 0 ? ' <span class="chip y">' + h.pref.toFixed(1) + 'x pref' + (h.participate ? ' + part' : '') + '</span>' : '') + '</span></div>' +
+    '<div class="tiny muted" style="margin:6px 0">' + esc(bg) + '. ' + esc(ask) + '.</div>' +
+    '<div class="row wrap" style="margin-top:10px;gap:6px">' + (largest ? '<button class="btn sm" data-a="buyout">Buy them out</button>' : '') +
+      '<button class="btn sm" data-a="buyoutminority"' + (short ? ' disabled aria-disabled="true" title="Costs ' + fmt(Math.round(q.cost)) + ' · you have ' + fmt(S.fin.cash) + ' · short ' + fmt(Math.round(q.cost - S.fin.cash)) + '"' : '') + '>Buy every outside holder out (' + fmt(Math.round(q.cost)) + ')</button></div>' +
+    '<div class="tiny muted" style="margin-top:8px">They own a share of this and they did not build it. You can have the whole company back, in cash, today, at a premium.</div>',
+    '<button class="btn" data-a="tab" data-t="gov">The register and the board</button><button class="btn ghost" data-a="close">Close</button>', 'style="max-width:460px"');
 }
 /* the card a tap opens: a person, or you */
 function hotModal(M){
@@ -929,6 +959,7 @@ function hotModal(M){
   }
   if(M.kind === 'quarter') return quarterCardHTML(M.id);
   if(M.kind === 'outlet') return outletCardHTML(M.id);
+  if(M.kind === 'holder') return holderCardHTML(M.id);
   if(M.kind === 'agenda') return agendaCardHTML(M.id);
   if(M.kind === 'deal') return dealCardHTML(M.id);
   if(M.kind === 'offer') return offerCardHTML(M.id);

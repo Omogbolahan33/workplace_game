@@ -329,3 +329,22 @@ test('the units are tiles and the track record a chart; (i) brings the rows back
   assert.doesNotMatch(C.viewBiz(), /trackchart/);
   C.UI.details = false;
 });
+
+test('world-first the outside holders are one row of faces; (i) brings the holder and minorities cards back', async () => {
+  stubDOM();
+  const C = await core();
+  (await ui()).install();
+  C.newGame({ name: 'Ada', city: 'lagos', profile: 'returnee', difficulty: 'realistic', seed: 4242 });
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  const b = C.S.biz;
+  C.ensureGov(b); C.grantPct(b, 22, { name: 'Lekki Ventures', kind: 'vc' }); C.grantPct(b, 8, { name: 'Ada Okafor', kind: 'angel' });
+  C.UI.details = false;
+  const v = C.viewBiz();
+  assert.ok(v.includes(C.holderFacesHTML(b)));
+  assert.doesNotMatch(v, /<h3>Minority holders/); assert.doesNotMatch(v, /data-a="buyout"/);
+  C.UI.details = true;
+  const full = C.viewBiz();
+  assert.match(full, /Largest outside holder/); assert.match(full, /data-a="buyoutminority"/);
+  C.UI.details = false;
+});

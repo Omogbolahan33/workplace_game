@@ -388,6 +388,8 @@
  "hireHouse": "core.js",
  "holdcoName": "core.js",
  "holderById": "core.js",
+ "holderCardHTML": "core.js",
+ "holderFacesHTML": "core.js",
  "holderPct": "core.js",
  "homeChange": "core.js",
  "homeLook": "core.js",

@@ -31,7 +31,7 @@
 */
 import {
   S, fmt, esc, pct, bar, BIZ, TRAITS, bizValue, startBizCost, priceBand,
-  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML, UI, staffStripBody, applicantFacesHTML, companyMeterInner, trackChartSVG
+  expandCost, ownerTime, staffMonthly, marketSalary, buyoutExternal, dateLabel, bizTypeTileHTML, UI, staffStripBody, applicantFacesHTML, companyMeterInner, trackChartSVG, holderFacesHTML, extHolders
 } from '@ledger/core';
 
 /* --------------------------------------------------------------------------
@@ -333,6 +333,15 @@ export function PartnershipsCard() {
       </div>
     );
   }
+  /* world-first: every outside holder a face that opens their card, with the buy-outs */
+  if (!UI.details) {
+    return (
+      <div className="card" style={{ marginTop: '12px' }}>
+        <h3>Outside holders <span className="tag">{extHolders(b).length}</span></h3>
+        <div className="facerow" dangerouslySetInnerHTML={{ __html: holderFacesHTML(b) }} />
+      </div>
+    );
+  }
   const pt = b.partner;
   const bg = pt.bg || (pt.kind === 'partner' ? 'came in at the founding' : 'came in on a later round');
   const ask = pt.ask || (((pt.pct || 0) >= 25) ? 'holds enough to require a seat and a say' : 'holds a minority and knows it');
@@ -361,7 +370,8 @@ export function PartnershipsCard() {
    there is somebody to buy, and it names the premium and the cash you have
    against it. */
 export function MinorityCard() {
-  const b = S.biz; if (!b) return null;
+  /* world-first the buy-out is on each holder's card */
+  const b = S.biz; if (!b || !UI.details) return null;
   const q = buyoutExternal(b, 1.30);
   if (!q.holders.length) return null;
   const short = S.fin.cash < q.cost;

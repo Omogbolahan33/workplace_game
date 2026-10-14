@@ -1,6 +1,6 @@
 
 
-import { ASSETS, BIZ, CAREER, CITY, D, PRINCIPLES, S, TRAITS, applicantFacesHTML, bar, bizTypeTileHTML, bizValue, buyoutExternal, clamp, companyMeterInner, dateLabel, esc, expandCost, fmt, foldHTML, hoursBudget, hoursLeft, lifeInner, marketSalary, needs, ownerTime, pct, positionStrip, priceBand, sceneFirst, sleepDebt, staffMonthly, staffStripHTML, startBizCost, statRow, trackChartSVG, weeklyFreeHours, worthInner } from '@ledger/core';
+import { ASSETS, BIZ, CAREER, CITY, D, PRINCIPLES, S, TRAITS, applicantFacesHTML, bar, bizTypeTileHTML, bizValue, buyoutExternal, clamp, companyMeterInner, dateLabel, esc, expandCost, extHolders, fmt, foldHTML, holderFacesHTML, hoursBudget, hoursLeft, lifeInner, marketSalary, needs, ownerTime, pct, positionStrip, priceBand, sceneFirst, sleepDebt, staffMonthly, staffStripHTML, startBizCost, statRow, trackChartSVG, weeklyFreeHours, worthInner } from '@ledger/core';
 import { viewMoneyBudget, viewMoneyProperty } from './06-view-money-budget.js';
 
 /* Generated from src/07-view-money-position.js by tools/tomodules.mjs. Edit the section in src/, not this file. */
@@ -313,7 +313,13 @@ export function viewBiz(){
     h += '<div class="tiny muted">Hiring costs half a month of salary upfront in recruitment. Nobody tells you the best hires are the ones who cost the most per month and least per unit of output.</div>';
   }
   h += '</div>';
-  if(b.partner){
+  if(b.partner && sceneFirst()){
+    /* world-first: every outside holder a face - the stake as the ring - each
+       opening the card with what they hold, their trust, and the buy-outs;
+       they also stand in the boardroom by the register */
+    h += '<div class="card" style="margin-top:12px"><h3>Outside holders <span class="tag">'+extHolders(b).length+'</span></h3>'+
+      '<div class="facerow">'+holderFacesHTML(b)+'</div></div>';
+  } else if(b.partner){
     const pt = b.partner;
     const ptBg  = pt.bg  || (pt.kind==='partner' ? 'came in at the founding' : 'came in on a later round');
     const ptAsk = pt.ask || (((pt.pct||0) >= 25) ? 'holds enough to require a seat and a say' : 'holds a minority and knows it');
@@ -334,7 +340,7 @@ export function viewBiz(){
      It shows only when there is somebody to buy, and it names the premium and
      the cash you have against it - a 30% premium is exactly the kind of thing
      you should have to look at before agreeing to pay it. */
-  {
+  if(!sceneFirst()){
     const q = buyoutExternal(b, 1.30);
     if(q.holders.length){
       h += '<div class="card" style="margin-top:12px"><h3>Minority holders '+

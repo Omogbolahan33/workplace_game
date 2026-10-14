@@ -28,9 +28,15 @@ function boardLook(){
   }) : [{name: S.name || 'You', yours: true, chair: true, label: 'founder', pct: mine, vote: res ? 'for' : ''}];
   if(!seats.some(function(x){ return x.yours; })) seats.push({name: S.name || 'You', yours: true, chair: false, label: 'shareholder', pct: mine, vote: ''});
   const holders = total > 0 ? shares.map(function(h){ return {you: !!h.you, pct: pctOf(h), name: h.name}; }) : [{you: true, pct: 100, name: S.name || 'You'}];
+  /* the outside holders who have no seat stand by the register: they own part
+     of the room without sitting in it */
+  const seated = {};
+  board.forEach(function(d){ if(d.holderId) seated[d.holderId] = true; });
+  const standing = shares.filter(function(h){ return !h.you && !seated[h.id]; }).sort(function(a, c){ return (c.shares || 0) - (a.shares || 0); })
+    .slice(0, 3).map(function(h){ return {id: h.id, name: h.name, pct: pctOf(h)}; });
   const cov = b.covenants || [];
   const breached = cov.length ? covenantBreaches(b).length > 0 : false;
-  return Object.assign(base, {none: false, name: b.name || 'Your company', seats: seats.slice(0, 7), holders: holders,
+  return Object.assign(base, {none: false, name: b.name || 'Your company', seats: seats.slice(0, 7), holders: holders, standing: standing,
     res: res ? resMeta(res.kind).label : '', lender: cov.length > 0, breached: breached,
     label: (b.name || 'Your company') + ' boardroom: you hold ' + Math.round(mine) + '%' + (res ? ', a vote is open' : '') + (breached ? ', a covenant is breached' : '')});
 }
@@ -61,6 +67,10 @@ function boardSceneSVG(st, vh){
     add('<g transform="translate(312 ' + (gy - 14) + ') rotate(-8)"><rect width="22" height="16" rx="1" fill="' + (st.breached ? '#c62828' : '#1f4e8c') + '"/><rect x="3" y="-3" width="16" height="4" fill="#f4f1e6"/></g>');
     if (st.breached) add('<circle cx="300" cy="' + (gy - 50) + '" r="8" fill="#ff5f6d"/><rect x="298.8" y="' + (gy - 56) + '" width="2.4" height="7" fill="#fff"/><rect x="298.8" y="' + (gy - 47) + '" width="2.4" height="2.4" fill="#fff"/>');
   }
+  /* the holders without a seat, standing by the register, in the register's colours */
+  (st.standing || []).forEach(function(h, i){
+    add(person(372 - i * 22, gy + 40 - i * 3, {shirt: ['#5aa9ff', '#a78bfa', '#2fd47a'][i % 3], tie: i % 2 === 0, skin: ['#4a3020', '#7d573b', '#5a3b27'][i % 3], scale: 1.6}));
+  });
   /* the table, and who sits at it: the bigger the stake, the bigger the chair */
   const seats = st.seats || [], n = seats.length, x0 = 56, x1 = 244, Z = 2.1;
   seats.forEach(function(s, i){

@@ -727,3 +727,29 @@ test('the track record is revenue and profit as bars, profit on its own scale', 
   assert.ok(heights[0] > 10, 'profit is drawn at revenue scale and vanishes');
   assert.equal(C.trackChartSVG([]), '');
 });
+
+test('outside holders stand by the register and are faces on the sheet; each card has the buy-outs', async () => {
+  const C = await world();
+  C.S.fin.cash = 40000000;
+  C.startBiz('food', 'Mama T Kitchen', 4000000, null);
+  const b = C.S.biz;
+  C.ensureGov(b); C.grantPct(b, 22, { name: 'Lekki Ventures', kind: 'vc' }); C.grantPct(b, 8, { name: 'Ada Okafor', kind: 'angel' });
+  C.UI.tab = 'governance'; C.UI.sub = 'register';
+  /* grantPct leaves the derived figures (S.der) stale until the next draw
+     recomputes them; that is a cache, not the run - take the baseline after it */
+  C.worldHTML();
+  const before = JSON.stringify(C.S);
+  const ext = C.extHolders(b).map((h) => h.id).sort();
+  assert.deepEqual([...C.worldHTML().matchAll(/data-k="holder" data-c="([^"]+)"/g)].map((m) => m[1]).sort(), ext, 'not every outside holder stands in the boardroom');
+  assert.deepEqual([...C.holderFacesHTML(b).matchAll(/data-k="holder" data-c="([^"]+)"/g)].map((m) => m[1]).sort(), ext);
+  /* the largest has their own buy-out; every card has buying them all out */
+  const big = C.holderCardHTML(b.partner.id);
+  assert.match(big, /data-a="buyout"/); assert.match(big, /data-a="buyoutminority"/); assert.match(big, /data-a="tab" data-t="gov"/);
+  const small = C.holderCardHTML(ext.find((id) => id !== b.partner.id));
+  assert.doesNotMatch(small, /data-a="buyout"/); assert.match(small, /data-a="buyoutminority"/);
+  C.S.fin.cash = 0;
+  assert.match(C.holderCardHTML(b.partner.id), /data-a="buyoutminority" disabled aria-disabled="true" title="Costs/);
+  C.S.fin.cash = 40000000 - 4000000;
+  assert.equal(JSON.stringify(C.S), before, 'looking at the holders changed the run');
+  C.UI.tab = 'overview'; C.UI.sub = '';
+});
